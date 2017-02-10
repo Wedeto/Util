@@ -44,47 +44,65 @@ class Redirection
         }
     }
 
-    public static function meep()
+    private static function analyzeHost($hostname, array $hosts)
     {
-        $config = \WASP\Config::getConfig();
-        $cur_host = Request::$host;
-        $cur_lang = null;
-        $cur_domain = null;
-        $cur_subdomain = null;
-        if ($config->has('site', 'url', Dictionary::TYPE_ARRAY))
+        $hostname = strtolower($hostname);
+        foreach ($hosts as $lang => $host)
         {
-            $hosts = $config->getArray('site', 'url');
-            foreach ($hosts as $lang => $host)
+            $host = strtolower($host);
+            if (substr($hostname, -strlen($host)) === $host)
             {
-                $host = strtolower($host);
-                if (substr($cur_host, -strlen($host)) === $host)
-                {
-                    $cur_lang = $lang;
-                    $cur_domain = $host;
-                    $cur_subdomain = str_replace($host, "", $cur_host);
-                    break;
-                }
+                return array(
+                    'language' => $lang,
+                    'hostname' => $host,
+                    'subdomain' => str_replace($host, '', $hostname)
+                );
             }
         }
+        return null;
+    }
 
-        $redirect = false;
+    public static function checkRedirectAlternative()
+    {
+        $config = \WASP\Config::getConfig();
+
         $use_ssl = $config->dget('site', 'secure', false) == true;
+        $use_www = $config->dget('site', 'www', true);
+        $hosts = $config->get('site', 'url');
+        $redirect_unknown = $config->get('site', 'redirect_unknown');
 
-        if ($use_ss
-        $protocol = 
-       
-        if ($config->get('site', 'redirect_unknown') && !empty($subdomain) && $subdomain !== "www.")
-            $redirect = 
+        if (\is_array_like($hosts))
+            $hosts = \to_array($hosts);
+        else
+            $hosts = array();
 
-        // Check www redirect
-        $use_www = $config->dget('site', 'www', true) == true;
-        if ($cur_domain !== "www." && $use_www)
-            $redirect = "www." . $cur_host;
+        if (empty($hosts))
+        {
+            $hosts = array('en' => $url->host);
+            $use_www = false;
+            $redirect_unknown = false;
+        }
+        else
+            $first_host = reset($hosts);
 
-        $protocol = Request::$protocol;
-        if (Request::$secure && 
+        $url = new URL(Request::$uri);
+        $analysis = self::analyzeHost($url->host, $hosts);
 
+        $url->scheme = ($use_ssl) ? "https" : "http";
+        $is_unknown = empty($analysis) || ($analysis['subdomain'] !== 'www.' && !empty($analysis['subdomain']));
 
+        if ($is_unknown && $redirect_unknown)
+            $url->host = $first_host;
+        else
+            $url->host = ($use_www) ? "www." . $cur_domain : $cur_domain;
+
+        $url = $url->toString();
+        if ($url !== Request::$uri)
+            self::redirect($url);
+
+        Request::$domain = $analysis['hostname'];
+        Request::$subdomain = $analysis['subdomain'];
+        Request::$language = $analysis['language'];
     }
 
     public static function checkRedirect()
