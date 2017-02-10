@@ -44,6 +44,49 @@ class Redirection
         }
     }
 
+    public static function meep()
+    {
+        $config = \WASP\Config::getConfig();
+        $cur_host = Request::$host;
+        $cur_lang = null;
+        $cur_domain = null;
+        $cur_subdomain = null;
+        if ($config->has('site', 'url', Dictionary::TYPE_ARRAY))
+        {
+            $hosts = $config->getArray('site', 'url');
+            foreach ($hosts as $lang => $host)
+            {
+                $host = strtolower($host);
+                if (substr($cur_host, -strlen($host)) === $host)
+                {
+                    $cur_lang = $lang;
+                    $cur_domain = $host;
+                    $cur_subdomain = str_replace($host, "", $cur_host);
+                    break;
+                }
+            }
+        }
+
+        $redirect = false;
+        $use_ssl = $config->dget('site', 'secure', false) == true;
+
+        if ($use_ss
+        $protocol = 
+       
+        if ($config->get('site', 'redirect_unknown') && !empty($subdomain) && $subdomain !== "www.")
+            $redirect = 
+
+        // Check www redirect
+        $use_www = $config->dget('site', 'www', true) == true;
+        if ($cur_domain !== "www." && $use_www)
+            $redirect = "www." . $cur_host;
+
+        $protocol = Request::$protocol;
+        if (Request::$secure && 
+
+
+    }
+
     public static function checkRedirect()
     {
         $config = \WASP\Config::getConfig();
