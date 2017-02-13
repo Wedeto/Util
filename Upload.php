@@ -96,7 +96,7 @@ class Upload
             $rnd = (string)rand(0, 1000);
         }
 
-        \Debug\info("WASP.Util.Upload", "Moving uploaded file {$this->location} to {$target_path}");
+        \Debug\info("WASP.Util.Upload", "Moving uploaded file {0} to {0}", [$this->location, $target_path]);
         move_uploaded_file($this->location, $target_path);
         chmod($target_path, 0664);
 

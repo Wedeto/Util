@@ -142,7 +142,7 @@ class Redirection
         if ($domain === null)
         {
             // Unknown domain name - log and possibly redirect
-            Debug\info("Util.Redirection", "Unknown domain name in use: {}", $host);
+            Debug\info("Util.Redirection", "Unknown domain name in use: {0}", [$host]);
             $subdomain = null;
             
             if ($config->has('site', 'redirect_unknown'))
@@ -207,9 +207,9 @@ class Redirection
 
         // All is well
         if ($domain !== null)
-            Debug\debug("Util.Redirection", "Detected subdomain '{}' and domain '{}'", $subdomain, $domain);
+            Debug\debug("Util.Redirection", "Detected subdomain '{0}' and domain '{1}'", [$subdomain, $domain]);
 
-        Debug\debug("Util.Redirection", "Setting language to '{}'", $language);
+        Debug\debug("Util.Redirection", "Setting language to '{0}'", [$language]);
         Request::$language = $language;
         Request::$domain = $domain;
         Request::$subdomain = $subdomain;
