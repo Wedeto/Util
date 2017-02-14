@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace WASP\Util;
 
+use WASP\is_array_like;
 use WASP\Request;
 use WASP\Debug;
 
@@ -71,7 +72,7 @@ class Redirection
         $hosts = $config->get('site', 'url');
         $redirect_unknown = $config->get('site', 'redirect_unknown');
 
-        if (\is_array_like($hosts))
+        if (is_array_like($hosts))
             $hosts = \to_array($hosts);
         else
             $hosts = array();
