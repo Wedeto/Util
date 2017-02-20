@@ -34,6 +34,9 @@ class File
     private $ext;
     private $mime;
 
+    private static $file_group = null;
+    private static $file_mode = null;
+
     public function __construct($filename, $mime = null)
     {
         $this->path = $filename;
@@ -56,6 +59,30 @@ class File
             $this->basename = $name;
             $this->ext = null;
         }
+    }
+
+    public static function setFileGroup(string $group)
+    {
+        $this->file_group = $group;
+    }
+
+    public static function setFileMode(int $mode)
+    {
+        $this->file_mode = $mode;
+    }
+
+    public function touch()
+    {
+        touch($this->path);
+        $this->setPermissions();
+    }
+
+    public function setPermissions()
+    {
+        if (isset(self::$file_group))
+            chgrp($this->path, self::$file_group);
+        if (isset(self::$file_mode))
+            chmod($this->path, self::$file_mode);
     }
 
     public function getExt()
