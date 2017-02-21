@@ -140,19 +140,22 @@ class File
     public static function makeWritable($path)
     {
         $perms = self::getPermissions($path);
-        $current_user = posix_getpwnam($_SERVER['USER']);
+        while (ob_get_level())
+            ob_end_clean();
+
+        $current_user = posix_getpwuid(posix_geteuid());
         $owner = posix_getpwuid(fileowner($path));
         $group = posix_getgrgid(filegroup($path));
 
         if ($current_user['uid'] !== $owner['uid'])
-            throw new PermissionError($this->path, "Cannot change permissions - not the owner");
+            throw new PermissionError($path, "Cannot change permissions - not the owner");
 
         // We own the file, so we should be able to fix it
         $set_gid = false;
         if (self::$file_group !== null)
         {
             if (self::$file_group !== $group['name'] && !chgrp($path, self::$file_group))
-                throw new PermissionError($this->path, "Cannot change group");
+                throw new PermissionError($path, "Cannot change group");
             $set_gid = true;
         }
 
@@ -193,18 +196,41 @@ class File
 
     public function setPermissions()
     {
-        try
+        if (self::$file_group)
         {
-            if (isset(self::$file_group))
-                @chgrp($this->path, self::$file_group);
-            if (isset(self::$file_mode))
-                @chmod($this->path, self::$file_mode);
+            $current_gid = filegroup($this->path);
+            $grpinfo = posix_getgrnam(self::$file_group);
+            $wanted_gid = $grpinfo['gid'];
+            if ($wanted_gid !== $current_gid)
+            {
+                try
+                {
+                    @chgrp($this->path, $wanted_gid);
+                }
+                catch (Throwable $e)
+                {
+                    throw new PermissionError($this->path, "Could not set group");
+                }
+            }
         }
-        catch (Throwable $e)
+        
+        if (isset(self::$file_mode))
         {
-            self::$logger->critical("Failed to set permissions on {0}", $this->path);
-            self::$logger->critical($e);
-            throw new PermissionError($this->path);
+            $perms = self::getPermissions($this->path);
+            $wanted_mode = self::$file_mode;
+            $current_mode = $perms['mode'];
+            
+            if ($wanted_mode !== $current_mode)
+            {
+                try
+                {
+                    @chmod($this->path, $wanted_mode);
+                }
+                catch (Throwable $e)
+                {
+                    throw new PermissionError($this->path, "Could not set mode");
+                }
+            }
         }
     }
 
