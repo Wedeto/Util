@@ -25,13 +25,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace WASP\Util;
 
+use InvalidArgumentException;
 use RuntimeException;
 use DomainException;
 use DateInterval;
-use DateTimeImmutable
+use DateTimeImmutable;
 use ArrayAccess;
 use Traversable;
-use WASP\Http\Error as HttpError;
 
 /**
  * This is a class which use is only to allow
@@ -175,7 +175,7 @@ class Functions
     public static function flatten_array($arg)
     {
         if (!self::is_array_like($arg))
-            throw new \InvalidArgumentException("Not an array");
+            throw new InvalidArgumentException("Not an array");
 
         $arg = to_array($arg);
         $tgt = array();

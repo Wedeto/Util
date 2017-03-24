@@ -25,7 +25,7 @@ use WASP\Log\LoggerFactory;
  */
 class Hook
 {
-    use LoggerAwareStaticTrait;
+    protected static $logger = null;
 
     /** The registered hooks */
     protected static $hooks = array();
@@ -87,7 +87,7 @@ class Hook
             }
             catch (\Throwable $e)
             {
-                self::$logger->error("Callback to {0} throw an exception: {1}", $hook, $e);
+                self::getLogger()->error("Callback to {0} throw an exception: {1}", $hook, $e);
             }
         }
 
@@ -194,7 +194,3 @@ class Hook
         self::$logger = $logger;
     }
 }
-
-// @codeCoverageIgnoreStart
-Hook::setLogger();
-// @codeCoverageIgnoreEnd

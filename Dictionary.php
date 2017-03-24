@@ -368,7 +368,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     /**
      * Add all elements in the provided array-like object to the dictionary.
      * @param Traversable $values The values to add
-     * @return WASP\Dictionary Provides fluent interface
+     * @return WASP\Util\Dictionary Provides fluent interface
      */
     public function addAll($values)
     {
@@ -381,7 +381,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
 
     /**
      * Remove all elements from the dictionary
-     * @return WASP\Dictionary Provides fluent interface
+     * @return WASP\Util\Dictionary Provides fluent interface
      */
     public function clear()
     {
@@ -403,7 +403,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     /**
      * Add an element to the end of the dictionary
      * @param mixed $element The element to add to the end
-     * @return Dictionary provides fluent interface
+     * @return WASP\Util\Dictionary Provides fluent interface
      */
     public function push($element)
     {
@@ -414,7 +414,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     /**
      * Add an element to the end of the dictionary, wrapper of Dictionary#push
      * @param mixed $element The element to add to the end
-     * @return Dictionary provides fluent interface
+     * @return WASP\Util\Dictionary Provides fluent interface
      */
     public function append($element)
     {
@@ -433,7 +433,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     /**
      * Add an element to the beginning of the dictionary
      * @param mixed $element The element to add to the begin
-     * @return Dictionary provides fluent interface
+     * @return WASP\Util\Dictionary Provides fluent interface
      */
     public function unshift($element)
     {
@@ -445,7 +445,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      * Add an element to the beginning of the dictionary. Wraps
      * Dictionary#unshift
      * @param mixed $element The element to add to the begin
-     * @return Dictionary provides fluent interface
+     * @return WASP\Util\Dictionary Provides fluent interface
      */
     public function prepend($element)
     {

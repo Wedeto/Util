@@ -58,7 +58,7 @@ class Cache
     /**
      * Add the hook after the configuration has been loaded, and apply invalidation to the
      * cache once it times out.
-     * @param $config WASP\Dictionary The configuration to load settings from
+     * @param $config WASP\Util\Dictionary The configuration to load settings from
      */
     public static function setHook($config)
     {
