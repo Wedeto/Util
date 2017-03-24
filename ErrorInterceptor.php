@@ -25,10 +25,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace WASP\Util;
 
 use ErrorException;
+use InvalidArgumentException;
 
 /**
  * ErrorInterceptor registers itself to receive all PHP errors. Any errors
- * caught are thrown as HttpError exceptions. However, you can create a
+ * caught are thrown as ErrorExceptions exceptions. However, you can create a
  * ErrorInterceptor object that wraps a function call, and any errors generated
  * within are collected rather than thrown. This allows code that generates warnings
  * to run and complete, while still catching the errors. One example is 'session_start()',
@@ -53,13 +54,10 @@ class ErrorInterceptor
      *
      * @param callable $func What to wrap
      */
-    public function __construct($func)
+    public function __construct(callable $func)
     {
         if (self::$interceptor_stack === null)
             self::registerErrorHandler();
-
-        if (!is_callable($func))
-            throw new \InvalidArgumentException("Argument should be a valid callable");
 
         $this->func = $func;
     }
@@ -166,7 +164,7 @@ class ErrorInterceptor
     public static function registerErrorHandler()
     {
         self::$interceptor_stack = array();
-        set_error_handler(array("WASP\\Util\\ErrorInterceptor", "errorHandler"), E_ALL);
+        set_error_handler(array(statis::class, "errorHandler"), E_ALL);
     }
 
     /**

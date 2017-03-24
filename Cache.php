@@ -28,6 +28,8 @@ namespace WASP\Util;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use WASP\Log\LoggerFactory;
+use WASP\Platform\Path;
+use WASP\Platform\System;
 
 /**
  * Provides automatic persistent caching facilities. You can store and retrieve
@@ -62,7 +64,7 @@ class Cache
      */
     public static function setHook($config)
     {
-        register_shutdown_function(array('WASP\\Cache', 'saveCache'));
+        register_shutdown_function(array(Cache::class, 'saveCache'));
 
         self::$expiry = $config->dget('cache', 'expire', 60); // Clear out cache every minute by default
         foreach (self::$repository as $name => $cache)
