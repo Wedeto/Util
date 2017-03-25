@@ -26,11 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace WASP\Util;
 
 use WASP\Util\Functions as WF;
-use WASP\IO\File;
-use WASP\IO\DataWriter\DataWriter;
-use WASP\IO\DataWriter\DataWriterFactory;
-use WASP\IO\DataReader\DataReader;
-use WASP\IO\DataReader\DataReaderFactory;
 
 /**
  * Dictionary provides a flexible way to use arrays as objects. The getters and

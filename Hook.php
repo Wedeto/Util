@@ -39,22 +39,26 @@ class Hook
     /**
      * Subscribe to a hook.
      *
-     * @param string $hook The hook to hook into. Must contain of at least 2 parts separated by dots:
-     *                      vendor.hookname
-     * @param callable $callback The callback that will be called when the hook is executed.
-     *                           The function should have the following signature:
-     *                           function (array &$params);
+     * @param string $hook The hook to hook into. Must contain of at least 2
+     *                     parts separated by dots: vendor.hookname
+     * @param callable $callback The callback that will be called when the hook
+     *                           is executed.  The function should have the
+     *                           following signature: function (array
+     *                           &$params);
+     * @param int $precedence The lower this number, the sooner it will be
+     *                        called, the higher the later. Default is 0.
      */
-    public static function subscribe(string $hook, $callback)
+    public static function subscribe(string $hook, callable $callback, int $precedence = 0)
     {
-        if (!is_callable($callback))
-            throw new InvalidArgumentException("Callback is not callable");
-        
         $parts = explode(".", $hook);
         if (count($parts) < 2)
-            throw new InvalidArgumentException("Hook name must consist of at least two partS");
+            throw new InvalidArgumentException("Hook name must consist of at least two parts");
 
-        self::$hooks[$hook] = $callback;
+        self::$hooks[$hook][] = ['precedence' => $precedence, 'callback' => $callback];
+        usort(
+            self::$hooks[$hook], 
+            function (array $l, array $r) { return $l['precedence'] - $r['precedence']; }
+        );
     }
 
     /**
@@ -63,7 +67,7 @@ class Hook
      *                       to the subsribers so it can be modified.
      * @return array The collected responses of the hooks.
      */
-    public static function execute(string $hook, array &$params)
+    public static function execute(string $hook, array $params)
     {
         // Count invoked hooks
         if (!isset(self::$counters[$hook]))
@@ -72,7 +76,7 @@ class Hook
             ++self::$counters[$hook];
 
         // Check if the hook has any subscribers and if it hasn't been paused
-        $response = array();
+        $response = $params;
         if (!isset(self::$hooks[$hook]) || isset(self::$paused[$hooks]))
             return $response;
 
@@ -82,8 +86,12 @@ class Hook
             try
             {
                 $r = $cb($params);
-                if (!empty($r))
-                    $response[] = $r;
+                if (is_array($r))
+                    $response = array_merge($response, $r); 
+            }
+            catch (HookInterrupted $e)
+            {
+                return $e->getResponse() ?? $response;
             }
             catch (\Throwable $e)
             {
