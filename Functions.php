@@ -115,7 +115,7 @@ class Functions
 
                     // One last possibility to use scalar booleans as no, false, off etc
                     if (is_scalar($ret))
-                        return parse_bool($ret, $float_delta);
+                        return self::parse_bool($ret, $float_delta);
             
                     // Otherwise leave it to PHP
                     return $ret == true;

@@ -104,7 +104,8 @@ class Cache
             try
             {
                 $contents = file_get_contents($cache_file);
-                self::$repository[$name] = unserialize($contents, array('allowed_classes' => [Dictionary::class]));
+                $data = unserialize($contents, array('allowed_classes' => []));
+                self::$repository[$name] = new Dictionary($data);
                 self::$repository[$name]['_changed'] = false;
                 self::checkExpiry($name);
                 return;
@@ -136,7 +137,7 @@ class Cache
 
             unset($cache['_changed']);
             $cache_file = $cache_dir . '/' . $name . '.cache';
-            file_put_contents($cache_file, serialize($cache));
+            file_put_contents($cache_file, serialize($cache->getAll()));
         }
     }
 

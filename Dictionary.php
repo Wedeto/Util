@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace WASP\Util;
 
 use WASP\Util\Functions as WF;
+use WASP\Log\Logger;
 
 /**
  * Dictionary provides a flexible way to use arrays as objects. The getters and
@@ -97,7 +98,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
             case Dictionary::TYPE_NUMERIC:
                 return is_numeric($val);
             case Dictionary::TYPE_INT:
-                return is_int_val($val);
+                return WF::is_int_val($val);
             case Dictionary::TYPE_FLOAT:
                 return is_float($val);
             case Dictionary::TYPE_STRING:
@@ -192,7 +193,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
         switch ($type)
         {
             case Dictionary::TYPE_INT:
-                if (!is_int_val($val))
+                if (!WF::is_int_val($val))
                     throw new \DomainException("Key " . implode('.', $args) . " is not an integer");
                 return (int)$val;
             case Dictionary::TYPE_NUMERIC:
@@ -213,7 +214,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
                     throw new \DomainException("Key " . implode('.', $args) . " is not an object");
                 return $val;
             case Dictionary::TYPE_BOOL:
-                return parse_bool($val);
+                return WF::parse_bool($val);
             default:
         }
         
@@ -368,7 +369,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     public function addAll($values)
     {
         if (!WF::is_array_like($values))
-            throw new \DomainException("Invalid value to merge: " . Log\Logger::str($values));
+            throw new \DomainException("Invalid value to merge: " . WF::str($values));
         foreach ($values as $key => $val)
             $this->set($key, $val);
         return $this;
@@ -514,6 +515,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     // Serializable implementation
     public function serialize()
     {
+        echo "I WILL NOW SERIALIZE DICTIONARY!\n";
         return serialize($this->values);
     }
 
