@@ -25,9 +25,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace WASP\Util;
 
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
-use WASP\Log\LoggerFactory;
 use WASP\Platform\Path;
 use WASP\Platform\System;
 
@@ -40,7 +37,8 @@ use WASP\Platform\System;
  */ 
 class Cache
 {
-    private static $logger = null;
+    use LoggerAwareStaticTrait;
+
     private static $repository = array();
     private static $expiry = null;
     private $cache_name = 3600;
@@ -226,30 +224,5 @@ class Cache
 
         $data['_changed'] = true;
         $data['_timestamp'] = time();
-    }
-
-    /**
-     * Get a logger instance. If not set, it will be instantiated. If
-     * WASP\Log\LoggerFactory is available it is used.
-     */
-    protected static function getLogger()
-    {
-        if (self::$logger === null)
-        {
-            if (class_exists(LoggerFactory::class))
-                self::$logger = LoggerFactory::getLogger([static::class]);
-            else
-                self::$logger = new NullLogger();
-        }
-        return self::$logger;
-    }
-
-    /**
-     * Set a logger instance
-     * @param Psr\Log\LoggerInterface $logger The logger to set
-     */
-    public static function setLogger(LoggerInterface $logger)
-    {
-        self::$logger = $logger;
     }
 }

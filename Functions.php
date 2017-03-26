@@ -34,8 +34,7 @@ use ArrayAccess;
 use Traversable;
 
 /**
- * This is a class which use is only to allow
- * this file to be Autoloaded
+ * Functions contains some stand alone utility functions.
  */
 class Functions
 {
@@ -177,7 +176,7 @@ class Functions
         if (!self::is_array_like($arg))
             throw new InvalidArgumentException("Not an array");
 
-        $arg = to_array($arg);
+        $arg = self::to_array($arg);
         $tgt = array();
         foreach ($arg as $arg_l2)
         {

@@ -164,7 +164,7 @@ class ErrorInterceptor
     public static function registerErrorHandler()
     {
         self::$interceptor_stack = array();
-        set_error_handler(array(statis::class, "errorHandler"), E_ALL);
+        set_error_handler(array(static::class, "errorHandler"), E_ALL);
     }
 
     /**

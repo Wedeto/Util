@@ -21,11 +21,18 @@ trait LoggerAwareStaticTrait
      *
      * @param LoggerInterface $logger
      */
-    public static function setLogger(LoggerInterface $logger = null)
+    public static function setLogger(LoggerInterface $logger)
     {
-        if ($logger === null)
-            $logger = LoggerFactory::getLogger([static::class]);
         self::$logger = $logger;
+    }
+
+    /**
+     * Set the logger to null, and call getLogger to initialize a new one
+     */
+    public static function resetLogger()
+    {
+        static::$logger = null;
+        $this->setLogger();
     }
 
     /**
@@ -43,5 +50,6 @@ trait LoggerAwareStaticTrait
 
             self::$logger = $result['logger'] ?? new NullLogger();
         }
+        return self::$logger;
     }
 }

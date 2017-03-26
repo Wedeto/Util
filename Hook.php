@@ -1,6 +1,6 @@
 <?php
 
-namespace WASP\Functions;
+namespace WASP\Util;
 
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
