@@ -25,9 +25,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace WASP\Util;
 
-use WASP\Platform\Path;
-use WASP\Platform\System;
-
 /**
  * Provides automatic persistent caching facilities. You can store and retrieve
  * objects in this cache. When they are available, they'll be returned,
@@ -39,37 +36,30 @@ class Cache
 {
     use LoggerAwareStaticTrait;
 
-    private static $repository = array();
-    private static $expiry = null;
-    private $cache_name = 3600;
-
-    /**
-     * Create a cache
-     * @param $name string The name of the cache, determines the file name
-     *
-     */
-    public function __construct($name)
-    {
-        $this->cache_name = $name;
-        if (!isset($this->repository[$name]))
-            self::loadCache($name);
-    }
+    protected static $cache_path = "";
+    protected static $repository = array();
+    protected static $expiry = null;
+    protected $cache_name = 3600;
 
     /**
      * Add the hook after the configuration has been loaded, and apply invalidation to the
      * cache once it times out.
-     * @param $config WASP\Util\Dictionary The configuration to load settings from
+     * @param int $expiry The amount of seconds before the cache expires
      */
-    public static function setHook($config)
+    public static function setHook(int $expiry = 60)
     {
         register_shutdown_function(array(Cache::class, 'saveCache'));
 
-        self::$expiry = $config->dget('cache', 'expire', 60); // Clear out cache every minute by default
+        self::$expiry = $expiry;
         foreach (self::$repository as $name => $cache)
             self::checkExpiry($name);
     }
 
-    private static function checkExpiry($name)
+    /**
+     * Check if the cache has expired
+     * @param string $name The cache to check
+     */
+    private static function checkExpiry(string $name)
     {
         $timeout = self::$expiry;
         $st = isset(self::$repository[$name]['_timestamp']) ? self::$repository[$name]['_timestamp'] : time();
@@ -88,10 +78,10 @@ class Cache
      *
      * @param $name string The name of the cache to load
      */
-    private static function loadCache($name)
+    private static function loadCache(string $name)
     {
-        $path = Path::current();
-        $cache_file = $path->cache . '/' . $name  . '.cache';
+        $path = self::$cache_path;
+        $cache_file = $path . '/' . $name  . '.cache';
 
         if (file_exists($cache_file))
         {
@@ -128,8 +118,7 @@ class Cache
      */
     public static function saveCache()
     {
-        $path = System::path();
-        $cache_dir = $path->cache;
+        $cache_dir = self::$cache_path;
         foreach (self::$repository as $name => $cache)
         {
             if (empty($cache['_changed']))
@@ -138,8 +127,47 @@ class Cache
             unset($cache['_changed']);
             $cache_file = $cache_dir . '/' . $name . '.cache';
             file_put_contents($cache_file, serialize($cache->getAll()));
+            Hook::execute('WASP.IO.FileCreated', ['filename' => $cache_file]);
         }
     }
+
+    /**
+     * Set the base directory for the cache files
+     * @param string $path The cache directory
+     */
+    public static function setCachePath(string $path)
+    {
+        $rpath = realpath($path);
+        if (empty($rpath))
+            throw new InvalidArgumentException("Path does not exist: " . $rpath);
+        self::$cache_path = $rpath;
+    }
+
+    /**
+     * Get the base directory for the cache files
+     */
+    public static function getCachePath()
+    {
+        return self::$cache_path;
+    }
+
+    /**
+     * Create a cache
+     * @param $name string The name of the cache, determines the file name
+     *
+     */
+    public function __construct($name)
+    {
+        // Fix the path to the current working directory if nothing has been
+        // configured yet
+        if (empty(self::$cache_path))
+            self::setCachePath(getcwd());
+
+        $this->cache_name = $name;
+        if (!isset($this->repository[$name]))
+            self::loadCache($name);
+    }
+
 
     /**
      * Get a value from the cache
