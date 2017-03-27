@@ -4,6 +4,7 @@ namespace WASP\Util;
 
 use DateTime;
 use DateTimeImmutable;
+use DateTimeZone;
 use DateInterval;
 use InvalidArgumentException;
 use WASP\Util\Functions as WF;
@@ -34,6 +35,14 @@ class Date
         }
 
         throw new InvalidArgumentException("Invalid argument: " . WF::str($str));
+    }
+
+    public static function createFromFloat(float $timestamp, DateTimeZone $zone = null)
+    {
+        $timestamp = sprintf("%.6f", $timestamp); 
+        $dt = DateTime::createFromFormat('U.u', $timestamp);
+        $dt->setTimeZone($zone ?? new DateTimeZone(date_default_timezone_get()));
+        return $dt;
     }
 
     public static function compareInterval(DateInterval $l, DateInterval $r)
