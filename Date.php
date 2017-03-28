@@ -2,6 +2,7 @@
 
 namespace WASP\Util;
 
+use DateTimeInterface;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -44,6 +45,11 @@ class Date
         $dt->setTimeZone($zone ?? new DateTimeZone(date_default_timezone_get()));
         return $dt;
     }
+    
+    public static function dateToFloat(DateTimeInterface $date)
+    {
+        return (float)$date->format('U.u');
+    }
 
     public static function compareInterval(DateInterval $l, DateInterval $r)
     {
@@ -83,25 +89,38 @@ class Date
         return self::compareInterval($l, $r) >= 0;
     }
 
-    public static function isBefore(DateTime $l, DateTime $r)
+    public static function isBefore(DateTimeInterface $l, DateTimeInterface $r)
     {
         return $l < $r;
     }
 
-    public static function isAfter(DateTime $l, DateTime $r)
+    public static function isAfter(DateTimeInterface $l, DateTimeInterface $r)
     {
         return $l > $r;
     }
 
-    public static function isPast(DateTime $l)
+    public static function isPast(DateTimeInterface $l)
     {
         $now = new DateTime();
         return $l < $now;
     }
 
-    public static function isFuture(DateTime $l)
+    public static function isFuture(DateTimeInterface $l)
     {
         $now = new DateTime();
         return $l > $now;
+    }
+
+    public static function now()
+    {
+        return createFromFloat(microtime(true));
+    }
+
+    public static function diff(DateTimeInterface $l, DateTimeInterface $r)
+    {
+        $lf = self::dateToFloat($l);
+        $rf = self::dateToFloat($r);
+
+        return $lf - $rf;
     }
 }

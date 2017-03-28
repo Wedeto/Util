@@ -3,9 +3,6 @@
 namespace WASP\Util;
 
 use InvalidArgumentException;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
-use WASP\Log\LoggerFactory;
 
 /**
  * Provide hook interface.
@@ -25,10 +22,21 @@ use WASP\Log\LoggerFactory;
  */
 class Hook
 {
+    use LoggerAwareStaticTrait;
+
+    /** Precendence value to suggest the hook should run last */
+    const RUN_FIRST = PHP_INT_MIN;
+
+    /** Precedence value to suggest hook should run first */
+    const RUN_LAST = PHP_INT_MAX;
+
     protected static $logger = null;
 
     /** The registered hooks */
     protected static $hooks = array();
+
+    /** The sequence number */
+    protected static $sequence = 0;
 
     /** A list of hooks that have been paused */
     protected static $paused = array();
@@ -47,6 +55,8 @@ class Hook
      *                           &$params);
      * @param int $precedence The lower this number, the sooner it will be
      *                        called, the higher the later. Default is 0.
+     *                        Subscribers with equal precendece will be called
+     *                        in the order they were registered.
      */
     public static function subscribe(string $hook, callable $callback, int $precedence = 0)
     {
@@ -54,10 +64,14 @@ class Hook
         if (count($parts) < 2)
             throw new InvalidArgumentException("Hook name must consist of at least two parts");
 
-        self::$hooks[$hook][] = ['precedence' => $precedence, 'callback' => $callback];
+        self::$hooks[$hook][] = ['precedence' => $precedence, 'callback' => $callback, 'seq' => ++self::$sequence];
         usort(
             self::$hooks[$hook], 
-            function (array $l, array $r) { return $l['precedence'] - $r['precedence']; }
+            function (array $l, array $r) { 
+                if ($l['precedence'] !== $r['precendence'])
+                    return $l['precedence'] - $r['precedence']; 
+                return $l['seq'] - $r['seq'];
+            }
         );
     }
 
@@ -74,6 +88,9 @@ class Hook
             self::$counters[$hook] = 1;
         else
             ++self::$counters[$hook];
+
+        // Add the name of the hook to the parameters
+        $params['hook'] = $hook;
 
         // Check if the hook has any subscribers and if it hasn't been paused
         $response = $params;
@@ -175,30 +192,5 @@ class Hook
         $called = array_keys(self::$counters);
         $all = array_merge($subscribed, $called);
         return array_unique($all);
-    }
-
-    /**
-     * Get a logger instance. If not set, it will be instantiated. If
-     * WASP\Log\LoggerFactory is available it is used.
-     */
-    protected static function getLogger()
-    {
-        if (self::$logger === null)
-        {
-            if (class_exists(LoggerFactory::class))
-                self::$logger = LoggerFactory::getLogger([static::class]);
-            else
-                self::$logger = new NullLogger();
-        }
-        return self::$logger;
-    }
-
-    /**
-     * Set a logger instance
-     * @param Psr\Log\LoggerInterface $logger The logger to set
-     */
-    public static function setLogger(LoggerInterface $logger)
-    {
-        self::$logger = $logger;
     }
 }
