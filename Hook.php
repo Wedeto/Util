@@ -94,7 +94,7 @@ class Hook
 
         // Check if the hook has any subscribers and if it hasn't been paused
         $response = $params;
-        if (!isset(self::$hooks[$hook]) || isset(self::$paused[$hooks]))
+        if (!isset(self::$hooks[$hook]) || isset(self::$paused[$hook]))
             return $response;
 
         // Call hooks and collect responses
@@ -112,7 +112,7 @@ class Hook
             }
             catch (\Throwable $e)
             {
-                self::getLogger()->error("Callback to {0} throw an exception: {1}", $hook, $e);
+                self::getLogger()->error("Callback to {0} throw an exception: {1}", [$hook, $e]);
             }
         }
 
