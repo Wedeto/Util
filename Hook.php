@@ -44,6 +44,9 @@ class Hook
     /** The number of times each hook has been executed */
     protected static $counters = array();
 
+    /** Hooks currently in execution */
+    protected static $in_progress = array();
+
     /**
      * Subscribe to a hook.
      *
@@ -83,6 +86,11 @@ class Hook
      */
     public static function execute(string $hook, array $params)
     {
+        if (isset(self::$in_progress[$hook]))
+            throw new RecursionException("Recursion in hooks is not supported");
+
+        self::$in_progress[$hook] = true;
+
         // Count invoked hooks
         if (!isset(self::$counters[$hook]))
             self::$counters[$hook] = 1;
@@ -94,27 +102,32 @@ class Hook
 
         // Check if the hook has any subscribers and if it hasn't been paused
         $response = $params;
-        if (!isset(self::$hooks[$hook]) || isset(self::$paused[$hook]))
-            return $response;
 
-        // Call hooks and collect responses
-        foreach (self::$hooks[$hook] as $cb)
+        if (isset(self::$hooks[$hook]) && empty(self::$paused[$hook]))
         {
-            try
+            // Call hooks and collect responses
+            foreach (self::$hooks[$hook] as $subscriber)
             {
-                $r = $cb($params);
-                if (is_array($r))
-                    $response = array_merge($response, $r); 
-            }
-            catch (HookInterrupted $e)
-            {
-                return $e->getResponse() ?? $response;
-            }
-            catch (\Throwable $e)
-            {
-                self::getLogger()->error("Callback to {0} throw an exception: {1}", [$hook, $e]);
+                $cb = $subscriber['callback'];
+
+                try
+                {
+                    $r = $cb($params);
+                    if (is_array($r))
+                        $response = array_merge($response, $r); 
+                }
+                catch (HookInterrupted $e)
+                {
+                    return $e->getResponse() ?? $response;
+                }
+                catch (\Throwable $e)
+                {
+                    self::getLogger()->error("Callback to {0} throw an exception: {1}", [$hook, $e]);
+                }
             }
         }
+
+        unset(self::$in_progress[$hook]);
 
         return $response;
     }

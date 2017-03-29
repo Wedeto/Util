@@ -44,7 +44,7 @@ trait LoggerAwareStaticTrait
         if (self::$logger === null)
         {
             $result = Hook::execute(
-                "WASP.Util.LoggerAware.GetLogger", 
+                "WASP.Util.GetLogger", 
                 ["logger" => null, "class" => static::class]
             );
 

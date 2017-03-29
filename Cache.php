@@ -94,7 +94,7 @@ class Cache
             try
             {
                 $contents = file_get_contents($cache_file);
-                $data = unserialize($contents, array('allowed_classes' => []));
+                $data = unserialize($contents);
                 self::$repository[$name] = new Dictionary($data);
                 self::$repository[$name]['_changed'] = false;
                 self::checkExpiry($name);

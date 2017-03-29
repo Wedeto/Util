@@ -264,7 +264,7 @@ class Functions
                 if (!is_int($k))
                     $repr = "'$k' => ";
                 
-                $repr .= str($v, $html, $depth + 1);
+                $repr .= self::str($v, $html, $depth + 1);
                 $vals[] = $repr;
             }
             return '[' . implode(', ', $vals) . ']';
