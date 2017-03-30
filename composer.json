@@ -9,7 +9,7 @@
     },
     "autoload": {
         "psr-4": {
-            "WASP\\Util\\": "src/"
+            "Wedeto\\Util\\": "src/"
         }
     },
     "authors": [
