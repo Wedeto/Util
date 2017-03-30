@@ -32,6 +32,16 @@ use PHPUnit\Framework\TestCase;
  */
 final class ErrorInterceptorTest extends TestCase
 {
+    public function setUp()
+    {
+        ErrorInterceptor::registerErrorHandler();
+    }
+
+    public function tearDown()
+    {
+        ErrorInterceptor::unregisterErrorHandler();
+    }
+
     /**
      * @covers Wedeto\Util\ErrorInterceptor::__construct
      * @covers Wedeto\Util\ErrorInterceptor::registerError
@@ -77,46 +87,5 @@ final class ErrorInterceptorTest extends TestCase
         $this->expectException(\TypeError::class);
         $this->expectExceptionMessage("must be callable");
         $a = new ErrorInterceptor("1foo");
-    }
-
-    public function testUnregisterAndRegisterErrorHandler()
-    {
-        $old_display_errors = ini_get('display_errors');
-        ini_set('display_errors', 'on');
-        $a = new ErrorInterceptor(function () {
-            trigger_error("Test error", E_USER_NOTICE);
-        });
-
-        $a->registerError(E_USER_NOTICE, 'Test error');
-        $a->execute();
-
-        $errors = $a->getInterceptedErrors();
-        $this->assertEquals(1, count($errors));
-
-        ErrorInterceptor::unregisterErrorHandler();
-
-        $expected = "Test error foobarred";
-        ob_start();
-        trigger_error($expected, E_USER_WARNING);
-        $buf = ob_get_contents();
-        ob_end_clean();
-
-        $this->assertTrue(strpos($buf, $expected) !== false);
-
-        $a = new ErrorInterceptor(function () {
-            trigger_error("Test error", E_USER_NOTICE);
-        });
-
-        $a->registerError(E_USER_NOTICE, 'Test error');
-        $a->execute();
-
-        $errors = $a->getInterceptedErrors();
-        $this->assertEquals(1, count($errors));
-
-        $this->expectException(\ErrorException::class);
-        $this->expectExceptionMessage($expected);
-        trigger_error($expected, E_USER_WARNING);
-
-        ini_set('display_errors', $old_display_errors);
     }
 }

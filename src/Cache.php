@@ -25,6 +25,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Wedeto\Util;
 
+use InvalidArgumentException;
+
 /**
  * Provides automatic persistent caching facilities. You can store and retrieve
  * objects in this cache. When they are available, they'll be returned,
@@ -38,8 +40,8 @@ class Cache
 
     protected static $cache_path = "";
     protected static $repository = array();
-    protected static $expiry = null;
-    protected $cache_name = 3600;
+    protected static $expiry = 3600;
+    protected $cache_name = null;
 
     /**
      * Add the hook after the configuration has been loaded, and apply invalidation to the
@@ -137,7 +139,7 @@ class Cache
      */
     public static function setCachePath(string $path)
     {
-        $rpath = realpath($path);
+        $rpath = substr($path, 0, 6) === "vfs://" ? $path : realpath($path);
         if (empty($rpath))
             throw new InvalidArgumentException("Path does not exist: " . $rpath);
         self::$cache_path = $rpath;
@@ -255,3 +257,5 @@ class Cache
         $data['_timestamp'] = time();
     }
 }
+
+ErrorInterceptor::registerErrorHandler();

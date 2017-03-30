@@ -26,33 +26,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\Util;
 
 use PHPUnit\Framework\TestCase;
-use Wedeto\IO\Dir;
-use Wedeto\Platform\System;
+
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamWrapper;
+use org\bovigo\vfs\vfsStreamDirectory;
 
 /**
  * @covers Wedeto\Dictionary
  */
 final class DictionaryTest extends TestCase
 {
-    private $pathconfig;
-    private $path = null;
-
-    public function setUp()
-    {
-        $this->pathconfig = System::path();
-        Dir::setRequiredPrefix($this->pathconfig->var);
-        $this->path = $this->pathconfig->var . '/test';
-        if (file_exists($this->path))
-            Dir::rmtree($this->path);
-        Dir::mkdir($this->path);
-    }
-    
-    public function tearDown()
-    {
-        if ($this->path)
-            Dir::rmtree($this->path); 
-    }
-
     /**
      * @covers Wedeto\Dictionary::__construct
      * @covers Wedeto\Dictionary::getAll

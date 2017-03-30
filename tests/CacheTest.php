@@ -27,14 +27,27 @@ namespace Wedeto\Util;
 
 use PHPUnit\Framework\TestCase;
 
-use Wedeto\IO\Dir;
-use Wedeto\Platform\System;
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamWrapper;
+use org\bovigo\vfs\vfsStreamDirectory;
+use Wedeto\IO\DirReader;
 
 /**
  * @covers Wedeto\Util\Cache
  */
 final class CacheTest extends TestCase
 {
+    private $dir;
+
+    public function setUp()
+    {
+        vfsStreamWrapper::register();
+        vfsStreamWrapper::setRoot(new vfsStreamDirectory('cachedir'));
+        $this->dir = vfsStream::url('cachedir');
+
+        Cache::setCachePath($this->dir);
+    }
+
     /**
      * @covers Wedeto\Util\Cache::__construct
      * @covers Wedeto\Util\Cache::loadCache
@@ -44,12 +57,8 @@ final class CacheTest extends TestCase
      */
     public function testConstruct()
     {
-        $path = System::path();
         $data = array('test' => array('a' => true, 'b' => false, 'c' => true), 'test2' => array(1, 2, 3));
-        $file = $path->cache . '/testcache.cache';
-
-        if (file_exists($file))
-            Dir::rmtree($file);
+        $file = $this->dir . '/testcache.cache';
 
         $dataser = serialize($data);
         file_put_contents($file, $dataser);
@@ -90,11 +99,8 @@ final class CacheTest extends TestCase
      */
     public function testHook()
     {
-        $config = new Dictionary();
-        $config->set('cache', 'expire', 0);
-
         $cc = new Cache('resolve');
-        Cache::setHook($config);
+        Cache::setHook(0);
         $class = $cc->get('class');
         $this->assertEmpty($class);
     }
@@ -112,8 +118,7 @@ final class CacheTest extends TestCase
         $testdata = array('var1' => 'val1', 'var2' => 'var2');
         $data = serialize($testdata);
 
-        $path = System::path();
-        $file = $path->cache . '/testcache.cache';
+        $file = $this->dir . '/testcache.cache';
         $fh = fopen($file, 'w');
         fputs($fh, $data);
         fclose($fh);
@@ -139,8 +144,7 @@ final class CacheTest extends TestCase
         $config = new Dictionary();
         $config->set('cache', 'expire', 0);
 
-        $path = System::path();
-        $file = $path->cache . '/testcache.cache';
+        $file = $this->dir . '/testcache.cache';
         $fh = fopen($file, 'w');
         fputs($fh, 'garbage-data');
         fclose($fh);
@@ -164,9 +168,6 @@ final class CacheTest extends TestCase
         $config = new Dictionary();
         $config->set('cache', 'expire', 0);
 
-        $path = System::path();
-        if (file_exists($path->cache . '/testcache2.cache'))
-            unlink($path->cache . '/testcache2.cache');
         $cc = new Cache('testcache2');
 
         $contents = $cc->get();
@@ -176,9 +177,6 @@ final class CacheTest extends TestCase
         $cc->put('test', 'bar', true);
         $this->assertTrue($cc->has('test', 'bar'));
         $this->assertFalse($cc->has('test', 'foo'));
-
-        if (file_exists($path->cache . '/testcache2.cache'))
-            unlink($path->cache . '/testcache2.cache');
     }
 
     /**

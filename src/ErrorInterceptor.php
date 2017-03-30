@@ -132,7 +132,7 @@ class ErrorInterceptor
     /** 
      * A stack of interceptors in effect
      */
-    protected static $interceptor_stack = array();
+    protected static $interceptor_stack = null;
 
     /**
      * Catch all PHP errors, notices and throw them as an exception instead. If
@@ -163,8 +163,11 @@ class ErrorInterceptor
      */
     public static function registerErrorHandler()
     {
-        self::$interceptor_stack = array();
-        set_error_handler(array(static::class, "errorHandler"), E_ALL);
+        if (self::$interceptor_stack === null)
+        {
+            self::$interceptor_stack = array();
+            set_error_handler(array(static::class, "errorHandler"), E_ALL);
+        }
     }
 
     /**

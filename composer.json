@@ -7,6 +7,10 @@
         "Psr/Log": "1.0.*",
         "php": ">=7.0.0"
     },
+    "require-dev": {
+        "phpunit/phpunit": ">=6.0.8",
+        "mikey179/vfsStream": "~1"
+    },
     "autoload": {
         "psr-4": {
             "Wedeto\\Util\\": "src/"

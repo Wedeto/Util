@@ -515,7 +515,6 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     // Serializable implementation
     public function serialize()
     {
-        echo "I WILL NOW SERIALIZE DICTIONARY!\n";
         return serialize($this->values);
     }
 
