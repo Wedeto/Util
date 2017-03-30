@@ -32,13 +32,13 @@ use org\bovigo\vfs\vfsStreamWrapper;
 use org\bovigo\vfs\vfsStreamDirectory;
 
 /**
- * @covers Wedeto\Dictionary
+ * @covers Wedeto\Util\Dictionary
  */
 final class DictionaryTest extends TestCase
 {
     /**
-     * @covers Wedeto\Dictionary::__construct
-     * @covers Wedeto\Dictionary::getAll
+     * @covers Wedeto\Util\Dictionary::__construct
+     * @covers Wedeto\Util\Dictionary::getAll
      */
     public function testConstruct()
     {
@@ -48,11 +48,11 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::__construct
-     * @covers Wedeto\Dictionary::get
-     * @covers Wedeto\Dictionary::dget
-     * @covers Wedeto\Dictionary::offsetGet
-     * @covers Wedeto\Dictionary::has
+     * @covers Wedeto\Util\Dictionary::__construct
+     * @covers Wedeto\Util\Dictionary::get
+     * @covers Wedeto\Util\Dictionary::dget
+     * @covers Wedeto\Util\Dictionary::offsetGet
+     * @covers Wedeto\Util\Dictionary::has
      */
     public function testConstructArray()
     {
@@ -81,10 +81,10 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::__construct
-     * @covers Wedeto\Dictionary::get
-     * @covers Wedeto\Dictionary::has
-     * @covers Wedeto\Dictionary::offsetGet
+     * @covers Wedeto\Util\Dictionary::__construct
+     * @covers Wedeto\Util\Dictionary::get
+     * @covers Wedeto\Util\Dictionary::has
+     * @covers Wedeto\Util\Dictionary::offsetGet
      */
     public function testConstructArrayRecursive()
     {
@@ -106,8 +106,8 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::has
-     * @covers Wedeto\Dictionary::set
+     * @covers Wedeto\Util\Dictionary::has
+     * @covers Wedeto\Util\Dictionary::set
      */
     public function testTypeChecking()
     {
@@ -182,13 +182,13 @@ final class DictionaryTest extends TestCase
     }
 
     /** 
-     * @covers Wedeto\Dictionary::getType
-     * @covers Wedeto\Dictionary::getBool
-     * @covers Wedeto\Dictionary::getInt
-     * @covers Wedeto\Dictionary::getFloat
-     * @covers Wedeto\Dictionary::getString
-     * @covers Wedeto\Dictionary::getArray
-     * @covers Wedeto\Dictionary::getObject
+     * @covers Wedeto\Util\Dictionary::getType
+     * @covers Wedeto\Util\Dictionary::getBool
+     * @covers Wedeto\Util\Dictionary::getInt
+     * @covers Wedeto\Util\Dictionary::getFloat
+     * @covers Wedeto\Util\Dictionary::getString
+     * @covers Wedeto\Util\Dictionary::getArray
+     * @covers Wedeto\Util\Dictionary::getObject
      */ 
     public function testGetType()
     {
@@ -265,7 +265,7 @@ final class DictionaryTest extends TestCase
         $this->assertEquals($a->get('test', 'test2'), 'test3');
     }
     /** 
-     * @covers Wedeto\Dictionary::getType
+     * @covers Wedeto\Util\Dictionary::getType
      */ 
     public function testGetTypeNotExistsException()
     {
@@ -315,11 +315,11 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::offsetGet
-     * @covers Wedeto\Dictionary::offsetSet
-     * @covers Wedeto\Dictionary::offsetExists
-     * @covers Wedeto\Dictionary::offsetUnset
-     * @covers Wedeto\Dictionary::getAll
+     * @covers Wedeto\Util\Dictionary::offsetGet
+     * @covers Wedeto\Util\Dictionary::offsetSet
+     * @covers Wedeto\Util\Dictionary::offsetExists
+     * @covers Wedeto\Util\Dictionary::offsetUnset
+     * @covers Wedeto\Util\Dictionary::getAll
      */
     public function testArrayAccess()
     {
@@ -345,11 +345,11 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::rewind
-     * @covers Wedeto\Dictionary::current
-     * @covers Wedeto\Dictionary::next
-     * @covers Wedeto\Dictionary::key
-     * @covers Wedeto\Dictionary::valid
+     * @covers Wedeto\Util\Dictionary::rewind
+     * @covers Wedeto\Util\Dictionary::current
+     * @covers Wedeto\Util\Dictionary::next
+     * @covers Wedeto\Util\Dictionary::key
+     * @covers Wedeto\Util\Dictionary::valid
      */
     public function testIterator()
     {
@@ -371,7 +371,7 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::count
+     * @covers Wedeto\Util\Dictionary::count
      */
     public function testCountable()
     {
@@ -382,8 +382,8 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::offsetSet
-     * @covers Wedeto\Dictionary::offsetGet
+     * @covers Wedeto\Util\Dictionary::offsetSet
+     * @covers Wedeto\Util\Dictionary::offsetGet
      */
     public function testNumericIndex()
     {
@@ -399,9 +399,9 @@ final class DictionaryTest extends TestCase
     }
 
     /** 
-     * @covers Wedeto\Dictionary::getSection
-     * @covers Wedeto\Dictionary::getArray
-     * @covers Wedeto\Dictionary::toArray
+     * @covers Wedeto\Util\Dictionary::getSection
+     * @covers Wedeto\Util\Dictionary::getArray
+     * @covers Wedeto\Util\Dictionary::toArray
      */
     public function testSections()
     {
@@ -418,9 +418,9 @@ final class DictionaryTest extends TestCase
     }
 
     /** 
-     * @covers Wedeto\Dictionary::addAll
-     * @covers Wedeto\Dictionary::getArray
-     * @covers Wedeto\Dictionary::toArray
+     * @covers Wedeto\Util\Dictionary::addAll
+     * @covers Wedeto\Util\Dictionary::getArray
+     * @covers Wedeto\Util\Dictionary::toArray
      */
     public function testAddAll()
     {
@@ -444,7 +444,7 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::toArray
+     * @covers Wedeto\Util\Dictionary::toArray
      */
     public function testToArray()
     {
@@ -457,9 +457,9 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::pop
-     * @covers Wedeto\Dictionary::push
-     * @covers Wedeto\Dictionary::append
+     * @covers Wedeto\Util\Dictionary::pop
+     * @covers Wedeto\Util\Dictionary::push
+     * @covers Wedeto\Util\Dictionary::append
      */
     public function testStack()
     {
@@ -476,10 +476,10 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::push
-     * @covers Wedeto\Dictionary::shift
-     * @covers Wedeto\Dictionary::unshift
-     * @covers Wedeto\Dictionary::prepend
+     * @covers Wedeto\Util\Dictionary::push
+     * @covers Wedeto\Util\Dictionary::shift
+     * @covers Wedeto\Util\Dictionary::unshift
+     * @covers Wedeto\Util\Dictionary::prepend
      */
     public function testQueue()
     {
@@ -505,9 +505,9 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::append
-     * @covers Wedeto\Dictionary::prepend
-     * @covers Wedeto\Dictionary::clear
+     * @covers Wedeto\Util\Dictionary::append
+     * @covers Wedeto\Util\Dictionary::prepend
+     * @covers Wedeto\Util\Dictionary::clear
      */
     public function testClear()
     {
@@ -526,8 +526,8 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::dget
-     * @covers Wedeto\Dictionary::get
+     * @covers Wedeto\Util\Dictionary::dget
+     * @covers Wedeto\Util\Dictionary::get
      */
     public function testDefVal()
     {
@@ -642,7 +642,7 @@ final class DictionaryTest extends TestCase
 
 
     /**
-     * @covers Wedeto\Dictionary::jsonSerialize
+     * @covers Wedeto\Util\Dictionary::jsonSerialize
      */
     public function testJsonSerialize()
     {
@@ -655,8 +655,8 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Dictionary::serialize
-     * @covers Wedeto\Dictionary::unserialize
+     * @covers Wedeto\Util\Dictionary::serialize
+     * @covers Wedeto\Util\Dictionary::unserialize
      */
     public function testPHPSerialize()
     {

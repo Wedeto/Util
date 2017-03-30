@@ -1,13 +1,3 @@
-Wedeto is licensed using a MIT license. Some classes were imported and adapted
-from other open source projects:
-
-* Wedeto\Util\Encoding
-Adapted from: ForceUTF8\Encoding - https://github.com/neitanod/forceutf8
-Copyright (c) 2008 Sebastián Grignol
-License: Revised BSD
-
-The rest of Wedeto is covered by the MIT license, detailed below.
-
 MIT License
 
 Copyright (c) 2017 Egbert van der Wal

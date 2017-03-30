@@ -35,7 +35,7 @@ use Wedeto\Util\Functions as WF;
 final class FunctionsTest extends TestCase
 {
     /**
-     * @covers Wedeto\is_int_val
+     * @covers Wedeto\Util\Functions::is_int_val
      */
     public function testIsInt()
     {
@@ -50,7 +50,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\parse_bool
+     * @covers Wedeto\Util\Functions::parse_bool
      */
     public function testParseBool()
     {
@@ -79,7 +79,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\is_array_like
+     * @covers Wedeto\Util\Functions::is_array_like
      */
     public function testIsArrayLike()
     {
@@ -92,7 +92,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\to_array
+     * @covers Wedeto\Util\Functions::to_array
      */
     public function testToArray()
     {
@@ -110,7 +110,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\cast_array
+     * @covers Wedeto\Util\Functions::cast_array
      */
     public function testCastArray()
     {
@@ -129,7 +129,7 @@ final class FunctionsTest extends TestCase
 
 
     /**
-     * @covers Wedeto\check_extension
+     * @covers Wedeto\Util\Functions::check_extension
      */
     public function testCheckExtensionClass()
     {
@@ -138,7 +138,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\check_extension
+     * @covers Wedeto\Util\Functions::check_extension
      */
     public function testCheckExtensionFunction()
     {
@@ -147,7 +147,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\check_extension
+     * @covers Wedeto\Util\Functions::check_extension
      */
     public function testCheckExtensionExists()
     {
