@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,14 +23,14 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\Util;
+namespace Wedeto\Util;
 
 use PHPUnit\Framework\TestCase;
-use WASP\IO\Dir;
-use WASP\Platform\System;
+use Wedeto\IO\Dir;
+use Wedeto\Platform\System;
 
 /**
- * @covers WASP\Dictionary
+ * @covers Wedeto\Dictionary
  */
 final class DictionaryTest extends TestCase
 {
@@ -54,8 +54,8 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::__construct
-     * @covers WASP\Dictionary::getAll
+     * @covers Wedeto\Dictionary::__construct
+     * @covers Wedeto\Dictionary::getAll
      */
     public function testConstruct()
     {
@@ -65,11 +65,11 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::__construct
-     * @covers WASP\Dictionary::get
-     * @covers WASP\Dictionary::dget
-     * @covers WASP\Dictionary::offsetGet
-     * @covers WASP\Dictionary::has
+     * @covers Wedeto\Dictionary::__construct
+     * @covers Wedeto\Dictionary::get
+     * @covers Wedeto\Dictionary::dget
+     * @covers Wedeto\Dictionary::offsetGet
+     * @covers Wedeto\Dictionary::has
      */
     public function testConstructArray()
     {
@@ -98,10 +98,10 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::__construct
-     * @covers WASP\Dictionary::get
-     * @covers WASP\Dictionary::has
-     * @covers WASP\Dictionary::offsetGet
+     * @covers Wedeto\Dictionary::__construct
+     * @covers Wedeto\Dictionary::get
+     * @covers Wedeto\Dictionary::has
+     * @covers Wedeto\Dictionary::offsetGet
      */
     public function testConstructArrayRecursive()
     {
@@ -123,8 +123,8 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::has
-     * @covers WASP\Dictionary::set
+     * @covers Wedeto\Dictionary::has
+     * @covers Wedeto\Dictionary::set
      */
     public function testTypeChecking()
     {
@@ -199,13 +199,13 @@ final class DictionaryTest extends TestCase
     }
 
     /** 
-     * @covers WASP\Dictionary::getType
-     * @covers WASP\Dictionary::getBool
-     * @covers WASP\Dictionary::getInt
-     * @covers WASP\Dictionary::getFloat
-     * @covers WASP\Dictionary::getString
-     * @covers WASP\Dictionary::getArray
-     * @covers WASP\Dictionary::getObject
+     * @covers Wedeto\Dictionary::getType
+     * @covers Wedeto\Dictionary::getBool
+     * @covers Wedeto\Dictionary::getInt
+     * @covers Wedeto\Dictionary::getFloat
+     * @covers Wedeto\Dictionary::getString
+     * @covers Wedeto\Dictionary::getArray
+     * @covers Wedeto\Dictionary::getObject
      */ 
     public function testGetType()
     {
@@ -282,7 +282,7 @@ final class DictionaryTest extends TestCase
         $this->assertEquals($a->get('test', 'test2'), 'test3');
     }
     /** 
-     * @covers WASP\Dictionary::getType
+     * @covers Wedeto\Dictionary::getType
      */ 
     public function testGetTypeNotExistsException()
     {
@@ -332,11 +332,11 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::offsetGet
-     * @covers WASP\Dictionary::offsetSet
-     * @covers WASP\Dictionary::offsetExists
-     * @covers WASP\Dictionary::offsetUnset
-     * @covers WASP\Dictionary::getAll
+     * @covers Wedeto\Dictionary::offsetGet
+     * @covers Wedeto\Dictionary::offsetSet
+     * @covers Wedeto\Dictionary::offsetExists
+     * @covers Wedeto\Dictionary::offsetUnset
+     * @covers Wedeto\Dictionary::getAll
      */
     public function testArrayAccess()
     {
@@ -362,11 +362,11 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::rewind
-     * @covers WASP\Dictionary::current
-     * @covers WASP\Dictionary::next
-     * @covers WASP\Dictionary::key
-     * @covers WASP\Dictionary::valid
+     * @covers Wedeto\Dictionary::rewind
+     * @covers Wedeto\Dictionary::current
+     * @covers Wedeto\Dictionary::next
+     * @covers Wedeto\Dictionary::key
+     * @covers Wedeto\Dictionary::valid
      */
     public function testIterator()
     {
@@ -388,7 +388,7 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::count
+     * @covers Wedeto\Dictionary::count
      */
     public function testCountable()
     {
@@ -399,8 +399,8 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::offsetSet
-     * @covers WASP\Dictionary::offsetGet
+     * @covers Wedeto\Dictionary::offsetSet
+     * @covers Wedeto\Dictionary::offsetGet
      */
     public function testNumericIndex()
     {
@@ -416,9 +416,9 @@ final class DictionaryTest extends TestCase
     }
 
     /** 
-     * @covers WASP\Dictionary::getSection
-     * @covers WASP\Dictionary::getArray
-     * @covers WASP\Dictionary::toArray
+     * @covers Wedeto\Dictionary::getSection
+     * @covers Wedeto\Dictionary::getArray
+     * @covers Wedeto\Dictionary::toArray
      */
     public function testSections()
     {
@@ -435,9 +435,9 @@ final class DictionaryTest extends TestCase
     }
 
     /** 
-     * @covers WASP\Dictionary::addAll
-     * @covers WASP\Dictionary::getArray
-     * @covers WASP\Dictionary::toArray
+     * @covers Wedeto\Dictionary::addAll
+     * @covers Wedeto\Dictionary::getArray
+     * @covers Wedeto\Dictionary::toArray
      */
     public function testAddAll()
     {
@@ -461,7 +461,7 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::toArray
+     * @covers Wedeto\Dictionary::toArray
      */
     public function testToArray()
     {
@@ -474,9 +474,9 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::pop
-     * @covers WASP\Dictionary::push
-     * @covers WASP\Dictionary::append
+     * @covers Wedeto\Dictionary::pop
+     * @covers Wedeto\Dictionary::push
+     * @covers Wedeto\Dictionary::append
      */
     public function testStack()
     {
@@ -493,10 +493,10 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::push
-     * @covers WASP\Dictionary::shift
-     * @covers WASP\Dictionary::unshift
-     * @covers WASP\Dictionary::prepend
+     * @covers Wedeto\Dictionary::push
+     * @covers Wedeto\Dictionary::shift
+     * @covers Wedeto\Dictionary::unshift
+     * @covers Wedeto\Dictionary::prepend
      */
     public function testQueue()
     {
@@ -522,9 +522,9 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::append
-     * @covers WASP\Dictionary::prepend
-     * @covers WASP\Dictionary::clear
+     * @covers Wedeto\Dictionary::append
+     * @covers Wedeto\Dictionary::prepend
+     * @covers Wedeto\Dictionary::clear
      */
     public function testClear()
     {
@@ -543,8 +543,8 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::dget
-     * @covers WASP\Dictionary::get
+     * @covers Wedeto\Dictionary::dget
+     * @covers Wedeto\Dictionary::get
      */
     public function testDefVal()
     {
@@ -659,7 +659,7 @@ final class DictionaryTest extends TestCase
 
 
     /**
-     * @covers WASP\Dictionary::jsonSerialize
+     * @covers Wedeto\Dictionary::jsonSerialize
      */
     public function testJsonSerialize()
     {
@@ -672,8 +672,8 @@ final class DictionaryTest extends TestCase
     }
 
     /**
-     * @covers WASP\Dictionary::serialize
-     * @covers WASP\Dictionary::unserialize
+     * @covers Wedeto\Dictionary::serialize
+     * @covers Wedeto\Dictionary::unserialize
      */
     public function testPHPSerialize()
     {

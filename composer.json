@@ -1,8 +1,8 @@
 {
-    "name": "wasp/util",
+    "name": "wedeto/util",
     "license": "MIT",
-    "description": "WASP Platform - Basic Utilities",
-    "homepage": "https://wasp.systems/",
+    "description": "Wedeto Platform - Basic Utilities",
+    "homepage": "https://wedeto.net/",
     "require": {
         "Psr/Log": "1.0.*",
         "php": ">=7.0.0"
@@ -15,7 +15,7 @@
     "authors": [
         {
             "name": "Egbert van der Wal",
-            "email": "egbert@wasp.systems"
+            "email": "ewal@pointpro.nl"
         }
     ]
 }

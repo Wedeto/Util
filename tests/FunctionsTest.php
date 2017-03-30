@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,19 +23,19 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\Util;
+namespace Wedeto\Util;
 
 use PHPUnit\Framework\TestCase;
 
-use WASP\Util\Functions as WF;
+use Wedeto\Util\Functions as WF;
 
 /**
- * @covers WASP\Functions
+ * @covers Wedeto\Functions
  */
 final class FunctionsTest extends TestCase
 {
     /**
-     * @covers WASP\is_int_val
+     * @covers Wedeto\is_int_val
      */
     public function testIsInt()
     {
@@ -50,7 +50,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers WASP\parse_bool
+     * @covers Wedeto\parse_bool
      */
     public function testParseBool()
     {
@@ -79,7 +79,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers WASP\is_array_like
+     * @covers Wedeto\is_array_like
      */
     public function testIsArrayLike()
     {
@@ -92,7 +92,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers WASP\to_array
+     * @covers Wedeto\to_array
      */
     public function testToArray()
     {
@@ -110,7 +110,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers WASP\cast_array
+     * @covers Wedeto\cast_array
      */
     public function testCastArray()
     {
@@ -129,7 +129,7 @@ final class FunctionsTest extends TestCase
 
 
     /**
-     * @covers WASP\check_extension
+     * @covers Wedeto\check_extension
      */
     public function testCheckExtensionClass()
     {
@@ -138,7 +138,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers WASP\check_extension
+     * @covers Wedeto\check_extension
      */
     public function testCheckExtensionFunction()
     {
@@ -147,7 +147,7 @@ final class FunctionsTest extends TestCase
     }
 
     /**
-     * @covers WASP\check_extension
+     * @covers Wedeto\check_extension
      */
     public function testCheckExtensionExists()
     {

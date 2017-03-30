@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, The WEb DEvelopment TOolkit.
 
 The code is adapted from the ForceUTF8\Encoding class by Sebastián Grignoli
 <grignoli@gmail.com>. The original license follows.
@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
  * @license  Revised BSD
   */
 
-namespace WASP\Util;
+namespace Wedeto\Util;
 
 /**
  * Encoding is a class that can convert text from Windows-1252, ISO-85591-1 and similar to

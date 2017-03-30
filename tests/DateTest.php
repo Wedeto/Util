@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,7 +23,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\Util;
+namespace Wedeto\Util;
 
 use PHPUnit\Framework\TestCase;
 
@@ -32,12 +32,12 @@ use DateTimeImmutable;
 use DateInterval;
 
 /**
- * @covers WASP\Date
+ * @covers Wedeto\Date
  */
 final class DateTest extends TestCase
 {
     /**
-     * @covers WASP\Date::copy
+     * @covers Wedeto\Date::copy
      */
     public function testCopy()
     {
@@ -64,11 +64,11 @@ final class DateTest extends TestCase
     }
 
     /**
-     * @covers WASP\Date::lessThan
-     * @covers WASP\Date::lessThanOrEqual
-     * @covers WASP\Date::equal
-     * @covers WASP\Date::greaterThan
-     * @covers WASP\Date::greaterThanOrEqual
+     * @covers Wedeto\Date::lessThan
+     * @covers Wedeto\Date::lessThanOrEqual
+     * @covers Wedeto\Date::equal
+     * @covers Wedeto\Date::greaterThan
+     * @covers Wedeto\Date::greaterThanOrEqual
      */
     public function testCompareIntervals()
     {
@@ -140,11 +140,11 @@ final class DateTest extends TestCase
     }
 
     /**
-     * @covers WASP\Date::copy
-     * @covers WASP\Date::isBefore
-     * @covers WASP\Date::isAfter
-     * @covers WASP\Date::isPast
-     * @covers WASP\Date::isFuture
+     * @covers Wedeto\Date::copy
+     * @covers Wedeto\Date::isBefore
+     * @covers Wedeto\Date::isAfter
+     * @covers Wedeto\Date::isPast
+     * @covers Wedeto\Date::isFuture
      */
     public function testDateCompare()
     {

@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,7 +23,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\Util;
+namespace Wedeto\Util;
 
 /**
  * Provides automatic persistent caching facilities. You can store and retrieve
@@ -127,7 +127,7 @@ class Cache
             unset($cache['_changed']);
             $cache_file = $cache_dir . '/' . $name . '.cache';
             file_put_contents($cache_file, serialize($cache->getAll()));
-            Hook::execute('WASP.IO.FileCreated', ['filename' => $cache_file]);
+            Hook::execute('Wedeto.IO.FileCreated', ['filename' => $cache_file]);
         }
     }
 

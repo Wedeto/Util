@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -22,7 +22,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-namespace WASP\Util;
+namespace Wedeto\Util;
 
 use ErrorException;
 use InvalidArgumentException;
@@ -35,7 +35,7 @@ use InvalidArgumentException;
  * to run and complete, while still catching the errors. One example is 'session_start()',
  * which starts a session even if the cookie can not be sent.
  * 
- * The main idea is: no errors or warnings should be generated within WASP in normal operation,
+ * The main idea is: no errors or warnings should be generated within Wedeto in normal operation,
  * but in certain situations you can't avoid them and need to continue.
  */
 class ErrorInterceptor
@@ -69,7 +69,7 @@ class ErrorInterceptor
      *
      * @param int $errno The error type to register
      * @param string $errstr A part of the expected error message
-     * @return WASP\Util\ErrorInterceptor Provides fluent interface
+     * @return Wedeto\Util\ErrorInterceptor Provides fluent interface
      */
     public function registerError($errno, $errstr)
     {

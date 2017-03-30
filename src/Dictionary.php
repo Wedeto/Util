@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,10 +23,10 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\Util;
+namespace Wedeto\Util;
 
-use WASP\Util\Functions as WF;
-use WASP\Log\Logger;
+use Wedeto\Util\Functions as WF;
+use Wedeto\Log\Logger;
 
 /**
  * Dictionary provides a flexible way to use arrays as objects. The getters and
@@ -364,7 +364,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     /**
      * Add all elements in the provided array-like object to the dictionary.
      * @param Traversable $values The values to add
-     * @return WASP\Util\Dictionary Provides fluent interface
+     * @return Wedeto\Util\Dictionary Provides fluent interface
      */
     public function addAll($values)
     {
@@ -377,7 +377,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
 
     /**
      * Remove all elements from the dictionary
-     * @return WASP\Util\Dictionary Provides fluent interface
+     * @return Wedeto\Util\Dictionary Provides fluent interface
      */
     public function clear()
     {
@@ -399,7 +399,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     /**
      * Add an element to the end of the dictionary
      * @param mixed $element The element to add to the end
-     * @return WASP\Util\Dictionary Provides fluent interface
+     * @return Wedeto\Util\Dictionary Provides fluent interface
      */
     public function push($element)
     {
@@ -410,7 +410,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     /**
      * Add an element to the end of the dictionary, wrapper of Dictionary#push
      * @param mixed $element The element to add to the end
-     * @return WASP\Util\Dictionary Provides fluent interface
+     * @return Wedeto\Util\Dictionary Provides fluent interface
      */
     public function append($element)
     {
@@ -429,7 +429,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     /**
      * Add an element to the beginning of the dictionary
      * @param mixed $element The element to add to the begin
-     * @return WASP\Util\Dictionary Provides fluent interface
+     * @return Wedeto\Util\Dictionary Provides fluent interface
      */
     public function unshift($element)
     {
@@ -441,7 +441,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      * Add an element to the beginning of the dictionary. Wraps
      * Dictionary#unshift
      * @param mixed $element The element to add to the begin
-     * @return WASP\Util\Dictionary Provides fluent interface
+     * @return Wedeto\Util\Dictionary Provides fluent interface
      */
     public function prepend($element)
     {

@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,20 +23,20 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\Util;
+namespace Wedeto\Util;
 
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers WASP\Util\ErrorInterceptor
+ * @covers Wedeto\Util\ErrorInterceptor
  */
 final class ErrorInterceptorTest extends TestCase
 {
     /**
-     * @covers WASP\Util\ErrorInterceptor::__construct
-     * @covers WASP\Util\ErrorInterceptor::registerError
-     * @covers WASP\Util\ErrorInterceptor::getInterceptedErrors
-     * @covers WASP\Util\ErrorInterceptor::intercept
+     * @covers Wedeto\Util\ErrorInterceptor::__construct
+     * @covers Wedeto\Util\ErrorInterceptor::registerError
+     * @covers Wedeto\Util\ErrorInterceptor::getInterceptedErrors
+     * @covers Wedeto\Util\ErrorInterceptor::intercept
      */
     public function testInterceptUserNotice()
     {
@@ -52,10 +52,10 @@ final class ErrorInterceptorTest extends TestCase
     }
 
     /**
-     * @covers WASP\Util\ErrorInterceptor::__construct
-     * @covers WASP\Util\ErrorInterceptor::registerError
-     * @covers WASP\Util\ErrorInterceptor::getInterceptedErrors
-     * @covers WASP\Util\ErrorInterceptor::intercept
+     * @covers Wedeto\Util\ErrorInterceptor::__construct
+     * @covers Wedeto\Util\ErrorInterceptor::registerError
+     * @covers Wedeto\Util\ErrorInterceptor::getInterceptedErrors
+     * @covers Wedeto\Util\ErrorInterceptor::intercept
      */
     public function testInterceptWithUnregisteredError()
     {
@@ -70,7 +70,7 @@ final class ErrorInterceptorTest extends TestCase
     }
 
     /**
-     * @covers WASP\Util\ErrorInterceptor::__construct
+     * @covers Wedeto\Util\ErrorInterceptor::__construct
      */
     public function testInvalidCallable()
     {

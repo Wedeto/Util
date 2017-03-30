@@ -1,6 +1,6 @@
 <?php
 /*
-This is part of WASP, the Web Application Software Platform.
+This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
 Copyright 2017, Egbert van der Wal
@@ -23,24 +23,24 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace WASP\Util;
+namespace Wedeto\Util;
 
 use PHPUnit\Framework\TestCase;
 
-use WASP\IO\Dir;
-use WASP\Platform\System;
+use Wedeto\IO\Dir;
+use Wedeto\Platform\System;
 
 /**
- * @covers WASP\Util\Cache
+ * @covers Wedeto\Util\Cache
  */
 final class CacheTest extends TestCase
 {
     /**
-     * @covers WASP\Util\Cache::__construct
-     * @covers WASP\Util\Cache::loadCache
-     * @covers WASP\Util\Cache::get
-     * @covers WASP\Util\Cache::put
-     * @covers WASP\Util\Cache::saveCache
+     * @covers Wedeto\Util\Cache::__construct
+     * @covers Wedeto\Util\Cache::loadCache
+     * @covers Wedeto\Util\Cache::get
+     * @covers Wedeto\Util\Cache::put
+     * @covers Wedeto\Util\Cache::saveCache
      */
     public function testConstruct()
     {
@@ -83,10 +83,10 @@ final class CacheTest extends TestCase
     }
 
     /**
-     * @covers WASP\Util\Cache::__construct
-     * @covers WASP\Util\Cache::loadCache
-     * @covers WASP\Util\Cache::setHook
-     * @covers WASP\Util\Cache::get
+     * @covers Wedeto\Util\Cache::__construct
+     * @covers Wedeto\Util\Cache::loadCache
+     * @covers Wedeto\Util\Cache::setHook
+     * @covers Wedeto\Util\Cache::get
      */
     public function testHook()
     {
@@ -100,9 +100,9 @@ final class CacheTest extends TestCase
     }
 
     /**
-     * @covers WASP\Util\Cache::__construct
-     * @covers WASP\Util\Cache::loadCache
-     * @covers WASP\Util\Cache::get
+     * @covers Wedeto\Util\Cache::__construct
+     * @covers Wedeto\Util\Cache::loadCache
+     * @covers Wedeto\Util\Cache::get
      */
     public function testUnreadable()
     {
@@ -130,9 +130,9 @@ final class CacheTest extends TestCase
     }
 
     /**
-     * @covers WASP\Util\Cache::__construct
-     * @covers WASP\Util\Cache::loadCache
-     * @covers WASP\Util\Cache::get
+     * @covers Wedeto\Util\Cache::__construct
+     * @covers Wedeto\Util\Cache::loadCache
+     * @covers Wedeto\Util\Cache::get
      */
     public function testInvalidCache()
     {
@@ -156,8 +156,8 @@ final class CacheTest extends TestCase
     }
 
     /**
-     * @covers WASP\Util\Cache::__construct
-     * @covers WASP\Util\Cache::loadCache
+     * @covers Wedeto\Util\Cache::__construct
+     * @covers Wedeto\Util\Cache::loadCache
      */
     public function testNewCache()
     {
@@ -182,10 +182,10 @@ final class CacheTest extends TestCase
     }
 
     /**
-     * @covers WASP\Util\Cache::__construct
-     * @covers WASP\Util\Cache::get
-     * @covers WASP\Util\Cache::put
-     * @covers WASP\Util\Cache::clear
+     * @covers Wedeto\Util\Cache::__construct
+     * @covers Wedeto\Util\Cache::get
+     * @covers Wedeto\Util\Cache::put
+     * @covers Wedeto\Util\Cache::clear
      */
     public function testClearCache()
     {
