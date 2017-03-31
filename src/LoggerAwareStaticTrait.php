@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\Util;
 
 use Psr\Log\NullLogger;
+use Psr\Log\LoggerInterface;
 
 /**
  * Static variant of Psr\Log\LoggerAwareTrait
