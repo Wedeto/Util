@@ -55,7 +55,7 @@ trait LoggerAwareStaticTrait
     public static function resetLogger()
     {
         static::$logger = null;
-        self::setLogger();
+        self::getLogger();
     }
 
     /**
