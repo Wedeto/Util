@@ -27,31 +27,19 @@ namespace Wedeto\Util;
 
 use PHPUnit\Framework\TestCase;
 
+use Wedeto\Util\Functions as WF;
+
 /**
- * @covers Wedeto\Util\DefVal
+ * @covers Wedeto\Util\HookInterrupted
  */
-final class DefValTest extends TestCase
+final class HookInterruptedTest extends TestCase
 {
-    public function testDefVal()
+    public function testHookInterrupted()
     {
-        $a = new DefVal('test');
-        $this->assertEquals('test', $a->getValue());
+        $a = new HookInterrupted();
+        $this->assertNull($a->getResponse());
 
-        $a = new DefVal(3);
-        $this->assertEquals(3, $a->getValue());
-
-        $a = new DefVal(null);
-        $this->assertEquals(null, $a->getValue());
-
-        $cl = new \StdClass;
-        $a = new DefVal($cl);
-        $this->assertEquals($cl, $a->getValue());
-
-        $a = new DefVal([1, 2]);
-        $this->assertEquals([1, 2], $a->getValue());
-
-        $arr = ['a' => 'foo', 'b' => 'bar'];
-        $a = new DefVal($arr);
-        $this->assertEquals($arr, $a->getValue());
+        $a = new HookInterrupted([1, 2, 3]);
+        $this->assertEquals([1, 2, 3], $a->getResponse());
     }
 }

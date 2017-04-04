@@ -32,6 +32,7 @@ use DateInterval;
 use DateTimeImmutable;
 use ArrayAccess;
 use Traversable;
+use Throwable;
 
 /**
  * Functions contains some stand alone utility functions.
@@ -211,19 +212,6 @@ class Functions
         }
     }
 
-    public static function compareDateInterval(DateInterval $l, DateInterval $r)
-    {
-        $now = new DateTimeImmutable();
-        $a = $now->add($l);
-        $b = $now->add($r);
-
-        if ($a < $b)
-            return -1;
-        if ($a > $b)
-            return 1;
-        return 0;
-    }
-
     /**
      * Convert any object to a string representation.
      *
@@ -324,5 +312,13 @@ class Functions
         }
 
         return $buf;
+    }
+
+    public static function printIndent($buf, string $text, int $indent = 4)
+    {
+        $parts = explode("\n", $text);
+        $indent = str_repeat(' ', $indent);
+        foreach ($parts as $p)
+            fprintf($buf, "%s%s\n", $indent, $p);
     }
 }

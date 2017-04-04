@@ -56,9 +56,6 @@ class ErrorInterceptor
      */
     public function __construct(callable $func)
     {
-        if (self::$interceptor_stack === null)
-            self::registerErrorHandler();
-
         $this->func = $func;
     }
 
@@ -84,6 +81,13 @@ class ErrorInterceptor
      */
     public function execute()
     {
+        $registered = false;
+        if (self::$interceptor_stack === null)
+        {
+            $registered = true;
+            self::registerErrorHandler();
+        }
+            
         array_push(self::$interceptor_stack, $this);
         $response = null;
         try
@@ -93,6 +97,9 @@ class ErrorInterceptor
         finally
         {
             array_pop(self::$interceptor_stack);
+
+            if ($registered)
+                self::unregisterErrorHandler();
         }
         return $response;
     }

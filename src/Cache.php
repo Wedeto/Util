@@ -96,7 +96,7 @@ class Cache
             try
             {
                 $contents = file_get_contents($cache_file);
-                $data = unserialize($contents);
+                $data = @unserialize($contents);
                 self::$repository[$name] = new Dictionary($data);
                 self::$repository[$name]['_changed'] = false;
                 self::checkExpiry($name);
@@ -140,7 +140,7 @@ class Cache
     public static function setCachePath(string $path)
     {
         $rpath = substr($path, 0, 6) === "vfs://" ? $path : realpath($path);
-        if (empty($rpath))
+        if (empty($rpath) || !file_exists($path))
             throw new InvalidArgumentException("Path does not exist: " . $rpath);
         self::$cache_path = $rpath;
     }
@@ -162,8 +162,10 @@ class Cache
     {
         // Fix the path to the current working directory if nothing has been
         // configured yet
+        // @codeCoverageIgnoreStart
         if (empty(self::$cache_path))
             self::setCachePath(getcwd());
+        // @codeCoverageIgnoreEnd
 
         $this->cache_name = $name;
         if (!isset($this->repository[$name]))
@@ -257,5 +259,3 @@ class Cache
         $data['_timestamp'] = time();
     }
 }
-
-ErrorInterceptor::registerErrorHandler();

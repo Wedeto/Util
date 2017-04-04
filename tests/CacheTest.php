@@ -47,6 +47,11 @@ final class CacheTest extends TestCase
 
         Cache::setCachePath($this->dir);
     }
+    
+    public function tearDown()
+    {
+        Cache::setCachePath($this->dir);
+    }
 
     /**
      * @covers Wedeto\Util\Cache::__construct
@@ -57,6 +62,8 @@ final class CacheTest extends TestCase
      */
     public function testConstruct()
     {
+        $this->assertEquals($this->dir, Cache::getCachePath());
+
         $data = array('test' => array('a' => true, 'b' => false, 'c' => true), 'test2' => array(1, 2, 3));
         $file = $this->dir . '/testcache.cache';
 
@@ -88,7 +95,7 @@ final class CacheTest extends TestCase
         unset($emptyarr['_timestamp']);
         $this->assertEquals($emptyarr, $dataunser);
 
-        unlink($file);
+        Cache::saveCache();
     }
 
     /**
@@ -177,6 +184,19 @@ final class CacheTest extends TestCase
         $cc->put('test', 'bar', true);
         $this->assertTrue($cc->has('test', 'bar'));
         $this->assertFalse($cc->has('test', 'foo'));
+
+        $all = $cc->getAll();
+        $this->assertEquals([
+            'test' => ['bar' => true],
+            '_changed' => true
+        ], $all);
+
+        $cc->set('test', 'bar2', true);
+        $all = $cc->getAll();
+        $this->assertEquals([
+            'test' => ['bar' => true, 'bar2' => true],
+            '_changed' => true
+        ], $all);
     }
 
     /**
@@ -199,6 +219,13 @@ final class CacheTest extends TestCase
         unset($a['_changed']);
         unset($a['_timestamp']);
         $this->assertEmpty($a);
+    }
+
+    public function testInvalidCachePath()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Path does not exist");
+        Cache::setCachePath($this->dir . '/foo/bar');
     }
 }
 

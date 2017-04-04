@@ -136,7 +136,7 @@ class Date
 
     public static function now()
     {
-        return createFromFloat(microtime(true));
+        return self::createFromFloat(microtime(true));
     }
 
     public static function diff(DateTimeInterface $l, DateTimeInterface $r)

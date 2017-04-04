@@ -32,12 +32,12 @@ use DateTimeImmutable;
 use DateInterval;
 
 /**
- * @covers Wedeto\Date
+ * @covers Wedeto\Util\Date
  */
 final class DateTest extends TestCase
 {
     /**
-     * @covers Wedeto\Date::copy
+     * @covers Wedeto\Util\Date::copy
      */
     public function testCopy()
     {
@@ -64,11 +64,11 @@ final class DateTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Date::lessThan
-     * @covers Wedeto\Date::lessThanOrEqual
-     * @covers Wedeto\Date::equal
-     * @covers Wedeto\Date::greaterThan
-     * @covers Wedeto\Date::greaterThanOrEqual
+     * @covers Wedeto\Util\Date::lessThan
+     * @covers Wedeto\Util\Date::lessThanOrEqual
+     * @covers Wedeto\Util\Date::equal
+     * @covers Wedeto\Util\Date::greaterThan
+     * @covers Wedeto\Util\Date::greaterThanOrEqual
      */
     public function testCompareIntervals()
     {
@@ -140,11 +140,11 @@ final class DateTest extends TestCase
     }
 
     /**
-     * @covers Wedeto\Date::copy
-     * @covers Wedeto\Date::isBefore
-     * @covers Wedeto\Date::isAfter
-     * @covers Wedeto\Date::isPast
-     * @covers Wedeto\Date::isFuture
+     * @covers Wedeto\Util\Date::copy
+     * @covers Wedeto\Util\Date::isBefore
+     * @covers Wedeto\Util\Date::isAfter
+     * @covers Wedeto\Util\Date::isPast
+     * @covers Wedeto\Util\Date::isFuture
      */
     public function testDateCompare()
     {
@@ -164,6 +164,26 @@ final class DateTest extends TestCase
         $this->assertFalse(Date::isPast($future));
         $this->assertFalse(Date::isFuture($past));
         $this->assertTrue(Date::isFuture($future));
+    }
+
+    public function testCreateFromFloat()
+    {
+        $m = microtime(true);
+        $dt = Date::now();
+
+        $fl = Date::dateToFloat($dt);
+
+        $this->assertTrue($fl - $m < 0.001);
+    }
+
+    public function testDiffDates()
+    {
+        $now = new DateTime();
+        $tomorrow = clone $now;
+        $tomorrow->add(new DateInterval("P1D"));
+
+        $diff = Date::diff($tomorrow, $now);
+        $this->assertEquals($diff, Date::SECONDS_IN_DAY);
     }
 }
 
