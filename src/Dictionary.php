@@ -40,15 +40,6 @@ use Wedeto\Log\Logger;
  */
 class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, \JsonSerializable
 {
-    const EXISTS = -1;
-    const TYPE_BOOL = -2;
-    const TYPE_NUMERIC = -3;
-    const TYPE_FLOAT = -4;
-    const TYPE_INT = -5;
-    const TYPE_STRING = -6;
-    const TYPE_ARRAY = -7;
-    const TYPE_OBJECT = -8;
-
     protected $values;
     protected $keys = null;
     protected $iterator = null;
@@ -72,16 +63,16 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      * Check if a key exists
      * 
      * @param $key The key to get. May be repeated to go deeper
-     * @param $type The type check. Defaults to EXISTS
+     * @param $type The type check. Defaults to Type::NOTEMPTY
      * @return boolean If the key exists
      */
-    public function has($key, $type = Dictionary::EXISTS)
+    public function has($key, $type = Type::EXISTS)
     {
-        $args = func_get_args();
+        $args = WF::flatten_array(func_get_args());
 
         $last = end($args);     
-        $type = Dictionary::EXISTS;
-        if (is_int($last) && $last < 0 && $last >= -8)
+        $type = Type::EXISTS;
+        if (defined(Type::class . '::' . $last))
             $type = array_pop($args);
 
         $val = $this->values;
@@ -93,23 +84,9 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
         }
 
         // Check type
-        switch ($type)
-        {
-            case Dictionary::TYPE_NUMERIC:
-                return is_numeric($val);
-            case Dictionary::TYPE_INT:
-                return WF::is_int_val($val);
-            case Dictionary::TYPE_FLOAT:
-                return is_float($val);
-            case Dictionary::TYPE_STRING:
-                return is_string($val);
-            case Dictionary::TYPE_ARRAY:
-                return is_array($val) || $val instanceof Dictionary;
-            case Dictionary::TYPE_OBJECT:
-                return is_object($val);
-            default:
-        }
-        return true; // Default to Dictionary::EXIST
+        $unstrict = in_array($type, [Type::INT, Type::FLOAT, Type::BOOL]);
+        $checker = new Type($type, ['unstrict' => $unstrict]);
+        return $checker->validate($val);
     }
 
     /**
@@ -126,13 +103,13 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     {
         if (is_array($key) && $default === null)
         {
-            $args = $key;
-            if (end($args) instanceof DefVal && $default === null)
+            $args = WF::flatten_array($key);
+            if (end($args) instanceof DefVal)
                 $default = array_pop($args);
         }
         else
         {
-            $args = func_get_args();
+            $args = WF::flatten_array(func_get_args());
             if (count($args) >= 2)
                 $default = array_pop($args);
         }
@@ -171,7 +148,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     /**
      * Get a value cast to a specific type.
      * @param $key scalar The key to get. May be repeated to go deeper
-     * @param $type The type (one of the TYPE_* constants in Dictionary)
+     * @param $type The type (one of the constants in Type)
      * @return mixed The type as requested
      */
     public function getType($key, $type)
@@ -190,36 +167,17 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
         if ($val === null)
             throw new \OutOfRangeException("Key " . implode('.', $args) . " does not exist");
 
-        switch ($type)
+        $checker = new Type($type, ['unstrict' => true]);
+        try
         {
-            case Dictionary::TYPE_INT:
-                if (!WF::is_int_val($val))
-                    throw new \DomainException("Key " . implode('.', $args) . " is not an integer");
-                return (int)$val;
-            case Dictionary::TYPE_NUMERIC:
-            case Dictionary::TYPE_FLOAT:
-                if (!is_numeric($val))
-                    throw new \DomainException("Key " . implode('.', $args) . " is not numeric");
-                return (float)$val;
-            case Dictionary::TYPE_STRING:
-                if (!is_string($val) && !is_numeric($val))
-                    throw new \DomainException("Key " . implode('.', $args) . " is not a string");
-                return (string)$val;
-            case Dictionary::TYPE_ARRAY:
-                if (!$val instanceof Dictionary)
-                    throw new \DomainException("Key " . implode('.', $args) . " is not an array");
-                return $val->getAll();
-            case Dictionary::TYPE_OBJECT:
-                if (!is_object($val) || $val instanceof Dictionary)
-                    throw new \DomainException("Key " . implode('.', $args) . " is not an object");
-                return $val;
-            case Dictionary::TYPE_BOOL:
-                return WF::parse_bool($val);
-            default:
+            $value = $checker->filter($val);
         }
-        
-        // Return the value as-is
-        return $val;
+        catch (\InvalidArgumentException $e)
+        {
+            throw new \DomainException("Key " . implode('.', $args) . " is not " . (string)$checker);
+        }
+
+        return $value;
     }
 
     /**
@@ -229,7 +187,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      */
     public function getBool($key, $default = null)
     {
-        return $this->getType(func_get_args(), Dictionary::TYPE_BOOL);
+        return $this->getType(func_get_args(), Type::BOOL);
     }
 
     /**
@@ -239,7 +197,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      */
     public function getInt($key)
     {
-        return $this->getType(func_get_args(), Dictionary::TYPE_INT);
+        return $this->getType(func_get_args(), Type::INT);
     }
 
     /**
@@ -249,7 +207,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      */
     public function getFloat($key)
     {
-        return $this->getType(func_get_args(), Dictionary::TYPE_FLOAT);
+        return $this->getType(func_get_args(), Type::FLOAT);
     }
 
     /**
@@ -259,7 +217,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      */
     public function getString($key)
     {
-        return $this->getType(func_get_args(), Dictionary::TYPE_STRING);
+        return $this->getType(func_get_args(), Type::STRING);
     }
 
     /**
@@ -285,7 +243,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      */
     public function getArray($key)
     {
-        return $this->getType(func_get_args(), Dictionary::TYPE_ARRAY);
+        return $this->getType(func_get_args(), Type::ARRAY);
     }
 
     /**
@@ -295,7 +253,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      */
     public function getObject($key)
     {
-        return $this->getType(func_get_args(), Dictionary::TYPE_OBJECT);
+        return $this->getType(func_get_args(), Type::OBJECT);
     }
 
     /**
@@ -451,7 +409,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     // Iterator implementation
     public function current()
     {
-        return $this->values[$this->key()];
+        return $this->get($this->key());
     }
 
     public function key()
@@ -557,5 +515,10 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     {
         uasort($this->values, "strnatcmp");
         return $this;
+    }
+
+    public function __toString()
+    {
+        return WF::str($this->values);
     }
 }

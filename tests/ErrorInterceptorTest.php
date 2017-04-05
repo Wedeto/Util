@@ -79,6 +79,20 @@ final class ErrorInterceptorTest extends TestCase
         $a->execute();
     }
 
+    public function testWithoutErrorHandler()
+    {
+        ErrorInterceptor::unregisterErrorHandler();
+
+        $a = new ErrorInterceptor(function () {
+            trigger_error("Test warning", E_USER_NOTICE);
+        });
+
+        $a->registerError(E_USER_NOTICE, 'Test error');
+        $this->expectException(\ErrorException::class);
+        $this->expectExceptionMessage("Test warning");
+        $a->execute();
+    }
+
     /**
      * @covers Wedeto\Util\ErrorInterceptor::__construct
      */

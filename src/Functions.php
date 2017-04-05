@@ -78,16 +78,12 @@ class Functions
             return false;
 
         // For numeric types, consider near-0 to be false
-        if (is_float($val))
+        if (is_numeric($val))
             return abs($val) > $float_delta;
 
         // Non-empty arrays are considered true
         if (is_array($val))
             return true;
-
-        // If it is a numeric string, consider it false if it is close to 0
-        if (is_string($val) && is_numeric($val))
-            return (float)abs($val) > $float_delta;
 
         // Parse some textual values representing a boolean
         if (is_string($val))
@@ -130,11 +126,7 @@ class Functions
 
     public static function is_array_like($arg)
     {
-        if (is_array($arg))
-            return true;
-        if (!is_object($arg))
-            return false;
-        return $arg instanceof ArrayAccess && $arg instanceof Traversable;
+        return is_array($arg) || $arg instanceof Traversable;
     }
 
     public static function is_numeric_array($arg)
@@ -172,24 +164,30 @@ class Functions
         }
     }
 
-    public static function flatten_array($arg)
+    public static function flat_array_gen($arg)
     {
         if (!self::is_array_like($arg))
             throw new InvalidArgumentException("Not an array");
 
         $arg = self::to_array($arg);
-        $tgt = array();
         foreach ($arg as $arg_l2)
         {
             if (self::is_numeric_array($arg_l2))
             {
-                $arg_l2 = self::flatten_array($arg_l2);
+                $arg_l2 = self::flat_array_gen($arg_l2);
                 foreach ($arg_l2 as $arg_l3)
-                    $tgt[] = $arg_l3;
+                    yield $arg_l3;
             }
             else
-                $tgt[] = $arg_l2;
+                yield $arg_l2;
         }
+    }
+
+    public static function flatten_array($arg)
+    {
+        $tgt = array();
+        foreach (self::flat_array_gen($arg) as $val)
+            $tgt[] = $val;
         return $tgt;
     }
 

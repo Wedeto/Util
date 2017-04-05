@@ -66,6 +66,7 @@ final class FunctionsTest extends TestCase
         $this->assertTrue(WF::parse_bool("0.1"));
         $this->assertTrue(WF::parse_bool(new DummyBoolA()));
         $this->assertTrue(WF::parse_bool([0]));
+        $this->assertTrue(WF::parse_bool(new DummyBoolC()));
 
         $this->assertFalse(WF::parse_bool('false'));
         $this->assertFalse(WF::parse_bool('no'));
@@ -248,3 +249,6 @@ class DummyBoolB
         return "off";
     }
 }
+
+class DummyBoolC
+{}

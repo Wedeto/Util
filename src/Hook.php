@@ -90,11 +90,20 @@ class Hook
         if (count($parts) < 2)
             throw new InvalidArgumentException("Hook name must consist of at least two parts");
 
+        // Make sure the callback is appropriate
+        $refl = new \ReflectionFunction($callback);
+        $params = $refl->getParameters();
+        if (count($params) !== 1)
+            throw new InvalidArgumentException("Hook must accept exactly one argument of type Dictionary");
+        
+        if ($params[0]->getType() === null || $params[0]->getType()->__toString() !== Dictionary::class)
+            throw new InvalidArgumentException("Hook must accept exactly one argument of type Dictionary");
+
         self::$hooks[$hook][] = ['precedence' => $precedence, 'callback' => $callback, 'seq' => ++self::$sequence];
         usort(
             self::$hooks[$hook], 
             function (array $l, array $r) { 
-                if ($l['precedence'] !== $r['precendence'])
+                if ($l['precedence'] !== $r['precedence'])
                     return $l['precedence'] - $r['precedence']; 
                 return $l['seq'] - $r['seq'];
             }
@@ -107,8 +116,11 @@ class Hook
      *                       to the subsribers so it can be modified.
      * @return array The collected responses of the hooks.
      */
-    public static function execute(string $hook, array $params)
+    public static function execute(string $hook, $params)
     {
+        if (!($params instanceof Dictionary))
+            $params = new Dictionary($params);
+
         if (isset(self::$in_progress[$hook]))
             throw new RecursionException("Recursion in hooks is not supported");
 
@@ -121,11 +133,11 @@ class Hook
             ++self::$counters[$hook];
 
         // Add the name of the hook to the parameters
+        if ($params instanceof TypedDictionary)
+            $params->setType('hook', Type::STRING);
         $params['hook'] = $hook;
 
         // Check if the hook has any subscribers and if it hasn't been paused
-        $response = $params;
-
         if (isset(self::$hooks[$hook]) && empty(self::$paused[$hook]))
         {
             // Call hooks and collect responses
@@ -135,13 +147,11 @@ class Hook
 
                 try
                 {
-                    $r = $cb($params);
-                    if (is_array($r))
-                        $response = array_merge($response, $r); 
+                    $cb($params);
                 }
                 catch (HookInterrupted $e)
                 {
-                    return $e->getResponse() ?? $response;
+                    break;
                 }
                 catch (\Throwable $e)
                 {
@@ -152,7 +162,7 @@ class Hook
 
         unset(self::$in_progress[$hook]);
 
-        return $response;
+        return $params;
     }
 
     /**
@@ -189,7 +199,14 @@ class Hook
      */
     public static function getSubscribers(string $hook)
     {
-        return isset(self::$hooks[$hook]) ? self::$hooks[$hook] : array();
+        if (!isset(self::$hooks[$hook]))
+            return array();
+
+        $subs = [];
+        foreach (self::$hooks[$hook] as $h)
+            $subs[] = $h['callback'];
+
+        return $subs;
     }
 
     /**
@@ -197,7 +214,7 @@ class Hook
      * @param string $hook The hook name
      * @return int The hook execution counter for this hook
      */
-    public static function getExcecuteCount(string $hook)
+    public static function getExecuteCount(string $hook)
     {
         return isset(self::$counters[$hook]) ? self::$counters[$hook] : 0;
     }

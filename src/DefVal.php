@@ -38,4 +38,9 @@ class DefVal
     {
         return $this->value;
     }
+
+    public function __toString()
+    {
+        return "DefVal(" . Functions::str($this->value) . ")";
+    }
 }

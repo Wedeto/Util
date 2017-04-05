@@ -53,5 +53,8 @@ final class DefValTest extends TestCase
         $arr = ['a' => 'foo', 'b' => 'bar'];
         $a = new DefVal($arr);
         $this->assertEquals($arr, $a->getValue());
+
+        $txt = $a->__toString();
+        $this->assertEquals('DefVal(' . Functions::str($arr) . ')', $txt);
     }
 }

@@ -27,64 +27,85 @@ namespace Wedeto\Util;
 
 class Type
 {
-    const TYPE_BOOL = -2;
-    const TYPE_NUMERIC = -3;
-    const TYPE_FLOAT = -4;
-    const TYPE_INT = -5;
-    const TYPE_STRING = -6;
-    const TYPE_DATE = -7;
-    const TYPE_ARRAY = -8;
-    const TYPE_OBJECT = -9;
-    const TYPE_CUSTOM = -10;
+    const EXISTS = "EXISTS";
+    const BOOL = "BOOL";
+    const NUMERIC = "NUMERIC";
+    const FLOAT = "FLOAT";
+    const INT = "INT";
+    const STRING = "STRING";
+    const SCALAR = "SCALAR";
+    const DATE = "DATE";
+    const ARRAY = "ARRAY";
+    const OBJECT = "OBJECT";
+    const ISSET = "ISSET";
+
+    const VALIDATE_CUSTOM = "VALIDATE_CUSTOM";
+    const VALIDATE_FILTER = "VALIDATE_FILTER";
 
     protected $type;
     protected $options = array();
 
     /** 
      * Create a type constraint.
-     * @param int $type The type, one of Type::TYPE_*
+     * @param string $type The type, one of the class constants
      * @param array $options The options. Supported:
-     *                       min => minimum value for numeric types, minimum length for TYPE_STRING, minimum date for TYPE_DATE
-     *                       max => maximum value for numeric types, maximum length for TYPE_STRING, maximum date for TYPE_DATE 
-     *                       class => exact classname for TYPE_OBJECT
-     *                       instanceof => class, ancestor class or interface for TYPE_OBJECT
-     *                       regex => regular expression to match for TYPE_STRING
-     *                       custom => Custom callback for all types
+     *                       min_range  => minimum value for INT, FLOAT, NUMERIC types, 
+     *                                     minimum length for STRING, 
+     *                                     minimum date for DATE
+     *                       max_range  => maximum value for INT, FLOAT, NUMERIC types, 
+     *                                     maximum length for STRING, 
+     *                                     maximum date for DATE 
+     *                       class      => exact classname for OBJECT
+     *                       instanceof => class, ancestor class or interface for OBJECT
+     *                       regex      => regular expression to match for STRING
+     *                       custom     => Custom callback for all types
      */                        
-    public function __construct(int $type, array $options = [])
+    public function __construct(string $type, array $options = [])
     {
-        switch ($type)
-        {
-            case Type::TYPE_BOOL:
-            case Type::TYPE_NUMERIC:
-            case Type::TYPE_FLOAT:
-            case Type::TYPE_INT:
-            case Type::TYPE_STRING:
-            case Type::TYPE_DATE:
-            case Type::TYPE_ARRAY:
-            case Type::TYPE_OBJECT:
-            case Type::TYPE_CUSTOM:
-                $this->type = $type;
-                break;
-            default:
-                throw new \InvalidArgumentException("Unknown type: " . $type);
-        }
+        $const_name = "static::" . $type;
+        if (!defined($const_name))
+            throw new \InvalidArgumentException("Unknown type: " . $type);
 
+        $this->type = $type;
         $this->options = $options;
     }
     
+    /**
+     * Return a properly typed value
+     *
+     * @param mixed $value The value to match and correct
+     * @return mixed The filtered value
+     * @throws InvalidArgumentException When the value is incompatible
+     */
+    public function filter($value)
+    {
+        $filtered = null;
+        if (!$this->validate($value, $filtered))
+        {
+            throw new \InvalidArgumentException(
+                "Not a valid value for " . $this->__toString() . ": " . Functions::str($value)
+            );
+        }
+
+        return $filtered;
+    }
+
     /**
      * Check if the value matches the expected value
      * @param mixed $value
      * @return bool True if the value matches all constraints, false if it does not
      */
-    public function match($value)
+    public function validate($value, &$filtered = null)
     {
         if ($value === null)
             return !empty($this->options['nullable']);
         
+        $filtered = $value;
+        if ($this->type === Type::EXISTS)
+            return true;
+        
         $o = $this->options;
-        if ($this->type !== Type::TYPE_CUSTOM && !$this->matchType($value))
+        if ($this->type !== Type::VALIDATE_CUSTOM && !$this->matchType($value, $filtered))
             return false;
 
         if (isset($o['custom']) && is_callable($o['custom']) && !$o['custom']($value))
@@ -98,31 +119,39 @@ class Type
      * @param mixed $value The value to validate
      * @return bool True if the value validates, false if it does not
      */
-    protected function matchType($value)
+    protected function matchType($value, &$filtered)
     {
         $o = $this->options;
-        $min = $o['min'] ?? null;
-        $max = $o['max'] ?? null;
+        $min = $o['min_range'] ?? null;
+        $max = $o['max_range'] ?? null;
+        $strict = !($o['unstrict'] ?? false);
 
         switch ($this->type)
         {
-            case Type::TYPE_BOOL:
-                return is_bool($value);
-            case Type::TYPE_NUMERIC:
+            case Type::BOOL:
+                if ($strict && !is_bool($value))
+                    return false;
+                $filtered = Functions::parse_bool($value);
+                return true;
+            case Type::NUMERIC:
                 if (!is_numeric($value))
                     return false;
-                return $this->numRangeCheck($value, $min, $max);
-            case Type::TYPE_FLOAT:
-                if (!is_float($value) && !is_int($value))
+                $filtered = Functions::is_int_val($value) ? (int)$value : (float)$value;
+                return $this->numRangeCheck($filtered, $min, $max);
+            case Type::FLOAT:
+                if ($strict && !is_float($value) && !is_int($value))
                     return false;
-                return $this->numRangeCheck($value, $min, $max);
-            case Type::TYPE_INT:
-                if (!is_int($value))
+                $filtered = filter_var($value, FILTER_VALIDATE_FLOAT);
+                return ($filtered !== false) && $this->numRangeCheck($filtered, $min, $max);
+            case Type::INT:
+                if (!is_int($value) && ($strict || !Functions::is_int_val($value)))
                     return false;
-                return $this->numRangeCheck($value, $min, $max);
-            case Type::TYPE_STRING:
-                if (!is_string($value))
+                $filtered = (int)$value;
+                return $this->numRangeCheck($filtered, $min, $max);
+            case Type::STRING:
+                if (!is_string($value) && ($strict || !is_scalar($value)))
                     return false;
+                $filtered = (string)$value;
                 if ($min !== null && strlen($value) < $min)
                     return false;
                 if ($max !== null && strlen($value) > $max)
@@ -130,7 +159,9 @@ class Type
                 if (isset($o['regex']) && !preg_match($o['regex'], $value))
                     return false;
                 return true;
-            case Type::TYPE_DATE:
+            case Type::SCALAR:
+                return is_scalar($value);
+            case Type::DATE:
                 if (!($value instanceof \DateTimeInterface))
                     return false;
                 if ($min instanceof \DateTimeInterface && $value < $min)
@@ -138,9 +169,22 @@ class Type
                 if ($max instanceof \DateTimeInterface && $value > $max)
                     return false;
                 return true;
-            case Type::TYPE_ARRAY:
-                return Functions::is_array_like($value);
-            case Type::TYPE_OBJECT:
+            case Type::ARRAY:
+                if (!Functions::is_array_like($value))
+                    return false;
+                $filtered = Functions::to_array($value);
+                return true;
+            case Type::VALIDATE_FILTER:
+                $ft = $o['filter'];
+                unset($o['filter']);
+                if ($ft === FILTER_VALIDATE_BOOLEAN)
+                    $o['flags'] = FILTER_NULL_ON_FAILURE;
+
+                $filtered = filter_var($value, $ft, $o);
+                if ($ft === FILTER_VALIDATE_BOOLEAN)
+                    return !($filtered === null);
+                return $filtered !== false;
+            case Type::OBJECT:
                 if (!is_object($value))
                     return false;
 
@@ -154,7 +198,9 @@ class Type
 
                 return true;
             default:
+                // @codeCoverageIgnoreStart
                 return false;
+                // @codeCoverageIgnoreEnd
         }
         return true;
     }
@@ -173,5 +219,13 @@ class Type
         if ($max !== null && $value > $max)
             return false;
         return true;
+    }
+
+    public function __toString()
+    {
+        $desc = $this->type;
+        if (!empty($this->options))
+            $desc .= Functions::str($this->options);
+        return $desc;
     }
 }

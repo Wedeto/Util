@@ -38,8 +38,11 @@ class TypedDictionary extends Dictionary
      * @param Dictionary $types The keys and types to allow. Can be nested
      * @param array $values The initial values to set
      */
-    public function __construct(Dictionary $types, $values = array())
+    public function __construct($types, $values = array())
     {
+        if (!($types instanceof Dictionary))
+            $types = new Dictionary($types);
+
         $this->validateTypes($types);
         
         if ($values instanceof Dictionary)
@@ -47,7 +50,10 @@ class TypedDictionary extends Dictionary
         else
             $values = WF::to_array($values);
 
-        $this->validateValues($values, $types);
+        $this->types = $types;
+        $this->values = [];
+
+        $this->addAll($values);
     }
 
     /**
@@ -63,53 +69,47 @@ class TypedDictionary extends Dictionary
             $kpath = $spath . $key;
             if ($value instanceof Dictionary)
             {
-                $this->validateTypes($value, $spath);
+                $this->validateTypes($value, $kpath);
+            }
+            elseif (is_string($value))
+            {
+                $types[$key] = new Type($value);
             }
             elseif (!($value instanceof Type))
             {
                 throw new \InvalidArgumentException(
-                    "Invalid type for " . $kpath . ": " . Functions::str($value)
+                    "Unknown type: " . Functions::str($value) . " for " . $kpath
                 );
             }
         }
     }
 
-
-    /**
-     * Validate the array for valid types.
-     * @param array $values The values to validate
-     * @param Dictionary $types The type definitions
-     * @param string $path The key path, used for reporting errors
+    /** 
+     * Add a type for a parameter
+     * @param string $key The key to set a type for. Can be repeated to go deeper
+     * @param Type $type The type for the parameter
+     * @return TypedDictionary Provides fluent interface
      */
-    protected function validateValues(array $values, Dictionary $types, string $path = "")
+    public function setType($key, $type)
     {
-        $spath = empty($path) ? "" : $path . ".";
-        foreach ($values as $key => $value)
-        {
-            $kpath = $spath . $key;
-            if (!$types->has($key))
-                throw new \InvalidArgumentException("Undefined key: " . $kpath);
-                
-            $type = $types->get($key);
-            if ($type instanceof Dictionary)
-            {
-                if (!Functions::is_array_like($value))
-                    throw new \InvalidArgumentException("Value must be array at: " . $kpath);
-                if ($value instanceof Dictionary)
-                    $value = $value->values;
-                else
-                    $value = Functions::to_array($value);
+        $args = func_get_args();
+        $type = array_pop($args);
 
-                $this->validateValue($value, $type, $kpath);
-            }
-            elseif ($type instanceof Type)
-            {
-                if (!$type->match($value))
-                    throw new \InvalidArgumentException("Value must be " . (string)$type . " at: " . $kpath);
-            }
-            else
-                throw new \RuntimeException("Invalid type classifier");
+        if (!($type instanceof Type))
+            $type = new Type($type);
+
+        if ($this->types->has($args))
+        {
+            $old_type = $this->types->get($args); 
+            if ($old_type != $type)
+                throw new \LogicException("Duplicate key: " . WF::str($args));
         }
+        else
+        {
+            $args[] = $type;
+            $this->types->set($args, null);
+        }
+        return $this;
     }
 
     /**
@@ -133,10 +133,26 @@ class TypedDictionary extends Dictionary
         if ($type === null)
             throw new \InvalidArgumentException("Undefined key: " . $kpath);
 
-        if (!$type->match($value))
+        if ($type instanceof Dictionary)
+        {
+            // Subfiltering required - extract values
+            if (!Functions::is_array_like($value))
+                throw new \InvalidArgumentException("Value must be array at: " . $kpath);
+
+            foreach ($value as $subkey => $subval)
+            {
+                $nargs = $path;
+                $nargs[] = $subkey;
+                $nargs[] = $subval;
+                $this->set($nargs, null);
+            }
+            return;
+        }
+
+        if (!$type->validate($value))
             throw new \InvalidArgumentException("Value must be " . (string)$type . " at: " . $kpath);
 
-        return parent::set($args);
+        return parent::set($args, null);
     }
 
     /**
@@ -149,13 +165,30 @@ class TypedDictionary extends Dictionary
      */
     public function &dget($key, $default = null)
     {
-        if (is_array($key) && $default === null)
-            $args = $key;
-        else
-            $args = func_get_args();
+        $args = WF::flatten_array(func_get_args());
+        if (func_num_args() > 1)
+        {
+            $default = array_pop($args);
+            if (!($default instanceof DefVal))
+                $default = new DefVal($default);
+            $args[] = $default;
+        }
 
         // Get the value, without referencing, so that we actually return a copy
-        $result = parent::dget($args);
+        $result = parent::dget($args, null);
+
+        if ($result instanceof Dictionary)
+        {
+            // Sub-arrays are returned as dictionary - which allow
+            // modification without type checking. Re-wrap into
+            // a TypedDictionary including the correct types
+            $path = $args;
+            $types = $this->types->dget($path);
+            
+            $dict = new TypedDictionary($types);
+            $dict->values = &$result->values;
+            $result = $dict;
+        }
 
         // Return the copy to keep it unmodifiable
         return $result;
@@ -168,8 +201,9 @@ class TypedDictionary extends Dictionary
      */
     public function addAll($values)
     {
-        $this->validateValues($values, $this->types, "");
-        return parent::addAll($values);
+        foreach ($values as $key => $value)
+            $this->set($key, $value);
+        return $this;
     }
 
     /** 
@@ -226,6 +260,16 @@ class TypedDictionary extends Dictionary
     public static function wrap(array &$values)
     {
         throw new \RuntimeException("Cannot wrap into a TypedDictionary");
+    }
+
+    /**
+     * @return string The TypedDictionary as a string 
+     */
+    public function __toString()
+    {
+        $val = WF::str($this->values);
+        $tp = WF::str($this->types->values);
+        return "$val (Type: " . $tp . ")";
     }
 }
 
