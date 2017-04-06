@@ -33,8 +33,15 @@ use InvalidArgumentException;
  * otherwise null will be returned. The cache is automatically saved to PHP
  * serialized files on shutdown, and they are loaded from these files on
  * initialization.
+ *
+ * Changes are monitored, and only when something changes, the cache is
+ * written.  However, due to the implementation of Dictionary it is possible to
+ * get a reference to the inner values. This allows changing them without the
+ * Cache knowing. This may lead to unsaved changed. When you use this
+ * functionality, be sure to call Cache->setChanged() after your changes to
+ * update the changed flag manually.
  */ 
-class Cache
+class Cache extends Dictionary
 {
     use LoggerAwareStaticTrait;
 
@@ -64,13 +71,16 @@ class Cache
     private static function checkExpiry(string $name)
     {
         $timeout = self::$expiry;
-        $st = isset(self::$repository[$name]['_timestamp']) ? self::$repository[$name]['_timestamp'] : time();
+        $st = self::$repository[$name]['_timestamp'] ?? time();
         $expires = $st + $timeout;
 
         if (time() >= $expires || $timeout === 0)
         {
             self::getLogger()->debug("Cache for {0} expired - clearing", [$name]);
-            self::$repository[$name] = new Dictionary();
+            $keys = array_keys(self::$repository[$name]);
+            foreach ($keys as $k)
+                unset(self::$repository[$name][$k]);
+
             self::$repository[$name]['_timestamp'] = time();
         }
     }
@@ -97,7 +107,9 @@ class Cache
             {
                 $contents = file_get_contents($cache_file);
                 $data = @unserialize($contents);
-                self::$repository[$name] = new Dictionary($data);
+                if (!is_array($data))
+                    $data = [];
+                self::$repository[$name] = $data;
                 self::$repository[$name]['_changed'] = false;
                 self::checkExpiry($name);
                 return;
@@ -111,7 +123,7 @@ class Cache
             }
         }
         self::getLogger()->debug("Cache {0} does not exist - creating", [$cache_file]);
-        self::$repository[$name] = new Dictionary();
+        self::$repository[$name] = [];
     }
 
     /**
@@ -121,16 +133,19 @@ class Cache
     public static function saveCache()
     {
         $cache_dir = self::$cache_path;
-        foreach (self::$repository as $name => $cache)
+        $cnt = 0;
+        foreach (self::$repository as $name => &$cache)
         {
             if (empty($cache['_changed']))
                 continue;
 
+            ++$cnt;
             unset($cache['_changed']);
             $cache_file = $cache_dir . '/' . $name . '.cache';
-            file_put_contents($cache_file, serialize($cache->getAll()));
+            file_put_contents($cache_file, serialize($cache));
             Hook::execute('Wedeto.IO.FileCreated', ['filename' => $cache_file]);
         }
+        return $cnt;
     }
 
     /**
@@ -158,7 +173,7 @@ class Cache
      * @param $name string The name of the cache, determines the file name
      *
      */
-    public function __construct($name)
+    public function __construct(string $name)
     {
         // Fix the path to the current working directory if nothing has been
         // configured yet
@@ -170,52 +185,9 @@ class Cache
         $this->cache_name = $name;
         if (!isset($this->repository[$name]))
             self::loadCache($name);
-    }
 
-
-    /**
-     * Get a value from the cache
-     *
-     * @param $key scalar The key under which to store. Can be repeated to go deeper
-     * @return mixed The requested value, or null if it doesn't exist
-     */
-    public function &get()
-    {
-        if (func_num_args() === 0)
-            return self::$repository[$this->cache_name]->getAll();
-
-        return self::$repository[$this->cache_name]->dget(func_get_args(), null);
-    }
-
-    /**
-     * Return a full copy of the contents of the cache
-     */
-    public function getAll()
-    {
-        return self::$repository[$this->cache_name]->getAll();
-    }
-
-    /**
-     * Check if the cache contains the provided value
-     */
-    public function has(...$params)
-    {
-        return call_user_func_array(array(self::$repository[$this->cache_name], 'has'), $params);
-    }
-    
-    /**
-     * Put a value in the cache
-     *
-     * @param $key scalar The key under which to store. Can be repeated to go deeper.
-     * @param $val mixed The value to store. Should be PHP-serializable. If
-     *                   this is null, the entry will be removed from the cache
-     * @return Cache Provides fluent interface
-     */
-    public function put($key, $val)
-    {
-        self::$repository[$this->cache_name]->set(func_get_args(), null);
-        self::$repository[$this->cache_name]['_changed'] = true;
-        return $this;
+        // Attach to the correct repository
+        $this->values = &self::$repository[$name];
     }
 
     /**
@@ -228,21 +200,21 @@ class Cache
      */
     public function set($key, $val)
     {
-        self::$repository[$this->cache_name]->set(func_get_args(), null);
-        self::$repository[$this->cache_name]['_changed'] = true;
+        parent::set(func_get_args(), null); 
+        $this->values['_changed'] = true;
         return $this;
     }
 
     /**
-     * Replace the entire contents of the cache
+     * Set the changed flag to true, triggering a save on exit. Be sure
+     * to call this if you extract values by reference and change them.
      *
-     * @param $replacement array The replacement for the cache
+     * @return Cache Provides fluent interface
      */
-    public function replace(array &$replacement)
+    public function setChanged()
     {
-        self::$repository[$this->cache_name] = Dictionary::wrap($replacement);
-        self::$repository[$this->cache_name]['_changed'] = true;
-        self::$repository[$this->cache_name]['_timestamp'] = time();
+        $this->values['_changed'] = true;
+        return $this;
     }
 
     /**
@@ -250,12 +222,8 @@ class Cache
      */
     public function clear()
     {
-        $data = &self::$repository[$this->cache_name]->getAll();
-        $keys = array_keys($data);
-        foreach ($keys as $key)
-            unset($data[$key]);
-
-        $data['_changed'] = true;
-        $data['_timestamp'] = time();
+        parent::clear();
+        $this->set('_changed', true);
+        $this->set('_timestamp', time());
     }
 }

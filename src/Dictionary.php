@@ -114,6 +114,9 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
                 $default = array_pop($args);
         }
 
+        if (count($args) === 0)
+            return $this->getAll();
+
         if ($default instanceof DefVal)
             $default = $default->value;
 
@@ -140,9 +143,9 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      * @param $key scalar The key to get. May be repeated to go deeper
      * @return mixed The value from the dictionary
      */
-    public function &get($key)
+    public function &get(...$key)
     {
-        return $this->dget(func_get_args());
+        return $this->dget($key);
     }
 
     /**

@@ -45,14 +45,17 @@ final class DictionaryTest extends TestCase
         $dict = new Dictionary();
         $this->assertInstanceOf(Dictionary::class, $dict);
         $this->assertTrue(empty($dict->getAll()));
+        $this->assertTrue(empty($dict->get()));
 
         $dict = new Dictionary([1, 2, 3]);
         $this->assertInstanceOf(Dictionary::class, $dict);
         $this->assertEquals([1, 2, 3], $dict->getAll());
+        $this->assertEquals([1, 2, 3], $dict->get());
 
         $dict = new Dictionary($dict);
         $this->assertInstanceOf(Dictionary::class, $dict);
         $this->assertEquals([1, 2, 3], $dict->getAll());
+        $this->assertEquals([1, 2, 3], $dict->get());
     }
 
     /**

@@ -46,18 +46,20 @@ final class CacheTest extends TestCase
         $this->dir = vfsStream::url('cachedir');
 
         Cache::setCachePath($this->dir);
+        ErrorInterceptor::registerErrorHandler();
     }
     
     public function tearDown()
     {
         Cache::setCachePath($this->dir);
+        ErrorInterceptor::unregisterErrorHandler();
     }
 
     /**
      * @covers Wedeto\Util\Cache::__construct
      * @covers Wedeto\Util\Cache::loadCache
      * @covers Wedeto\Util\Cache::get
-     * @covers Wedeto\Util\Cache::put
+     * @covers Wedeto\Util\Cache::set
      * @covers Wedeto\Util\Cache::saveCache
      */
     public function testConstruct()
@@ -78,24 +80,20 @@ final class CacheTest extends TestCase
         $this->assertEquals($c->get('test', 'c'), true);
         $this->assertEquals($c->get('test2')->toArray(), $data['test2']);
 
-        $c->put('test2', 'foobar');
+        $c->set('test2', 'foobar');
         Cache::saveCache();
 
         $dataser = file_get_contents($file);
         $dataunser = unserialize($dataser);
         $this->assertEquals($dataunser['test2'], 'foobar');
 
-        $emptyarr = array();
-        $c->replace($emptyarr);
-        Cache::saveCache();
+        // Check if saving again doesn't actually save
+        $this->assertEquals(0, Cache::saveCache());
 
-        $dataser = file_get_contents($file);
-        $dataunser = unserialize($dataser);
-        unset($dataunser['_timestamp']); // Added by cache
-        unset($emptyarr['_timestamp']);
-        $this->assertEquals($emptyarr, $dataunser);
+        // Force a re-save
+        $c->setChanged();
 
-        Cache::saveCache();
+        $this->assertEquals(1, Cache::saveCache());
     }
 
     /**
@@ -162,8 +160,15 @@ final class CacheTest extends TestCase
         unset($contents['_timestamp']);
         $this->assertEmpty($contents);
 
-        if (file_exists($file))
-            unlink($file);
+        $file = $this->dir . '/testcache2.cache';
+        $fh = fopen($file, 'w');
+        fputs($fh, serialize(new \DateTime()));
+        fclose($fh);
+
+        $cc = new Cache('testcache2');
+        $contents = $cc->get();
+        unset($contents['_timestamp']);
+        $this->assertEmptY($contents);
     }
 
     /**
@@ -181,7 +186,7 @@ final class CacheTest extends TestCase
         unset($contents['_timestamp']);
         $this->assertEmpty($contents);
 
-        $cc->put('test', 'bar', true);
+        $cc->set('test', 'bar', true);
         $this->assertTrue($cc->has('test', 'bar'));
         $this->assertFalse($cc->has('test', 'foo'));
 
@@ -202,14 +207,14 @@ final class CacheTest extends TestCase
     /**
      * @covers Wedeto\Util\Cache::__construct
      * @covers Wedeto\Util\Cache::get
-     * @covers Wedeto\Util\Cache::put
+     * @covers Wedeto\Util\Cache::set
      * @covers Wedeto\Util\Cache::clear
      */
     public function testClearCache()
     {
         $c = new Cache('testcache');
 
-        $c->put('test', 'mock');
+        $c->set('test', 'mock');
         $this->assertEquals('mock', $c->get('test'));
 
         $c->clear();
