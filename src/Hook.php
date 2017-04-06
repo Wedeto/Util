@@ -34,14 +34,17 @@ use InvalidArgumentException;
  *
  * Hook::execute("my.hook.name", ['my' => 'parameters']);
  *
- * To have their hooks executed, and inspect the resulting parameter array. Execute
- * will also return an array containing the non-empty responses from the callbacks.
+ * To have their hooks executed, and inspect the resulting parameter
+ * Dictionary. Execute returns the Dictionary containing the resulting
+ * parameters.
  *
  * To hook into the module, call:
  *
- * Hook::subscribe('my.hook.name', function (array &params) { // my code });
+ * Hook::subscribe('my.hook.name', function (Dictionary $params) { // your code });
  *
- * Somewhere in your initialization code.
+ * Somewhere in your initialization code. Any Hook subscriber can throw HookInterrupted 
+ * to stop execution directly, skipping remaining other subscribers. Any other exceptions
+ * will be caught, logged and ignored, continuing with other subscribers.
  */
 class Hook
 {
@@ -77,8 +80,7 @@ class Hook
      *                     parts separated by dots: vendor.hookname
      * @param callable $callback The callback that will be called when the hook
      *                           is executed.  The function should have the
-     *                           following signature: function (array
-     *                           &$params);
+     *                           following signature: function (Dictionary $params);
      * @param int $precedence The lower this number, the sooner it will be
      *                        called, the higher the later. Default is 0.
      *                        Subscribers with equal precendece will be called
