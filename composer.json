@@ -5,7 +5,8 @@
     "homepage": "https://wedeto.net/",
     "require": {
         "Psr/Log": "1.0.*",
-        "php": ">=7.0.0"
+        "php": ">=7.0.0",
+        "ext-iconv": "*"
     },
     "require-dev": {
         "phpunit/phpunit": ">=6.0.8",
