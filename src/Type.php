@@ -29,11 +29,15 @@ class Type
 {
     const EXISTS = "EXISTS";
     const BOOL = "BOOL";
+    const BOOLEAN = "BOOL";
     const NUMERIC = "NUMERIC";
     const FLOAT = "FLOAT";
+    const DOUBLE = "FLOAT";
     const INT = "INT";
+    const INTEGER = "INT";
     const STRING = "STRING";
     const SCALAR = "SCALAR";
+    const RESOURCE = "RESOURCE";
     const DATE = "DATE";
     const ARRAY = "ARRAY";
     const OBJECT = "OBJECT";
@@ -161,6 +165,8 @@ class Type
                 return true;
             case Type::SCALAR:
                 return is_scalar($value);
+            case Type::RESOURCE:
+                return is_resource($value);
             case Type::DATE:
                 if (!($value instanceof \DateTimeInterface))
                     return false;

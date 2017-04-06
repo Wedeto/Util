@@ -259,7 +259,44 @@ class TypedDictionary extends Dictionary
      */
     public static function wrap(array &$values)
     {
-        throw new \RuntimeException("Cannot wrap into a TypedDictionary");
+        $types = new Dictionary;
+        self::determineTypes($values, $types);
+
+        return new TypedDictionary($types, $values);
+    }
+
+    protected function determineTypes(array $values, Dictionary $types)
+    {
+        foreach ($values as $key => $value)
+        {
+            if (WF::is_array_like($value))
+            {
+                $subarray = WF::to_array($value);
+                $subtypes = new Dictionary;
+                self::determineTypes($subarray, $subtypes);
+                $types[$key] = $subtypes;
+            }
+            else
+            {
+                $tp = strtoupper(gettype($value));
+
+                $opts = [];
+                if ($tp === "NULL")
+                {
+                    $tp = "EXISTS";
+                    $opts['nullable'] = true;
+                }
+                else
+                    $tp = constant(Type::class . '::' . $tp);
+
+                if ($tp === "OBJECT")
+                    $opts['instanceof'] = get_class($value);
+                
+                $type = new Type($tp, $opts);
+                $types[$key] = $type;
+            }
+        }
+        return $types;
     }
 
     /**

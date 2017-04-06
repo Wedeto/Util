@@ -208,7 +208,6 @@ final class TypedDictionaryTest extends TestCase
         $this->wrapExpectError($a, "unshift", "", \RuntimeException::class, "TypedDictionary cannot be used as a stack");
         $this->wrapExpectError($a, "shift", "", \RuntimeException::class, "TypedDictionary cannot be used as a stack");
         $this->wrapExpectError($a, "pop", "", \RuntimeException::class, "TypedDictionary cannot be used as a stack");
-        $this->wrapExpectError($a, "wrap", [], \RuntimeException::class, "Cannot wrap into a TypedDictionary");
     }
 
     public function wrapExpectError($dict, $func, $arg, $class, $msg)
@@ -263,5 +262,106 @@ final class TypedDictionaryTest extends TestCase
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage("Duplicate key: [bar]");
         $dict->setType('bar', Type::STRING);
+    }
+
+    public function testWrap()
+    {
+        $fh = fopen("php://memory", "rw");
+        $arr = [
+            'fl' => 3.5,
+            'int' => 15,
+            'str' => "string",
+            'date' => new \DateTime(),
+            'stdcl' => new \StdClass(),
+            'resource' => $fh,
+            'null' => NULL,
+            'bool' => true
+        ];
+
+        $dict = TypedDictionary::wrap($arr);
+        fclose($fh);
+
+        $fh2 = fopen("php://memory", "rw");
+        $this->assignment($dict, ['fl'], 4.5, true);
+        $this->assignment($dict, ['fl'], 3, true);
+        $this->assignment($dict, ['fl'], "str", false);
+        $this->assignment($dict, ['fl'], false, false);
+        $this->assignment($dict, ['fl'], new \DateTime, false);
+        $this->assignment($dict, ['fl'], new \stdClass, false);
+        $this->assignment($dict, ['fl'], $fh2, false);
+        $this->assignment($dict, ['fl'], null, false);
+        $this->assignment($dict, ['int'], 4.5, false);
+        $this->assignment($dict, ['int'], 3, true);
+        $this->assignment($dict, ['int'], "str", false);
+        $this->assignment($dict, ['int'], false, false);
+        $this->assignment($dict, ['int'], new \DateTime, false);
+        $this->assignment($dict, ['int'], new \stdClass, false);
+        $this->assignment($dict, ['int'], $fh2, false);
+        $this->assignment($dict, ['int'], null, false);
+
+        $this->assignment($dict, ['str'], 4.5, false);
+        $this->assignment($dict, ['str'], 3, false);
+        $this->assignment($dict, ['str'], "str", true);
+        $this->assignment($dict, ['str'], false, false);
+        $this->assignment($dict, ['str'], new \DateTime, false);
+        $this->assignment($dict, ['str'], new \stdClass, false);
+        $this->assignment($dict, ['str'], $fh2, false);
+        $this->assignment($dict, ['str'], null, false);
+
+        $this->assignment($dict, ['date'], 4.5, false);
+        $this->assignment($dict, ['date'], 3, false);
+        $this->assignment($dict, ['date'], "str", false);
+        $this->assignment($dict, ['date'], false, false);
+        $this->assignment($dict, ['date'], new \DateTime, true);
+        $this->assignment($dict, ['date'], new \stdClass, false);
+        $this->assignment($dict, ['date'], $fh2, false);
+        $this->assignment($dict, ['date'], null, false);
+
+        $this->assignment($dict, ['stdcl'], 4.5, false);
+        $this->assignment($dict, ['stdcl'], 3, false);
+        $this->assignment($dict, ['stdcl'], "str", false);
+        $this->assignment($dict, ['stdcl'], false, false);
+        $this->assignment($dict, ['stdcl'], new \DateTime, false);
+        $this->assignment($dict, ['stdcl'], new \stdClass, true);
+        $this->assignment($dict, ['stdcl'], $fh2, false);
+        $this->assignment($dict, ['stdcl'], null, false);
+
+        $this->assignment($dict, ['resource'], 4.5, false);
+        $this->assignment($dict, ['resource'], 3, false);
+        $this->assignment($dict, ['resource'], "str", false);
+        $this->assignment($dict, ['resource'], false, false);
+        $this->assignment($dict, ['resource'], new \DateTime, false);
+        $this->assignment($dict, ['resource'], new \stdClass, false);
+        $this->assignment($dict, ['resource'], $fh2, true);
+        $this->assignment($dict, ['resource'], null, false);
+
+        $this->assignment($dict, ['null'], 4.5, true);
+        $this->assignment($dict, ['null'], 3, true);
+        $this->assignment($dict, ['null'], "str", true);
+        $this->assignment($dict, ['null'], false, true);
+        $this->assignment($dict, ['null'], new \DateTime, true);
+        $this->assignment($dict, ['null'], new \stdClass, true);
+        $this->assignment($dict, ['null'], $fh2, true);
+        $this->assignment($dict, ['null'], null, true);
+
+        $this->assignment($dict, ['bool'], 4.5, false);
+        $this->assignment($dict, ['bool'], 3, false);
+        $this->assignment($dict, ['bool'], "str", false);
+        $this->assignment($dict, ['bool'], false, true);
+        $this->assignment($dict, ['bool'], new \DateTime, false);
+        $this->assignment($dict, ['bool'], new \stdClass, false);
+        $this->assignment($dict, ['bool'], $fh2, false);
+        fclose($fh2);
+
+        $arr['foo']['bar'] = 3.5;
+        unset($arr['resource']); // Closed already
+        $dict = TypedDictionary::wrap($arr);
+        $this->assignment($dict, ['foo', 'bar'], 4.5, true);
+        $this->assignment($dict, ['foo', 'bar'], 3, true);
+        $this->assignment($dict, ['foo', 'bar'], "str", false);
+        $this->assignment($dict, ['foo', 'bar'], false, false);
+        $this->assignment($dict, ['foo', 'bar'], new \DateTime, false);
+        $this->assignment($dict, ['foo', 'bar'], new \stdClass, false);
+        $this->assignment($dict, ['foo', 'bar'], $fh2, false);
     }
 }
