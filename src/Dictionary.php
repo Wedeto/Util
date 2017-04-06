@@ -170,7 +170,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
         if ($val === null)
             throw new \OutOfRangeException("Key " . implode('.', $args) . " does not exist");
 
-        $checker = new Type($type, ['unstrict' => true]);
+        $checker = $type instanceof Type ? $type : new Type($type, ['unstrict' => true]);
         try
         {
             $value = $checker->filter($val);

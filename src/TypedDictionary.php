@@ -265,7 +265,7 @@ class TypedDictionary extends Dictionary
         return new TypedDictionary($types, $values);
     }
 
-    protected function determineTypes(array $values, Dictionary $types)
+    protected static function determineTypes(array $values, Dictionary $types)
     {
         foreach ($values as $key => $value)
         {

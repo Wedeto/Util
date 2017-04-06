@@ -48,7 +48,7 @@ final class EncodingTest extends TestCase
 
         $this->assertEquals(
               file_get_contents($this->data . "/test1.txt"),
-              Encoding::toUTF8(file_get_contents(dirname(__FILE__)."/data/test1Latin.txt")),
+              Encoding::toUTF8(file_get_contents($this->data . "/test1Latin.txt")),
               "Simple Encoding works."
         );
     }
@@ -103,7 +103,7 @@ final class EncodingTest extends TestCase
 
         $this->assertEquals(
             file_get_contents($this->data . "/test1.txt"),
-            Encoding::fixUTF8(utf8_encode(file_get_contents(dirname(__FILE__)."/data/test1.txt"))),
+            Encoding::fixUTF8(utf8_encode(file_get_contents($this->data . "/test1.txt"))),
             "fixUTF8() reverts to UTF-8 a double encoded string."
         );
     }
@@ -127,15 +127,15 @@ final class EncodingTest extends TestCase
     public function test_double_encoded_arrays_fix()
     {
         $arr1 = array(
-            utf8_encode(file_get_contents(dirname(__FILE__)."/data/test1Latin.txt")),
-            utf8_encode(file_get_contents(dirname(__FILE__)."/data/test1.txt")),
-            utf8_encode(file_get_contents(dirname(__FILE__)."/data/test1Latin.txt"))
+            utf8_encode(file_get_contents($this->data . "/test1Latin.txt")),
+            utf8_encode(file_get_contents($this->data . "/test1.txt")),
+            utf8_encode(file_get_contents($this->data . "/test1Latin.txt"))
         );
 
         $arr2 = array(
-          file_get_contents(dirname(__FILE__)."/data/test1.txt"),
-          file_get_contents(dirname(__FILE__)."/data/test1.txt"),
-          file_get_contents(dirname(__FILE__)."/data/test1.txt")
+          file_get_contents($this->data . "/test1.txt"),
+          file_get_contents($this->data . "/test1.txt"),
+          file_get_contents($this->data . "/test1.txt")
         );
 
         $this->assertEquals($arr2, Encoding::fixUTF8($arr1), "Fixing of double encoded array works.");
@@ -166,5 +166,132 @@ final class EncodingTest extends TestCase
             Encoding::fixUTF8("FÃÂÂÂÂ©dÃÂÂÂÂ©ration Camerounaise de Football\n"),
             "fixUTF8() Example 4 still working."
         );
+    }
+
+    public function testUTF8FixWin1252Chars()
+    {
+        $faulty_chars = file_get_contents($this->data . '/utf8-from-win1252-as-iso8859-1.txt');
+        $correct_utf8 = file_get_contents($this->data . '/utf8-correct-contents.txt');
+
+        $this->assertNotEquals($faulty_chars, $correct_utf8);
+        $fixed = Encoding::UTF8FixWin1252Chars($faulty_chars);
+        $this->assertEquals($correct_utf8, $fixed);
+    }
+
+    public function testUTF8RemoveBom()
+    {
+        $databom = file_get_contents($this->data . '/utf8-with-bom.txt'); 
+        $datanobom = file_get_contents($this->data . '/utf8-without-bom.txt'); 
+
+        $this->assertNotEquals($databom, $datanobom);
+
+        $databom_removed = Encoding::removeBOM($databom);
+        $this->assertEquals($datanobom, $databom_removed);
+    }
+
+    public function testNormalizeEncodings()
+    {
+        $this->assertEquals("ISO-8859-1", Encoding::normalizeEncoding("ISO88591"));
+        $this->assertEquals("ISO-8859-1", Encoding::normalizeEncoding("ISO8859"));
+        $this->assertEquals("ISO-8859-1", Encoding::normalizeEncoding("ISO"));
+        $this->assertEquals("ISO-8859-1", Encoding::normalizeEncoding("LATIN1"));
+        $this->assertEquals("ISO-8859-1", Encoding::normalizeEncoding("LATIN"));
+        $this->assertEquals("ISO-8859-1", Encoding::normalizeEncoding("WIN1252"));
+        $this->assertEquals("ISO-8859-1", Encoding::normalizeEncoding("WINDOWS1252"));
+        $this->assertEquals("UTF-8", Encoding::normalizeEncoding("UTF8"));
+        $this->assertEquals("UTF-8", Encoding::normalizeEncoding("UTF"));
+        $this->assertEquals("UTF-8", Encoding::normalizeEncoding("FOO"));
+    }
+
+    public function testEncode()
+    {
+        $data_utf8 = file_get_contents($this->data . '/test-encoding-utf8.txt'); 
+        $data_win1252 = file_get_contents($this->data . '/test-encoding-windows-1252.txt'); 
+
+        $this->assertNotEquals($data_utf8, $data_win1252);
+
+        $to_utf8 = Encoding::encode("UTF-8", $data_win1252);
+        $to_win1252 = Encoding::encode("Windows-1252", $data_win1252);
+
+        $this->assertEquals($data_utf8, $to_utf8);
+
+        $c1 = Encoding::encode("UTF-8", $data_win1252);
+        $c2 = Encoding::encode("UTF-8", $to_win1252);
+        $this->assertEquals($c1, $c2);
+        $this->assertEquals($data_win1252, $to_win1252);
+    }
+
+    public function testUTF8Decode()
+    {
+        $data_utf8 = file_get_contents($this->data . '/test-encoding-utf8.txt');
+
+        $decode1 = Encoding::toWin1252($data_utf8, Encoding::WITHOUT_ICONV);
+        $decode2 = Encoding::toWin1252($data_utf8, Encoding::ICONV_TRANSLIT);
+        $decode3 = Encoding::toWin1252($data_utf8, Encoding::ICONV_IGNORE);
+
+        $recode1 = iconv("Windows-1252", "UTF-8", $decode1);
+        $recode2 = iconv("Windows-1252", "UTF-8", $decode2);
+        $recode3 = iconv("Windows-1252", "UTF-8", $decode3);
+
+        $this->assertEquals($recode1, $recode2);
+        $this->assertEquals($recode1, $recode3);
+
+        $this->assertEquals($decode1, $decode2);
+        $this->assertEquals($decode1, $decode3);
+    }
+
+    public function testDoubleEncode()
+    {
+        $data_win1252 = file_get_contents($this->data . '/test-encoding-windows-1252.txt');
+        $correct_utf8 = file_get_contents($this->data . '/test-encoding-utf8.txt');
+
+        $enc1 = iconv("Windows-1252", "UTF-8", $data_win1252);
+        $enc2 = iconv("Windows-1252", "UTF-8", $enc1);
+
+        $this->assertEquals($correct_utf8, $enc1);
+        $this->assertNotEquals($correct_utf8, $enc2);
+
+        $enc3 = Encoding::fixUTF8($enc1);
+        $enc4 = Encoding::fixUTF8($enc2);
+
+        $this->assertEquals($correct_utf8, $enc3);
+        $this->assertEquals($correct_utf8, $enc4);
+    }
+
+    public function testEncodeWin1252Array()
+    {
+        $sample1 = file_get_contents($this->data . '/test-encoding-utf8.txt');
+        $sample2 = file_get_contents($this->data . '/test1.txt');
+
+        $encoded = Encoding::toWin1252([$sample1, $sample2], Encoding::ICONV_TRANSLIT);
+
+        $this->assertNotEquals($sample1, $encoded[0]);
+        $this->assertNotEquals($sample2, $encoded[1]);
+
+        $correct1 = iconv("UTF-8", "Windows-1252", $sample1);
+        $correct2 = iconv("UTF-8", "Windows-1252", $sample2);
+
+        $this->assertEquals($correct1, $encoded[0]);
+        $this->assertEquals($correct2, $encoded[1]);
+
+        $num = Encoding::toWin1252(3);
+        $this->assertEquals(3, $num);
+    }
+
+    public function testUTF8NonString()
+    {
+        $this->assertEquals(5, Encoding::toUTF8(5));
+    }
+
+    public function testMultiByteUTF8()
+    {
+        $str = "𠜎 𠜱 𠝹";
+        $encoded = Encoding::toUTF8($str);
+
+        $this->assertEquals($str, $encoded);
+
+        $str = "‎ 	ﬡ‎ 	ﬢ‎ 	ﬣ‎ 	ﬤ‎ 	ﬥ‎ 	ﬦ";
+        $encoded = Encoding::toUTF8($str);
+        $this->assertEquals($str, $encoded);
     }
 }

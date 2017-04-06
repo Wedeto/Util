@@ -112,14 +112,16 @@ class Hook
 
     /**
      * Call the specified hook with the provided parameters.
-     * @param array &$params The parameters for the hook. This is passed as a reference
-     *                       to the subsribers so it can be modified.
-     * @return array The collected responses of the hooks.
+     * @param array $params The parameters for the hook. You can pass in
+     *                      an array or any traversable object. If it
+     *                      is not yet an instance of Dictionary, it will
+     *                      be converted to a TypedDictionary to fix the types.
+     * @return Dictionary The collected responses of the hooks.
      */
     public static function execute(string $hook, $params)
     {
         if (!($params instanceof Dictionary))
-            $params = new Dictionary($params);
+            $params = TypedDictionary::wrap($params);
 
         if (isset(self::$in_progress[$hook]))
             throw new RecursionException("Recursion in hooks is not supported");
