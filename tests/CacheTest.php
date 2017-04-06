@@ -30,7 +30,6 @@ use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;
 use org\bovigo\vfs\vfsStreamDirectory;
-use Wedeto\IO\DirReader;
 
 if (!defined('WEDETO_TEST')) define('WEDETO_TEST', 1);
 
