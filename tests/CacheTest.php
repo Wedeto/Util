@@ -32,6 +32,8 @@ use org\bovigo\vfs\vfsStreamWrapper;
 use org\bovigo\vfs\vfsStreamDirectory;
 use Wedeto\IO\DirReader;
 
+if (!defined('WEDETO_TEST')) define('WEDETO_TEST', 1);
+
 /**
  * @covers Wedeto\Util\Cache
  */
@@ -46,6 +48,7 @@ final class CacheTest extends TestCase
         $this->dir = vfsStream::url('cachedir');
 
         Cache::setCachePath($this->dir);
+        Cache::setDefaultExpiry(0);
         ErrorInterceptor::registerErrorHandler();
     }
     
@@ -64,6 +67,7 @@ final class CacheTest extends TestCase
      */
     public function testConstruct()
     {
+        Cache::setDefaultExpiry(60);
         $this->assertEquals($this->dir, Cache::getCachePath());
 
         $data = array('test' => array('a' => true, 'b' => false, 'c' => true), 'test2' => array(1, 2, 3));
@@ -105,7 +109,7 @@ final class CacheTest extends TestCase
     public function testHook()
     {
         $cc = new Cache('resolve');
-        Cache::setHook(0);
+        Cache::setHook();
         $class = $cc->get('class');
         $this->assertEmpty($class);
     }
@@ -117,9 +121,6 @@ final class CacheTest extends TestCase
      */
     public function testUnreadable()
     {
-        $config = new Dictionary();
-        $config->set('cache', 'expire', 0);
-
         $testdata = array('var1' => 'val1', 'var2' => 'var2');
         $data = serialize($testdata);
 
@@ -146,14 +147,12 @@ final class CacheTest extends TestCase
      */
     public function testInvalidCache()
     {
-        $config = new Dictionary();
-        $config->set('cache', 'expire', 0);
-
         $file = $this->dir . '/testcache.cache';
         $fh = fopen($file, 'w');
         fputs($fh, 'garbage-data');
         fclose($fh);
 
+        Cache::unloadCache('testcache');
         $cc = new Cache('testcache');
 
         $contents = $cc->get();
@@ -177,9 +176,6 @@ final class CacheTest extends TestCase
      */
     public function testNewCache()
     {
-        $config = new Dictionary();
-        $config->set('cache', 'expire', 0);
-
         $cc = new Cache('testcache2');
 
         $contents = $cc->get();
@@ -191,6 +187,7 @@ final class CacheTest extends TestCase
         $this->assertFalse($cc->has('test', 'foo'));
 
         $all = $cc->getAll();
+        unset($all['_timestamp']);
         $this->assertEquals([
             'test' => ['bar' => true],
             '_changed' => true
@@ -198,6 +195,7 @@ final class CacheTest extends TestCase
 
         $cc->set('test', 'bar2', true);
         $all = $cc->getAll();
+        unset($all['_timestamp']);
         $this->assertEquals([
             'test' => ['bar' => true, 'bar2' => true],
             '_changed' => true
@@ -231,6 +229,42 @@ final class CacheTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("Path does not exist");
         Cache::setCachePath($this->dir . '/foo/bar');
+    }
+
+    public function testExpiry()
+    {
+        $a = new Cache('foocache');
+        $a->setExpiry(1);
+
+        Cache::saveCache();
+        $b = new Cache('foocache');
+        $this->assertEquals(1, $a['_expiry']);
+        $this->assertEquals(1, $b['_expiry']);
+
+        $b->clear();
+        $this->assertEquals(1, $a['_expiry']);
+        $this->assertEquals(1, $b['_expiry']);
+
+        $a->setExpiry(-1);
+        $this->assertEquals(-1, $a['_expiry']);
+        $this->assertEquals(-1, $b['_expiry']);
+
+        $b = new Cache('foocache');
+        $this->assertEquals(-1, $a['_expiry']);
+        $this->assertEquals(-1, $b['_expiry']);
+    }
+
+    public function testUnreadableCache()
+    {
+        $p = $this->dir . '/testcache3.cache';
+        touch($p);
+        chmod($p, 0000);
+        $this->assertFalse(is_readable($p));
+
+        $c = new Cache('testcache3');
+        $all = $c->getAll();
+        unset($all['_timestamp']);
+        $this->assertEmpty($all);
     }
 }
 

@@ -51,15 +51,22 @@ class Cache extends Dictionary
     protected $cache_name = null;
 
     /**
-     * Add the hook after the configuration has been loaded, and apply invalidation to the
-     * cache once it times out.
+     * Set the expiry period
      * @param int $expiry The amount of seconds before the cache expires
      */
-    public static function setHook(int $expiry = 60)
+    public static function setDefaultExpiry(int $expiry)
+    {
+        self::$expiry = $expiry;
+    }
+
+    /**
+     * Add the hook after the configuration has been loaded, and apply invalidation to the
+     * cache once it times out.
+     */
+    public static function setHook()
     {
         register_shutdown_function(array(Cache::class, 'saveCache'));
 
-        self::$expiry = $expiry;
         foreach (self::$repository as $name => $cache)
             self::checkExpiry($name);
     }
@@ -70,7 +77,8 @@ class Cache extends Dictionary
      */
     private static function checkExpiry(string $name)
     {
-        $timeout = self::$expiry;
+        $expiry = self::$repository[$name]['_expiry'] ?? null;
+        $timeout = $expiry ?? self::$expiry;
         $st = self::$repository[$name]['_timestamp'] ?? time();
         $expires = $st + $timeout;
 
@@ -82,6 +90,8 @@ class Cache extends Dictionary
                 unset(self::$repository[$name][$k]);
 
             self::$repository[$name]['_timestamp'] = time();
+            if ($expiry)
+                self::$repository[$name]['_expiry'] = $expiry;
         }
     }
 
@@ -106,7 +116,7 @@ class Cache extends Dictionary
             try
             {
                 $contents = file_get_contents($cache_file);
-                $data = @unserialize($contents);
+                $data = unserialize($contents);
                 if (!is_array($data))
                     $data = [];
                 self::$repository[$name] = $data;
@@ -183,8 +193,10 @@ class Cache extends Dictionary
         // @codeCoverageIgnoreEnd
 
         $this->cache_name = $name;
-        if (!isset($this->repository[$name]))
+        if (!isset(self::$repository[$name]))
             self::loadCache($name);
+        else
+            self::checkExpiry($name);
 
         // Attach to the correct repository
         $this->values = &self::$repository[$name];
@@ -218,12 +230,37 @@ class Cache extends Dictionary
     }
 
     /**
+     * Set the amount of seconds before this cache expires
+     * @param int $expiry The amount of seconds
+     *
+     * @return Cache Provides fluent interface
+     */
+    public function setExpiry(int $expiry)
+    {
+        $this->values['_expiry'] = $expiry;
+        $this->setChanged();
+        return $this;
+    }
+
+    /**
      * Remove all contents from the cache
+     *
+     * @return Cache Provides fluent interface
      */
     public function clear()
     {
+        $expiry = $this->values['_expiry'] ?? null;
         parent::clear();
         $this->set('_changed', true);
         $this->set('_timestamp', time());
+        if ($expiry)
+            $this->setExpiry($expiry);
+        return $this;
+    }
+
+    public static function unloadCache(string $name)
+    {
+        if (!defined('WEDETO_TEST') || WEDETO_TEST === 0) throw new \RuntimeException('Refusing to run outside of tests');
+        unset(self::$repository[$name]);
     }
 }
