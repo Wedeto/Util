@@ -67,6 +67,7 @@ final class FunctionsTest extends TestCase
         $this->assertTrue(WF::parse_bool(new DummyBoolA()));
         $this->assertTrue(WF::parse_bool([0]));
         $this->assertTrue(WF::parse_bool(new DummyBoolC()));
+        $this->assertTrue(WF::parse_bool(new DummyBoolD()));
 
         $this->assertFalse(WF::parse_bool('false'));
         $this->assertFalse(WF::parse_bool('no'));
@@ -252,3 +253,11 @@ class DummyBoolB
 
 class DummyBoolC
 {}
+
+class DummyBoolD
+{
+    public function getval()
+    {
+        return new \DateTime();
+    }
+}
