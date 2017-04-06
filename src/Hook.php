@@ -91,7 +91,7 @@ class Hook
             throw new InvalidArgumentException("Hook name must consist of at least two parts");
 
         // Make sure the callback is appropriate
-        $refl = is_array($callback) ? new \ReflectionMethod($callback) : new \ReflectionFunction($callback);
+        $refl = is_array($callback) ? new \ReflectionMethod($callback[0], $callback[1]) : new \ReflectionFunction($callback);
         $params = $refl->getParameters();
         if (count($params) !== 1)
             throw new InvalidArgumentException("Hook must accept exactly one argument of type Dictionary");
