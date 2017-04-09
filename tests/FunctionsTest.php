@@ -107,6 +107,19 @@ final class FunctionsTest extends TestCase
         $this->assertFalse(WF::is_numeric_array(new \StdClass));
     }
 
+    public function testIsSequentialArray()
+    {
+        $this->assertTrue(WF::is_sequential_array([]));
+        $this->assertTrue(WF::is_sequential_array([1, 2, 9, 88]));
+        $this->assertTrue(WF::is_sequential_array([1, 2, [4, 5], 88]));
+        $this->assertTrue(WF::is_sequential_array([1, 2, "foobar", 88]));
+        $this->assertTrue(WF::is_sequential_array([0 => "a", 1 => "b", "2" => "c"]));
+        $this->assertTrue(WF::is_sequential_array(new Dictionary([1, 2, 3])));
+        $this->assertFalse(WF::is_sequential_array([0 => "a", 2 => "b", 3 => "c"]));
+        $this->assertFalse(WF::is_sequential_array([1 => "a", 2 => "b", 3 => "c"]));
+        $this->assertFalse(WF::is_sequential_array("foo"));
+    }
+
     public function testFlattenArray()
     {
         $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], WF::flatten_array([[1, 2, [3, 4, [5, 6]], 7], 8, 9]));

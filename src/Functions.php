@@ -139,6 +139,18 @@ class Functions
         return true;
     }
 
+    public static function is_sequential_array($arg)
+    {
+        if (!self::is_array_like($arg))
+            return false;
+
+        $expected = 0;
+        foreach ($arg as $key => $v)
+            if (!is_int($key) || $key !== $expected++)
+                return false;
+        return true;
+    }
+
     public static function to_array($arg)
     {
         if (!self::is_array_like($arg))
