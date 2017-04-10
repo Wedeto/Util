@@ -123,7 +123,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
         $ref = &$this->values;
         foreach ($args as $arg)
         {
-            if (!isset($ref[$arg]))
+            if (!is_array($ref) || !isset($ref[$arg]))
                 return $default;
             $ref = &$ref[$arg];
         }

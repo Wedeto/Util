@@ -364,4 +364,19 @@ final class TypedDictionaryTest extends TestCase
         $this->assignment($dict, ['foo', 'bar'], new \stdClass, false);
         $this->assignment($dict, ['foo', 'bar'], $fh2, false);
     }
+
+    public function testNonTypedArrayInsideTypedDictionary()
+    {
+        $dict = new TypedDictionary(
+            ['list' => Type::ARRAY, 'test' => new Type(Type::OBJECT, ['instanceof' => 'DateTime'])], 
+            ['list' => ['foo' => 'bar'], 'test' => new \DateTime()]
+        );
+
+        $this->assignment($dict, ['test'], "loremipsum", false);
+        $this->assignment($dict, ['test'], new \DateTime(), true);
+        $this->assignment($dict, ['list', 'foo'], 'bar2', true);
+        $this->assignment($dict, ['list', 'foo'], new \DateTime(), true);
+        $this->assignment($dict, ['list', 'ipsum'], 'lorem', true);
+        $this->assignment($dict, ['list', 'ipsum2'], true, true);
+    }
 }

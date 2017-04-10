@@ -35,6 +35,7 @@ final class TypeTest extends TestCase
     public function testNumericTypes()
     {
         $a = new Type(Type::INT);
+        $this->assertEquals(Type::INT, $a->getType());
 
         $this->assertTrue($a->validate(0));
         $this->assertTrue($a->validate(1));
@@ -86,6 +87,7 @@ final class TypeTest extends TestCase
         $this->assertFalse($a->validate(16));
 
         $a = new Type(Type::FLOAT, ['min_range' => -3, 'max_range' => 3]);
+        $this->assertEquals(Type::FLOAT, $a->getType());
         $this->assertFalse($a->validate(-4));
         $this->assertTrue($a->validate(-3));
         $this->assertTrue($a->validate(-2));
@@ -116,6 +118,7 @@ final class TypeTest extends TestCase
         $this->assertFalse($a->validate("16"));
 
         $a = new Type(Type::NUMERIC, ['min_range' => -3, 'max_range' => 3]);
+        $this->assertEquals(Type::NUMERIC, $a->getType());
         $this->assertFalse($a->validate("-4"));
         $this->assertFalse($a->validate(-4));
         $this->assertTrue($a->validate("-3"));
@@ -131,6 +134,7 @@ final class TypeTest extends TestCase
     public function testStrings()
     {
         $a = new Type(Type::STRING);
+        $this->assertEquals(Type::STRING, $a->getType());
         $this->assertFalse($a->validate(0));
         $this->assertFalse($a->validate(3.14));
         $this->assertFalse($a->validate(null));
@@ -168,6 +172,7 @@ final class TypeTest extends TestCase
     public function testDates()
     {
         $a = new Type(Type::DATE);
+        $this->assertEquals(Type::DATE, $a->getType());
 
         $now = new DateTimeImmutable();
         $lastweek = $now->sub(new DateInterval("P7D"));
@@ -198,6 +203,7 @@ final class TypeTest extends TestCase
     public function testBool()
     {
         $a = new Type(Type::BOOL);
+        $this->assertEquals(Type::BOOL, $a->getType());
 
         $this->assertTrue($a->validate(true));
         $this->assertTrue($a->validate(false));
@@ -211,6 +217,7 @@ final class TypeTest extends TestCase
     public function testArray()
     {
         $a = new Type(Type::ARRAY);
+        $this->assertEquals(Type::ARRAY, $a->getType());
 
         $dict = new Dictionary;
         $ao = new \ArrayObject;
@@ -227,6 +234,7 @@ final class TypeTest extends TestCase
     public function testObject()
     {
         $a = new Type(Type::OBJECT);
+        $this->assertEquals(Type::OBJECT, $a->getType());
 
         $dict = new Dictionary;
         $dict2 = new TypedDictionary($dict);

@@ -73,6 +73,14 @@ class Type
         $this->type = $type;
         $this->options = $options;
     }
+
+    /**
+     * @return string The type of this Type
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
     
     /**
      * Return a properly typed value
@@ -208,7 +216,6 @@ class Type
                 return false;
                 // @codeCoverageIgnoreEnd
         }
-        return true;
     }
 
     /** 

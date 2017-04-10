@@ -130,6 +130,19 @@ class TypedDictionary extends Dictionary
         $type = $this->types->dget($path);
         $kpath = implode('.', $path);
 
+        // Key is undefined, but it may be in a untyped sub-array
+        if ($type === null)
+        {
+            $cpy = $path;
+            while (count($cpy))
+            {
+                $last = array_pop($cpy);
+                $subtype = $this->types->dget($cpy);
+                if ($subtype instanceof Type && $subtype->getType() === Type::ARRAY)
+                    return parent::set($args, null);
+            }
+        }
+
         if ($type === null)
             throw new \InvalidArgumentException("Undefined key: " . $kpath);
 
@@ -185,9 +198,12 @@ class TypedDictionary extends Dictionary
             $path = $args;
             $types = $this->types->dget($path);
             
-            $dict = new TypedDictionary($types);
-            $dict->values = &$result->values;
-            $result = $dict;
+            if (WF::is_array_like($types))
+            {
+                $dict = new TypedDictionary($types);
+                $dict->values = &$result->values;
+                $result = $dict;
+            }
         }
 
         // Return the copy to keep it unmodifiable
