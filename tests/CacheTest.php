@@ -265,5 +265,12 @@ final class CacheTest extends TestCase
         unset($all['_timestamp']);
         $this->assertEmpty($all);
     }
+
+    public function testSaveCache()
+    {
+        $cache = new Cache('savecachetest');
+        $cache->set('foo', 'bar');
+        $this->assertEquals($cache, $cache->save());
+    }
 }
 

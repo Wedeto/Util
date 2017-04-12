@@ -31,23 +31,29 @@ use Wedeto\Util\Cache;
 use Wedeto\Util\Type;
 use Wedeto\Util\ErrorInterceptor;
 
+use Serializable;
+
 /**
  * Cache Item, providing PSR-6 compatible caching
  */
-class Item implements CacheItemInterface
+class Item implements CacheItemInterface, Serializable
 {
     protected $key;
     protected $value;
+    protected $expires = null;
+    protected $hit;
 
     /**
      * Construct the Cache Item, using a cache and a key
+     *
      * @param string $key The key
      * @param Cache $value The cache instance containing the value
      */
-    public function __construct(string $key, Cache $value)
+    public function __construct(string $key, $value, bool $hit)
     {
         $this->key = $key;
         $this->value = $value;
+        $this->hit = $hit;
     }
 
     /**
@@ -80,14 +86,7 @@ class Item implements CacheItemInterface
         if (!$this->isHit())
             return null;
 
-        $unserialize = new ErrorInterceptor('unserialize');
-        $unserialize->register(E_NOTICE, 'unserialize');
-
-        $val = $this->value->getString('_cached_item');
-        $val = $unserialize->execute($val);
-
-        $errors = $unserialize->getInterceptedErrors();
-        return count($errors) === 0 ? $val : null;
+        return $this->value;
     }
 
     /**
@@ -101,10 +100,13 @@ class Item implements CacheItemInterface
      */
     public function isHit()
     {
-        if ($this->value->isExpired())
+        if (!$this->hit)
             return false;
+        
+        if ($this->expires === null)
+            return true;
 
-        return $this->value->has('_cached_item', Type::STRING);
+        return $this->expires->getTimestamp() > time();
     }
 
     /**
@@ -120,8 +122,8 @@ class Item implements CacheItemInterface
      */
     public function set($value)
     {
-        $this->value->set('_cached_item', serialize($value));
-        $this->value->resetExpired();
+        $this->value = $value;
+        $this->hit = true;
         return $this;
     }
 
@@ -139,14 +141,10 @@ class Item implements CacheItemInterface
     public function expiresAt($expiration)
     {
         if ($expiration instanceof \DateTimeInterface)
-        {
-            $diff = $expiration->getTimestamp() - time();
-            $this->value->setExpiry($diff);
-        }
+            $this->expires = $expiration;
         elseif ($expiration === null)
-        {
-            $this->value->setExpiry(null);
-        }
+            $this->expires = null;
+
         return $this;
     }
 
@@ -165,18 +163,50 @@ class Item implements CacheItemInterface
     public function expiresAfter($time)
     {
         if (is_int($time))
-            $time = new \DateInterval("PT" . $time . "S");
+        {
+            $neg = $time < 0;
+            $abs = abs($time);
+            $time = new \DateInterval("PT" . $abs . "S");
+            $time->invert = $neg;
+        }
 
         if ($time instanceof \DateInterval)
         {
             $now = new \DateTimeImmutable();
             $expires = $now->add($time);
-            $this->expiresAt($expires);
+
+            $this->expires = $expires;
         }
-        elseif ($expiration === null)
+        elseif ($time === null)
         {
-            $this->expiresAt(null);
+            $this->expires = null;
         }
         return $this;
+    }
+
+    /**
+     * Serialize the item. Required for storing in the containing cache
+     */
+    public function serialize()
+    {
+        return serialize([
+            'key' => $this->key,
+            'value' => $this->value,
+            'expires' => $this->expires,
+            'hit' => $this->hit
+        ]);
+    }
+
+    /**
+     * Unserialize the item. Required for storing in the containing cache
+     * @param string $data The data to unserialize
+     */
+    public function unserialize($data)
+    {
+        $data = unserialize($data);
+        $this->key = $data['key'];
+        $this->value = $data['value'];
+        $this->expires = $data['expires'];
+        $this->hit = $data['hit'];
     }
 }

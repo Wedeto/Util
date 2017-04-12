@@ -685,4 +685,15 @@ final class DictionaryTest extends TestCase
 
         $this->assertEquals(Functions::str($data), $dict->__toString());
     }
+
+    public function testHasWithTypeObjects()
+    {
+        $dict = new Dictionary(['a' => 1, 'b' => 2]);
+        
+        $str = new Type(Type::STRING);
+        $int = new Type(Type::INT);
+
+        $this->assertFalse($dict->has('a', $str));
+        $this->assertTrue($dict->has('a', $int));
+    }
 }

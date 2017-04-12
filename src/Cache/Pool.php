@@ -27,17 +27,44 @@ namespace Wedeto\Util\Cache;
 
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\CacheItemInterface;
-use Psr\Cache\CacheException;
-use Psr\Cache\InvalidArgumentException;
 
 use Wedeto\Util\Cache;
+use Wedeto\Util\Type;
+use Wedeto\Util\Date;
 use Wedeto\Util\Functions as WF;
 
 /**
- * Cache Item, providing PSR-6 compatible caching
+ * Cache Pool, providing PSR-6 compatible caching
  */
 class Pool implements CacheItemPoolInterface
 {
+    /** The pool identifier */
+    protected $identifier;
+
+    /** The cache instance */
+    protected $cache;
+
+    /** The type specificier for pool items. Used for detecting presence of cache items */
+    protected $type_spec;
+
+    /**
+     * Construct the cache pool.
+     * 
+     * @param string $identifier The cache pool identifier. This
+     *                           should be different for each cache
+     *                           pool or they will conflict.
+     */
+    public function __construct(string $identifier)
+    {
+        if (empty($identifier))
+            throw new InvalidArgumentException("Invalid identifier: " . $identifier);
+
+        $this->identifier = $identifier;
+        $this->cache = new Cache("cachepool_" . $identifier);
+        $this->cache->setExpiry(Date::SECONDS_IN_YEAR);
+        $this->type_spec = new Type(Type::OBJECT, ['class' => Item::class]);
+    }
+
    /**
      * Returns a Cache Item representing the specified key.
      *
@@ -55,8 +82,19 @@ class Pool implements CacheItemPoolInterface
      */
     public function getItem($key)
     {
-        $cache = new Cache($key);
-        return new Item($key, $cache);
+        if (!is_string($key))
+            throw new InvalidArgumentException("Invalid key: " . WF::str($key));
+
+        $value = null;
+        $hit = false;
+        if ($this->cache->has($key, $this->type_spec))
+        {
+            $item = $this->cache->get($key);
+            $value = $item->get();
+            $hit = true;
+        }
+
+        return new Item($key, $value, $hit);
     }
 
     /**
@@ -94,49 +132,87 @@ class Pool implements CacheItemPoolInterface
      * This could result in a race condition with CacheItemInterface::get(). To avoid
      * such situation use CacheItemInterface::isHit() instead.
      *
-     * @param string $key
-     *   The key for which to check existence.
+     * @param string $key The key for which to check existence.
      *
-     * @throws InvalidArgumentException
-     *   If the $key string is not a legal value a \Psr\Cache\InvalidArgumentException
-     *   MUST be thrown.
+     * @throws InvalidArgumentException If the $key string is not a legal value
+     *                                  a \Psr\Cache\InvalidArgumentException
+     *                                  MUST be thrown.
      *
-     * @return bool
-     *   True if item exists in the cache, false otherwise.
+     * @return bool True if item exists in the cache, false otherwise.
      */
     public function hasItem($key)
     {
-        return Cache::exists($key);
+        if (!is_string($key))
+            throw new InvalidArgumentException("Invalid key: " . WF::str($key));
+        return $this->cache->has($key, $this->type_spec);
     }
 
+    /**
+     * Clear the cache
+     *
+     * @return bool True
+     */
     public function clear()
     {
-        return Cache::clear();
+        $this->cache->clear();
+        return true;
     }
 
+    /**
+     * Remove an item from the pool
+     * @param string $key The item to remove
+     * @return bool True
+     */
     public function deleteItem($key)
     {
-        return Cache::deleteCache($key);
+        if (!is_string($key))
+            throw new InvalidArgumentException("Invalid key: " . WF::str($key)); 
+
+        unset($this->cache[$key]);
+        return true;
     }
 
+    /**
+     * Delete items from the pool
+     * @param array $keys The items to remove
+     * @return bool True
+     */
     public function deleteItems(array $keys)
     {
         foreach ($keys as $key)
             $this->deleteItem($key);
+        return true;
     }
 
+    /**
+     * Save item to the pool
+     * @param CacheItemInterface $item The item to save
+     * @return bool True
+     */
     public function save(CacheItemInterface $item)
     {
+        $this->cache->set($item->getKey(), $item);
         return $this->commit();
     }
 
+    /**
+     * Store but do not save yet
+     * @param CacheItemInterface $item The item to store
+     * @return bool True
+     */
     public function saveDeferred(CacheItemInterface $item)
     {
-        // No-op - cache items are persisted automatically
+        $this->cache->set($item->getKey(), $item);
+        return true;
     }
     
+    /** 
+     * Save the change
+     * @return bool True
+     */
     public function commit()
     {
-        return Cache::saveCache();
+        $this->cache->save();
+        return true;
     }
 }

@@ -90,12 +90,9 @@ class Cache extends Dictionary
                 unset(self::$repository[$name][$k]);
 
             self::$repository[$name]['_timestamp'] = time();
-            self::$repository[$name]['_expired'] = true;
             if ($expiry)
                 self::$repository[$name]['_expiry'] = $expiry;
         }
-        else
-            self::$repository[$name]['_expired'] = true;
     }
 
     /**
@@ -142,16 +139,21 @@ class Cache extends Dictionary
     /**
      * Save the cache once the script terminates. Is attached as a shutdown
      * hook by calling Cache::setHook
+     *
+     * @param string $cache_name Can be specified to save one specific cache
      */
-    public static function saveCache()
+    public static function saveCache(string $cache_name = null)
     {
         $cache_dir = self::$cache_path;
         $cnt = 0;
         foreach (self::$repository as $name => &$cache)
         {
-            if (empty($cache['_changed']))
+            if ($cache_name !== null && $name !== $cache_name)
                 continue;
 
+            if (empty($cache['_changed']))
+                continue;
+            
             ++$cnt;
             unset($cache['_changed']);
             $cache_file = $cache_dir . '/' . $name . '.cache';
@@ -206,6 +208,16 @@ class Cache extends Dictionary
     }
 
     /**
+     * Save the current cache
+     * @return Cache Provides fluent interface
+     */
+    public function save()
+    {
+        static::saveCache($this->cache_name);
+        return $this;
+    }
+
+    /**
      * Set a value in the cache
      *
      * @param $key scalar The key under which to store. Can be repeated to go deeper.
@@ -241,27 +253,8 @@ class Cache extends Dictionary
     public function setExpiry(int $expiry)
     {
         $this->values['_expiry'] = $expiry;
-        unset($this->values['_expired']);
         $this->setChanged();
         return $this;
-    }
-
-    /**
-     * Reset the expired state of the cache
-     * @return Cache Provides fluent interface
-     */
-    public function resetExpired()
-    {
-        unset($this->values['_expired']);
-        return $this;
-    }
-
-    /**
-     * @return bool True if the cache was expired after loading, false if it was not
-     */
-    public function isExpired()
-    {
-        return !empty($this->get('_expired']));
     }
 
     /**

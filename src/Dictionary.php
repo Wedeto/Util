@@ -72,7 +72,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
 
         $last = end($args);     
         $type = Type::EXISTS;
-        if (defined(Type::class . '::' . $last))
+        if (defined(Type::class . '::' . $last) || $last instanceof Type)
             $type = array_pop($args);
 
         $val = $this->values;
@@ -84,8 +84,14 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
         }
 
         // Check type
-        $unstrict = in_array($type, [Type::INT, Type::FLOAT, Type::BOOL]);
-        $checker = new Type($type, ['unstrict' => $unstrict]);
+        if (is_string($type))
+        {
+            $unstrict = in_array($type, [Type::INT, Type::FLOAT, Type::BOOL]);
+            $checker = new Type($type, ['unstrict' => $unstrict]);
+        }
+        else
+            $checker = $type;
+
         return $checker->validate($val);
     }
 
