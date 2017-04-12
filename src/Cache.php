@@ -90,9 +90,12 @@ class Cache extends Dictionary
                 unset(self::$repository[$name][$k]);
 
             self::$repository[$name]['_timestamp'] = time();
+            self::$repository[$name]['_expired'] = true;
             if ($expiry)
                 self::$repository[$name]['_expiry'] = $expiry;
         }
+        else
+            self::$repository[$name]['_expired'] = true;
     }
 
     /**
@@ -238,8 +241,27 @@ class Cache extends Dictionary
     public function setExpiry(int $expiry)
     {
         $this->values['_expiry'] = $expiry;
+        unset($this->values['_expired']);
         $this->setChanged();
         return $this;
+    }
+
+    /**
+     * Reset the expired state of the cache
+     * @return Cache Provides fluent interface
+     */
+    public function resetExpired()
+    {
+        unset($this->values['_expired']);
+        return $this;
+    }
+
+    /**
+     * @return bool True if the cache was expired after loading, false if it was not
+     */
+    public function isExpired()
+    {
+        return !empty($this->get('_expired']));
     }
 
     /**
