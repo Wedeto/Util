@@ -320,7 +320,8 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
         }
 
         // Unwrap Dictionary objects
-        if ($value instanceof Dictionary)
+        $cl = is_object($value) ? get_class($value) : null;
+        if ($cl === Dictionary::class)
             $ref = $value->getAll();
         else
             $ref = $value;
