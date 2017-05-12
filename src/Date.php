@@ -69,9 +69,9 @@ class Date
         return $dt;
     }
     
-    public static function dateToFloat(DateTimeInterface $date)
+    public static function dateToFloat($date)
     {
-        return (float)$date->format('U.u');
+        return (float)(self::toDT($date)->format('U.u'));
     }
 
     public static function compareInterval(DateInterval $l, DateInterval $r)
@@ -112,26 +112,26 @@ class Date
         return self::compareInterval($l, $r) >= 0;
     }
 
-    public static function isBefore(DateTimeInterface $l, DateTimeInterface $r)
+    public static function isBefore($l, $r)
     {
-        return $l < $r;
+        return self::toDT($l) < self::toDT($r);
     }
 
-    public static function isAfter(DateTimeInterface $l, DateTimeInterface $r)
+    public static function isAfter($l, $r)
     {
-        return $l > $r;
+        return self::toDT($l) > self::toDT($r);
     }
 
-    public static function isPast(DateTimeInterface $l)
+    public static function isPast($l)
     {
         $now = new DateTime();
-        return $l < $now;
+        return self::toDT($l) < $now;
     }
 
-    public static function isFuture(DateTimeInterface $l)
+    public static function isFuture($l)
     {
         $now = new DateTime();
-        return $l > $now;
+        return self::toDT($l) > $now;
     }
 
     public static function now()
@@ -139,11 +139,24 @@ class Date
         return self::createFromFloat(microtime(true));
     }
 
-    public static function diff(DateTimeInterface $l, DateTimeInterface $r)
+    public static function diff($l, $r)
     {
         $lf = self::dateToFloat($l);
         $rf = self::dateToFloat($r);
 
         return $lf - $rf;
+    }
+
+    public static function toDT($date)
+    {
+        if ($date instanceof DateTimeInterface)
+            return $date;
+        if ($date instanceof IntlCalendar)
+            return $date->toDateTime();
+        if (WF::is_int_val($date))
+            return new DateTime("@" . $date);
+        if (is_string($date))
+            return new DateTime($date);
+        throw new \InvalidArgumentException("Invalid date: " . WF::str($date));
     }
 }
