@@ -30,6 +30,7 @@ use PHPUnit\Framework\TestCase;
 use DateTime;
 use DateTimeImmutable;
 use DateInterval;
+use IntlCalendar;
 
 /**
  * @covers Wedeto\Util\Date
@@ -164,6 +165,60 @@ final class DateTest extends TestCase
         $this->assertFalse(Date::isPast($future));
         $this->assertFalse(Date::isFuture($past));
         $this->assertTrue(Date::isFuture($future));
+    }
+
+    /**
+     * @covers Wedeto\Util\Date::copy
+     * @covers Wedeto\Util\Date::isBefore
+     * @covers Wedeto\Util\Date::isAfter
+     * @covers Wedeto\Util\Date::isPast
+     * @covers Wedeto\Util\Date::isFuture
+     */
+    public function testDateCompareWithIntlCalendarAndIntAndString()
+    {
+        $a = new DateTime();
+        $past = Date::copy($a);
+        $future = Date::copy($a);
+
+        $offset = new DateInterval("P60D");
+        $future->add($offset);
+
+        $offset->invert = 1;
+        $past->add($offset);
+
+        $past = IntlCalendar::fromDateTime($past);
+        $this->assertInstanceOf(IntlCalendar::class, $past);
+
+        $this->assertTrue(Date::isBefore($past, $future));
+        $this->assertTrue(Date::isAfter($future, $past));
+        $this->assertTrue(Date::isPast($past));
+        $this->assertFalse(Date::isPast($future));
+        $this->assertFalse(Date::isFuture($past));
+        $this->assertTrue(Date::isFuture($future));
+
+        $future = $future->format('Y-m-d H:i:s');
+        $this->assertTrue(is_string($future));
+        $this->assertTrue(Date::isBefore($past, $future));
+        $this->assertTrue(Date::isAfter($future, $past));
+        $this->assertTrue(Date::isPast($past));
+        $this->assertFalse(Date::isPast($future));
+        $this->assertFalse(Date::isFuture($past));
+        $this->assertTrue(Date::isFuture($future));
+
+        $past = $past->toDateTime()->getTimestamp();
+        $this->assertTrue(is_int($past));
+        $this->assertTrue(is_string($future));
+        $this->assertTrue(Date::isBefore($past, $future));
+        $this->assertTrue(Date::isAfter($future, $past));
+        $this->assertTrue(Date::isPast($past));
+        $this->assertFalse(Date::isPast($future));
+        $this->assertFalse(Date::isFuture($past));
+        $this->assertTrue(Date::isFuture($future));
+
+        $past = new \StdClass;
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid date');
+        Date::isPast($past);
     }
 
     public function testCreateFromFloat()
