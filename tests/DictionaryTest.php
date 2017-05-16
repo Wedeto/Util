@@ -696,4 +696,45 @@ final class DictionaryTest extends TestCase
         $this->assertFalse($dict->has('a', $str));
         $this->assertTrue($dict->has('a', $int));
     }
+
+    public function testInvalidKeys()
+    {
+        $dict = new Dictionary;
+
+        $thrown = false;
+        try
+        {
+            var_Dump($dict->has('foo', new \StdClass));
+        }
+        catch (\InvalidArgumentException $e)
+        {
+            $this->assertContains('Keys must be scalar, not', $e->getMessage());
+            $thrown = true;
+        }
+        $this->assertTrue($thrown, 'Dictionary#has did not throw an exception when an array was used as key');
+
+        $thrown = false;
+        try
+        {
+            $dict->set('foo', new \StdClass, new \StdClass);
+        }
+        catch (\InvalidArgumentException $e)
+        {
+            $this->assertContains('Keys must be scalar, not', $e->getMessage());
+            $thrown = true;
+        }
+        $this->assertTrue($thrown, 'Dictionary#set did not throw an exception when an array was used as key');
+
+        $thrown = false;
+        try
+        {
+            $dict->get('foo', new \StdClass);
+        }
+        catch (\InvalidArgumentException $e)
+        {
+            $this->assertContains('Keys must be scalar, not', $e->getMessage());
+            $thrown = true;
+        }
+        $this->assertTrue($thrown, 'Dictionary#get did not throw an exception when an array was used as key');
+    }
 }

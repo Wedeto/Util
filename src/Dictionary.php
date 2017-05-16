@@ -72,8 +72,12 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
 
         $last = end($args);     
         $type = Type::EXISTS;
-        if (defined(Type::class . '::' . $last) || $last instanceof Type)
+        if ((is_string($last) && defined(Type::class . '::' . $last)) || $last instanceof Type)
             $type = array_pop($args);
+
+        foreach ($args as $arg)
+            if (!is_scalar($arg))
+                throw new \InvalidArgumentException("Keys must be scalar, not: " . WF::str($arg));
 
         $val = $this->values;
         foreach ($args as $arg)
@@ -129,6 +133,9 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
         $ref = &$this->values;
         foreach ($args as $arg)
         {
+            if (!is_scalar($arg))
+                throw new \InvalidArgumentException("Keys must be scalar, not: " . WF::str($arg));
+
             if (!is_array($ref) || !isset($ref[$arg]))
                 return $default;
             $ref = &$ref[$arg];
@@ -304,6 +311,9 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
         $ref = &$this->values;
         foreach ($args as $arg)
         {
+            if (!is_scalar($arg))
+                throw new \InvalidArgumentException("Keys must be scalar, not: " . WF::str($arg));
+
             if (!is_array($ref))
             {
                 if ($parent !== null)
