@@ -118,7 +118,7 @@ class ErrorInterceptor
      *
      * @param int $errno Error type
      * @param string $errstr The error string
-     * @param string $errfile The filfilfilfile the error occured in
+     * @param string $errfile The file the error occured in
      * @param int $errline The line the error occured on
      * @param array $errcontext Local variables
      * @return bool True if the message was intercepted, false if not
