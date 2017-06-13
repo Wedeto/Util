@@ -93,6 +93,9 @@ class Hook
             throw new InvalidArgumentException("Hook name must consist of at least two parts");
 
         // Make sure the callback is appropriate
+        if (is_object($callback))
+            $callback = [$callback, '__invoke'];
+
         $refl = is_array($callback) ? new \ReflectionMethod($callback[0], $callback[1]) : new \ReflectionFunction($callback);
         $params = $refl->getParameters();
         if (count($params) !== 1)

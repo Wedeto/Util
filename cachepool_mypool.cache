@@ -1,1 +1,0 @@
-a:3:{s:10:"_timestamp";i:1492005805;s:7:"_expiry";i:31536000;s:7:"my_item";C:22:"Wedeto\Util\Cache\Item":72:{a:3:{s:3:"key";s:7:"my_item";s:5:"value";s:7:"myvalue";s:7:"expires";N;}}}

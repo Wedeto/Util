@@ -200,4 +200,28 @@ final class HookTest extends TestCase
         $rdict = Hook::execute('foo.hook', $dict);
         $this->assertInstanceOf(TypedDictionary::class, $rdict);
     }
+
+    public function testHookWithFunctionObject()
+    {
+        $fo = new MockHookFunctionObject('foo');
+
+        Hook::subscribe('foo.hook', $fo);
+
+        $response = Hook::execute('foo.hook', ['value' => null]);
+
+        $this->assertEquals('foo', $response['value']);
+    }
+}
+
+class MockHookFunctionObject
+{
+    public function __construct($value)
+    {
+        $this->value = $value;
+    }
+
+    public function __invoke(Dictionary $params)
+    {
+        $params['value'] = $this->value;
+    }
 }
