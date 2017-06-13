@@ -158,7 +158,7 @@ class Cache extends Dictionary
             unset($cache['_changed']);
             $cache_file = $cache_dir . '/' . $name . '.cache';
             file_put_contents($cache_file, serialize($cache));
-            Hook::execute('Wedeto.IO.FileCreated', ['filename' => $cache_file]);
+            Hook::execute('Wedeto.IO.FileCreated', ['path' => $cache_file]);
         }
         return $cnt;
     }
