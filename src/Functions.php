@@ -39,6 +39,8 @@ use Throwable;
  */
 class Functions
 {
+    protected static $debug_stream = null;
+
     /**
      * Check if the provided value contains an integer value.
      * The value may be an int, or anything convertable to an int.
@@ -330,5 +332,37 @@ class Functions
         $indent = str_repeat(' ', $indent);
         foreach ($parts as $p)
             fprintf($buf, "%s%s\n", $indent, $p);
+    }
+
+    /**
+     * Log an output message to a specified stream
+     * @param string $format The formatting string
+     * @param ... Arguments to fprintf. Non-scalar arguments will be converted to a string using WF::str
+     */
+    public static function debug(string $format)
+    {
+        if (!is_resource(self::$debug_stream))
+            self::$debug_stream = fopen('php://output', 'w');
+
+        $args = func_get_args();
+        foreach ($args as $idx => &$arg)
+        {
+            if ($idx === 0)
+                $arg .= PHP_SAPI === 'cli' ? "\n" : "<br>\n";
+
+            if (!is_scalar($arg))
+                $arg = static::str($arg);
+        }
+
+        array_unshift($args, self::$debug_stream);
+        call_user_func_array('fprintf', $args);
+    }
+
+    /**
+     * Set the output stream used by WF::debug
+     */
+    public static function setDebugStream($stream)
+    {
+        self::$debug_stream = is_resource($stream) ? $stream : null;
     }
 }

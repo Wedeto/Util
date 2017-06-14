@@ -104,7 +104,7 @@ final class FunctionsTest extends TestCase
 
         $this->assertFalse(WF::is_numeric_array(["1" => 1, "5" => 2, "a" => 3]));
 
-        $this->assertFalse(WF::is_numeric_array(new \StdClass));
+        $this->assertFalse(WF::is_numeric_array(new \stdClass));
     }
 
     public function testIsSequentialArray()
@@ -127,7 +127,7 @@ final class FunctionsTest extends TestCase
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("Not an array");
-        WF::flatten_array(new \StdClass);
+        WF::flatten_array(new \stdClass);
     }
 
     /**
@@ -227,7 +227,7 @@ final class FunctionsTest extends TestCase
         $this->assertEquals($expected, WF::str($a, true));
         $this->assertEquals($expected, WF::html($a));
 
-        $actual = WF::str(new \StdClass);
+        $actual = WF::str(new \stdClass);
         $expected = "class stdClass#";
         $this->assertTrue(strpos($actual, $expected) !== false);
     }
@@ -245,6 +245,40 @@ final class FunctionsTest extends TestCase
         $expected = "** Recursion limit reached at Exception of class Exception **";
 
         $this->assertTrue(strpos($actual, $expected) !== false);
+    }
+
+    public function testDebug()
+    {
+        $h = fopen('php://memory', 'rw');
+        WF::setDebugStream($h);
+        WF::debug('foo');
+        rewind($h);
+        $this->assertEquals("foo\n", stream_get_contents($h));
+
+        $h = fopen('php://memory', 'rw');
+        WF::setDebugStream($h);
+        WF::debug("%s", new \stdClass);
+        rewind($h);
+        $this->assertContains("class stdClass", stream_get_contents($h));
+
+        $h = fopen('php://memory', 'rw');
+        WF::setDebugStream($h);
+        WF::debug("%s", [1, 2, 3]);
+        rewind($h);
+        $this->assertEquals("[1, 2, 3]\n", stream_get_contents($h));
+
+        $h = fopen('php://memory', 'rw');
+        WF::setDebugStream($h);
+        WF::debug("%s", 5);
+        rewind($h);
+        $this->assertEquals("5\n", stream_get_contents($h));
+
+        WF::setDebugStream(null);
+        ob_start();
+        WF::debug("%s", 5);
+        $cnt = ob_get_contents();
+        ob_end_clean();
+        $this->assertEquals("5\n", $cnt);
     }
 }
 
