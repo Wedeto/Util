@@ -348,9 +348,37 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     {
         if (!WF::is_array_like($values))
             throw new \DomainException("Invalid value to merge: " . WF::str($values));
-        foreach ($values as $key => $val)
-            $this->set($key, $val);
+        $this->addAllRecursive($values, $this);
         return $this;
+    }
+
+    /**
+     * Recursive function to merge all values from a source dictionary or array
+     * into a target dictionary.
+     */
+    private function addAllRecursive($source, $target, array $path = [])
+    {
+        foreach ($source as $key => $value)
+        {
+            if (!isset($target[$key]))
+            {
+                $target[$key] = $value;
+            }
+            else
+            {
+                $tgt = $target[$key];
+
+                if (is_array($source) || $source instanceof Dictionary)
+                {
+                    if ($tgt instanceof Dictionary)
+                        $this->addAllRecursive($value, $tgt);
+                    else
+                        $target[$key] = $value;
+                }
+                else
+                    $target[$key] = $value;
+            }
+        }
     }
 
     /**

@@ -452,6 +452,51 @@ final class DictionaryTest extends TestCase
         $dict->addAll($obj);
     }
 
+    public function testAddAllNested()
+    {
+        $data = [
+            'section1' => [
+                'setting1' => 'foo',
+                'setting2' => 'bar'
+            ],
+            'section2' => [
+                'setting3' => 'foobar'
+            ],
+            'item5' => new \StdClass
+        ];
+
+        $data2 = [
+            'test' => 'tst',
+            'section1' => [
+                'setting2' => 'baz',
+                'setting3' => 'foobarbaz'
+            ],
+            'section3' => [
+                'setting42' => true
+            ],
+            'item5' => [
+                'foo' => true,
+                'bar' => false
+            ]
+        ];
+
+        $dict = new Dictionary($data);
+        $dict->addAll($data2);
+
+        $this->assertEquals('foo', $dict->get('section1', 'setting1'));
+        $this->assertEquals('baz', $dict->get('section1', 'setting2'));
+        $this->assertEquals('foobarbaz', $dict->get('section1', 'setting3'));
+
+        $this->assertEquals('foobar', $dict->get('section2', 'setting3'));
+
+        $this->assertEquals(true, $dict->get('section3', 'setting42'));
+
+        $this->assertEquals(true, $dict->get('item5', 'foo'));
+        $this->assertEquals(false, $dict->get('item5', 'bar'));
+
+        $this->assertEquals('tst', $dict->get('test'));
+    }
+
     /**
      * @covers Wedeto\Util\Dictionary::toArray
      */
