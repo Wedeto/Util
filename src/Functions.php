@@ -39,6 +39,9 @@ use Throwable;
  */
 class Functions
 {
+    const CONTINUE = 0;
+    const BREAK = 1;
+
     protected static $debug_stream = null;
 
     /**
@@ -222,6 +225,52 @@ class Functions
                 "Check if the extension $extension is installed and enabled"
             );
         }
+    }
+
+    /**
+     * fee (ForEachElse) is a ForEach / Else implementation
+     * It will iterate over the iterable, and call the $loop function for each
+     * iterator.  If the loop does not execute at least once, it the provided
+     * else function will be called.
+     *
+     * Because this is not an actual loop, continue and break will not work. This
+     * is replaced by the return value. Return Functions::CONTINUE (or null) to continue,
+     * or Functions::BREAK to stop the iteration.
+     * 
+     * @param array|Traversable The data to be traversed
+     * @param callable $loop The loop function.
+     * @param callable $else The else function, called when the iterable is empty
+     * @return int The number of iterations
+     */
+    public static function fee(&$iterable, callable $loop, callable $else = null)
+    {
+        if (is_object($loop))
+            $refl = new \ReflectionMethod($loop, '__invoke');
+        elseif (is_array($loop))
+            $refl = new \ReflectionMethod($loop[0], $loop[1]);
+        else
+            $refl = new \ReflectionFunction($loop);
+
+        $key_val = $refl->getNumberOfParameters() > 1;
+
+        $in_loop = 0;
+        foreach ($iterable as $key => &$element)
+        {
+            ++$in_loop;
+            $ret = null;
+            if ($key_val)
+                $ret = $loop($key, $element);
+            else
+                $ret = $loop($element);
+
+            if ($ret === Functions::BREAK)
+                break;
+        }
+
+        if ($in_loop === 0 && $else !== null)
+            $else($iterable);
+
+        return $in_loop;
     }
 
     /**

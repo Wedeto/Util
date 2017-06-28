@@ -280,6 +280,116 @@ final class FunctionsTest extends TestCase
         ob_end_clean();
         $this->assertEquals("5\n", $cnt);
     }
+
+    public function testForEachElse()
+    {
+        $else_called = new \StdClass;
+        $else_called->called = false;
+
+        $loop_called = new \StdClass;
+        $loop_called->called = 0;
+        $loop_called->sum = 0;
+
+        $else = function () use ($else_called) {
+            $else_called->called = true;
+        };
+
+        $data = [];
+        WF::fee($data, function ($val) use ($loop_called) {
+            $loop_called->called++; 
+            $loop_called->sum += $val;
+        }, $else);
+
+        $this->assertTrue($else_called->called);
+        $this->assertEquals(0, $loop_called->called);
+        $this->assertEquals(0, $loop_called->sum);
+
+        $data = [1, 2, 3];
+
+        $else_called->called = false;
+        WF::fee($data, function ($val) use ($loop_called) {
+            $loop_called->called++; 
+            $loop_called->sum += $val;
+        }, $else);
+
+        $this->assertFalse($else_called->called);
+        $this->assertEquals(3, $loop_called->called);
+        $this->assertEquals(6, $loop_called->sum);
+
+        $loop_called->called = 0;
+        $loop_called->sum = 0;
+        $loop_called->keysum = 0;
+        WF::fee($data, function ($key, $val) use ($loop_called) {
+            $loop_called->called++; 
+            $loop_called->keysum += $key;
+            $loop_called->sum += $val;
+        }, $else);
+
+        $this->assertFalse($else_called->called);
+        $this->assertEquals(3, $loop_called->called);
+        $this->assertEquals(6, $loop_called->sum);
+        $this->assertEquals(3, $loop_called->keysum);
+
+        $data = [5 => 'foo', '7' => 'bar'];
+        $cl = new DummyValIterator;
+        WF::fee($data, $cl, $else);
+
+        $this->assertFalse($else_called->called);
+        $this->assertEquals(2, count($cl->pairs));
+        $this->assertEquals(['foo'], $cl->pairs[0]);
+        $this->assertEquals(['bar'], $cl->pairs[1]);
+
+        $cl = new DummyKeyValIterator;
+        WF::fee($data, $cl, $else);
+        $this->assertFalse($else_called->called);
+        $this->assertEquals(2, count($cl->pairs));
+        $this->assertEquals([5, 'foo'], $cl->pairs[0]);
+        $this->assertEquals([7, 'bar'], $cl->pairs[1]);
+
+        WF::fee($data, function ($key, &$val) {
+            $val = 'foo' . $val;
+        }, $else);
+        $this->assertFalse($else_called->called);
+        $this->assertEquals('foofoo', $data[5]);
+        $this->assertEquals('foobar', $data[7]);
+
+        $data = [5 => 'foo', '7' => 'bar'];
+        WF::fee($data, function (&$val) {
+            $val = 'foo' . $val;
+        }, $else);
+        $this->assertFalse($else_called->called);
+        $this->assertEquals('foofoo', $data[5]);
+        $this->assertEquals('foobar', $data[7]);
+
+        $data = [5 => 'foo', '7' => 'bar'];
+        WF::fee($data, function (&$val) {
+            $val = 'foo' . $val;
+            return WF::BREAK;
+        }, $else);
+        $this->assertFalse($else_called->called);
+        $this->assertEquals('foofoo', $data[5]);
+        $this->assertEquals('bar', $data[7]);
+
+        // Now test with some different callbacks
+        $data = [5 => 'foo', '7' => 'bar'];
+        WF::fee($data, 'Wedeto\\Util\\DummyValIteratorFn', $else);
+        $this->assertFalse($else_called->called);
+        $this->assertEquals('fooInVFunc', $data[5]);
+        $this->assertEquals('barInVFunc', $data[7]);
+
+        $data = [5 => 'foo', '7' => 'bar'];
+        WF::fee($data, 'Wedeto\\Util\\DummyKeyValIteratorFn', $else);
+        $this->assertFalse($else_called->called);
+        $this->assertEquals('5foo', $data[5]);
+        $this->assertEquals('7bar', $data[7]);
+
+        $data = [5 => 'foo', '7' => 'bar'];
+        $cl = new DummyKeyValIterator;
+        WF::fee($data, [$cl, 'execute'], $else);
+        $this->assertFalse($else_called->called);
+        $this->assertEquals([5, 'foo'], $cl->pairs[0]);
+        $this->assertEquals([7, 'bar'], $cl->pairs[1]);
+    }
 }
 
 class DummyBoolA
@@ -307,4 +417,39 @@ class DummyBoolD
     {
         return new \DateTime();
     }
+}
+
+class DummyKeyValIterator
+{
+    public $pairs = [];
+
+    function __invoke($key, $val)
+    {
+        $this->pairs[] = [$key, $val];
+    }
+
+    function execute($key, $val)
+    {
+        $this->pairs[] = [$key, $val];
+    }
+}
+
+class DummyValIterator
+{
+    public $pairs = [];
+
+    function __invoke($val)
+    {
+        $this->pairs[] = [$val];
+    }
+}
+
+function DummyValIteratorFn(&$val)
+{
+    $val .= 'InVFunc';
+}
+
+function DummyKeyValIteratorFn($key, &$val)
+{
+    $val = $key . $val;
 }
