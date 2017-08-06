@@ -48,6 +48,7 @@ class Type
 
     protected $type;
     protected $options = array();
+    protected $error = null;
 
     /** 
      * Create a type constraint.
@@ -63,6 +64,9 @@ class Type
      *                       instanceof => class, ancestor class or interface for OBJECT
      *                       regex      => regular expression to match for STRING
      *                       custom     => Custom callback for all types
+     *                       error      => Associative array containing msg and
+     *                                     context, useful for
+     *                                     internationalizing error messages.
      */                        
     public function __construct(string $type, array $options = [])
     {
@@ -80,6 +84,14 @@ class Type
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * @return bool True if null is a valid value, false if not
+     */
+    public function isNullable()
+    {
+        return $this->options['nullable'] ?? false;
     }
     
     /**
@@ -110,7 +122,7 @@ class Type
     public function validate($value, &$filtered = null)
     {
         if ($value === null)
-            return !empty($this->options['nullable']);
+            return $this->options['nullable'] ?? false;
         
         $filtered = $value;
         if ($this->type === Type::EXISTS)
@@ -177,7 +189,31 @@ class Type
                 return is_resource($value);
             case Type::DATE:
                 if (!($value instanceof \DateTimeInterface))
-                    return false;
+                {
+                    if (!$strict)
+                    {
+                        // Attempt conversion
+                        if ($value instanceof \IntlCalendar)
+                        {
+                            $value = $value->toDateTime();
+                        }
+                        elseif (is_string($value))
+                        {
+                            try
+                            {
+                                $value = new \DateTime($value);
+                            }
+                            catch (\Exception $e)
+                            {}
+                        }
+                    }
+
+                    if (!$value instanceof \DateTimeInterface)
+                        return false;
+                    
+                    $filtered = $value;
+                }
+
                 if ($min instanceof \DateTimeInterface && $value < $min)
                     return false;
                 if ($max instanceof \DateTimeInterface && $value > $max)
@@ -240,5 +276,151 @@ class Type
         if (!empty($this->options))
             $desc .= Functions::str($this->options);
         return $desc;
+    }
+
+    /**
+     * Get an error message when a validation fails. Can be used
+     * in form implementation.
+     * @param mixed $value The value that did not validate
+     * @return array Associative array with a key 'msg' containing
+     *               the error message and optionally 'context' containing
+     *               tokens to be inserted into the string.
+     */
+    public function getErrorMessage($value)
+    {
+        if ($value === null)
+            return ['msg' => "Required field"];
+
+        $o = $this->options;
+        $min = $o['min_range'] ?? null;
+        $max = $o['max_range'] ?? null;
+
+        // Prepare context array
+        $context = [
+            'min' => $min,
+            'max' => $max,
+            'type' => strtolower($this->type)
+        ];
+
+        // Allow error messages to be user-defined
+        if (isset($o['error']))
+        {
+            $context = $o['error']['context'] ?? $context;
+            $msg = $o['error']['msg'] ?? $o['error'];
+            return [
+                'msg' => $msg,
+                'context' => $context
+            ];
+        }
+
+        // Generate a message based on type
+        $type = null;
+        switch ($this->type)
+        {
+            case Type::INT:
+                $type = "Integral value";
+            case Type::NUMERIC:
+            case Type::FLOAT:
+                $type = $type ?: "Number";
+                $context['type'] = $type;
+
+                if ($min !== null && $max !== null)
+                {
+                    return [
+                        'msg' => "{type} between {min} and {max} is required", 
+                        'context' => $context
+                    ];
+                }
+                
+                if ($min !== null)
+                {
+                    return [
+                        'msg' => "{type} equal to or greater than {min} is required",
+                        'context' => $context
+                    ];
+                }
+                
+                if ($max !== null)
+                {
+                    return [
+                        'msg' => "{type} less than or equal to {max} is required", 
+                        'context' => $context
+                    ];
+                }
+
+                return [
+                    'msg' => '{type} required',
+                    'context' => $context
+                ];
+            case "BOOL":
+                return [
+                    'msg' => 'True or false required'
+                ];
+            case "STRING":
+            case "SCALAR":
+                if ($min !== null && $max !== null)
+                {
+                    return [
+                        'msg' => "Between {min} and {max} characters expected",
+                        'context' => $context
+                    ];
+                }
+
+                if ($min !== null)
+                {
+                    return [
+                        'msg' => 'At least {min} characters expected',
+                        'context' => $context
+                    ];
+                }
+
+                if ($max !== null)
+                {
+                    return [
+                        'msg' => 'At most {max} characters expected',
+                        'context' => $context
+                    ];
+                }
+
+                return [
+                    'msg' => 'Please enter a value'
+                ];
+            case "DATE":
+                if ($min !== null && $max !== null)
+                {
+                    return [
+                        'msg' => 'Date between {min} and {max} expected',
+                        'context' => $context
+                    ];
+                }
+
+                if ($min !== null)
+                {
+                    return [
+                        'msg' => 'Date after {min} expected',
+                        'context' => $context
+                    ];
+                }
+
+                if ($max !== null)
+                {
+                    return [
+                        'msg' => 'Date before {min} expected',
+                        'context' => $context
+                    ];
+                }
+                
+                return [
+                    'msg' => 'Date expected'
+                ];
+            case "ARRAY":
+                return ['msg' => 'Array expected'];
+            default:
+        }
+
+        return [
+            'msg' => 'Value matching filter {type} expected',
+            'context' => $context
+        ];
     }
 }
