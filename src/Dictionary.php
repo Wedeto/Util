@@ -340,6 +340,20 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     }
 
     /**
+     * @return bool True if the Dictionary is shallow: it has only non-array
+     * elements, false if it contains sub-arrays.
+     */
+    public function isShallow()
+    {
+        foreach ($this->values as $k => $v)
+        {
+            if (is_array($v))
+                return false;
+        }
+        return true;
+    }
+
+    /**
      * Add all elements in the provided array-like object to the dictionary.
      * @param Traversable $values The values to add
      * @return Wedeto\Util\Dictionary Provides fluent interface
