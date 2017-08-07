@@ -197,7 +197,7 @@ class Type
 
                 if (!($value instanceof \DateTimeInterface))
                 {
-                    if (!$strict && is_string($value))
+                    if (!$strict && is_string($value) && !empty($value))
                     {
                         try
                         {
