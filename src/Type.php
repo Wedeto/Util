@@ -188,29 +188,29 @@ class Type
             case Type::RESOURCE:
                 return is_resource($value);
             case Type::DATE:
+                // Attempt conversion
+                if ($value instanceof \IntlCalendar)
+                {
+                    $value = $value->toDateTime();
+                    $filtered = $value;
+                }
+
                 if (!($value instanceof \DateTimeInterface))
                 {
-                    if (!$strict)
+                    if (!$strict && is_string($value))
                     {
-                        // Attempt conversion
-                        if ($value instanceof \IntlCalendar)
+                        try
                         {
-                            $value = $value->toDateTime();
+                            $value = new \DateTime($value);
                         }
-                        elseif (is_string($value))
+                        catch (\Exception $e)
                         {
-                            try
-                            {
-                                $value = new \DateTime($value);
-                            }
-                            catch (\Exception $e)
-                            {}
+                            return false;
                         }
                     }
-
-                    if (!$value instanceof \DateTimeInterface)
+                    else
                         return false;
-                    
+
                     $filtered = $value;
                 }
 
@@ -405,7 +405,7 @@ class Type
                 if ($max !== null)
                 {
                     return [
-                        'msg' => 'Date before {min} expected',
+                        'msg' => 'Date before {max} expected',
                         'context' => $context
                     ];
                 }
@@ -415,7 +415,6 @@ class Type
                 ];
             case "ARRAY":
                 return ['msg' => 'Array expected'];
-            default:
         }
 
         return [
