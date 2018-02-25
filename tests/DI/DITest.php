@@ -82,21 +82,26 @@ final class DITest extends TestCase
     public function testIfInheritingWorks()
     {
         $injector = DI::getInjector();
-        $instance = $injector->getInstance(Stdclass::class);
+        $instance = $injector->getInstance(DITestMockClass::class);
 
-        $this->assertInstanceOf(Stdclass::class, $instance, "A Stdclass should be returned");
-        $instance2 = $injector->getInstance(Stdclass::class);
+        $this->assertInstanceOf(DITestMockClass::class, $instance, "A DITestMockClass should be returned");
+        $instance2 = $injector->getInstance(DITestMockClass::class);
         $this->assertSame($instance, $instance2, "The same instance should be returned");
 
         $injector2 = DI::startNewContext('test', true);
-        $instance3 = $injector2->getInstance(Stdclass::class);
+        $instance3 = $injector2->getInstance(DITestMockClass::class);
         $this->assertSame($instance, $instance2, "The same instance should be returned");
 
         $injector3 = DI::startNewContext('test2', false);
-        $instance4 = $injector3->getInstance(Stdclass::class);
+        $instance4 = $injector3->getInstance(DITestMockClass::class);
         $this->assertNotSame($instance, $instance4, "A new instance should be returned");
 
         DI::destroyContext('test2');
         DI::destroyContext('test');
     }
+}
+
+class DITestMockClass extends Stdclass
+{
+    const WDI_REUSABLE = true;
 }

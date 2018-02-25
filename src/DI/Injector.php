@@ -31,6 +31,7 @@ use ReflectionClass;
 use Wedeto\Util\Hook;
 use Wedeto\Util\TypedDictionary;
 use Wedeto\Util\Type;
+use Wedeto\Util\Functions as WF;
 
 /**
  * A dependency injector. Creates new objects using their constructor,
@@ -66,7 +67,7 @@ class Injector
     public function getInstance(string $class, string $selector = Injector::DEFAULT_SELECTOR)
     {
         if (array_search($class, $this->instance_stack, true))
-            throw new DIException("Cyclic dependencies in creating $class");
+            throw new DIException("Cyclic dependencies in creating $class: " . WF::str($this->instance_stack));
 
         array_push($this->instance_stack, $class);
         if (!isset($this->objects[$class]) || !isset($this->objects[$class][$selector]))
@@ -80,13 +81,20 @@ class Injector
             }
 
             $instance = $this->newInstance($class, ['wdiSelector' => $selector]);
-            $this->setInstance($class, $instance, $selector);
+            $nclass = get_class($instance);
+            $const_name = $nclass . '::WDI_REUSABLE';
+            if (defined($const_name) && constant($const_name) === true)
+                $this->setInstance($class, $instance, $selector);
+        }
+        else
+        {
+            $instance = $this->objects[$class][$selector];
         }
 
         if ($class !== array_pop($this->instance_stack))
             throw new DIException("Unexpected class at top of stack");
 
-        return $this->objects[$class][$selector];
+        return $instance;
     }
 
     /**
@@ -178,17 +186,21 @@ class Injector
                 continue;
             }
 
+            if ($param->isDefaultValueAvailable())
+            {
+                $default = $param->getDefaultValue();
+                $constructor_args[] = $default;
+                continue;
+            }
+
             if ($param->isOptional())
             {
                 // This and all remaining parameters have a default value
                 break;
             }
 
-            if (!$param->isDefaultValueAvailable())
-                throw new DIException("Unable to determine value for parameter $name for constructor of '$class'");
+            throw new DIException("Unable to determine value for parameter $name for constructor of '$class'");
 
-            $default = $param->getDefaultValue();
-            $constructor_args[] = $default;
         }
 
         // There should be a argument for every parameter

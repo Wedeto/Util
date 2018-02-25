@@ -56,25 +56,25 @@ final class InjectorTest extends TestCase
     public function testCanSetAndClearInstance()
     {
         $injector = new Injector;
-        $instance = $injector->getInstance(\Stdclass::class);
+        $instance = $injector->getInstance(Stdclass::class);
         $this->assertInstanceOf(\StdClass::class, $instance, "A Stdclass object should be returned");
 
-        $instance2 = $injector->getInstance(\Stdclass::class);
+        $instance2 = $injector->getInstance(Stdclass::class);
         $this->assertSame($instance, $instance2, "The same Stdclass should be returned when calling again");
 
-        $injector->clearInstance(\Stdclass::class);
-        $instance3 = $injector->getInstance(\Stdclass::class);
+        $injector->clearInstance(Stdclass::class);
+        $instance3 = $injector->getInstance(Stdclass::class);
         $this->assertSame($instance, $instance2, "A new Stdclass should be returned when calling again");
 
-        $instance4 = new \Stdclass;
-        $injector->setInstance(\Stdclass::class, $instance4);
-        $instance5 = $injector->getInstance(\Stdclass::class);
+        $instance4 = new Stdclass;
+        $injector->setInstance(Stdclass::class, $instance4);
+        $instance5 = $injector->getInstance(Stdclass::class);
         $this->assertSame($instance5, $instance4, "The instance set should be returned");
         $this->assertNotSame($instance5, $instance3, "A different instance should be returned than before");
         $this->assertNotSame($instance5, $instance2, "A different instance should be returned than before");
 
-        $injector->clearInstance(\Stdclass::class);
-        $instance6 = $injector->getInstance(\Stdclass::class);
+        $injector->clearInstance(Stdclass::class);
+        $instance6 = $injector->getInstance(Stdclass::class);
         $this->assertNotSame($instance6, $instance5, "The cleared instance should not be returned");
     }
 
@@ -90,7 +90,7 @@ final class InjectorTest extends TestCase
         $instance2 = $injector->getInstance(InjectorTestComplexerClass::class);
         $this->assertInstanceOf(InjectorTestComplexerClass::class, $instance2, "The returned object should be appropriate");
         $this->assertSame($instance, $instance2->arg1, "The first argument should be the same mock object");
-        $this->assertInstanceOf(\Stdclass::class, $instance2->arg2, "The second argument should be Stdclass object");
+        $this->assertInstanceOf(Stdclass::class, $instance2->arg2, "The second argument should be Stdclass object");
         $this->assertEquals(Injector::DEFAULT_SELECTOR, $instance2->arg3, "The third argument should be the DI selector");
 
         // Clear injector
@@ -113,7 +113,7 @@ final class InjectorTest extends TestCase
             "The second argument to the nested object should be a DateTime instance"
         );
         $this->assertInstanceOf(
-            \Stdclass::class, 
+            Stdclass::class, 
             $instance3->arg2, 
             "The second argument should be Stdclass object"
         );
@@ -128,24 +128,24 @@ final class InjectorTest extends TestCase
     {
         $injector = new Injector();
 
-        $instance = $injector->getInstance(\Stdclass::class);
-        $instance2 = $injector->getInstance(\Stdclass::class);
-        $instance3 = $injector->getInstance(\Stdclass::class, "other");
+        $instance = $injector->getInstance(Stdclass::class);
+        $instance2 = $injector->getInstance(Stdclass::class);
+        $instance3 = $injector->getInstance(Stdclass::class, "other");
 
         $this->assertSame($instance, $instance2, "Repeated calls should return the same object");
         $this->assertSame($instance, $instance3, "A selector should fall back to default when absent");
 
-        $instance4 = new \Stdclass;
-        $injector->setInstance(\Stdclass::class, $instance4, "other");
+        $instance4 = new Stdclass;
+        $injector->setInstance(Stdclass::class, $instance4, "other");
 
-        $instance5 = $injector->getInstance(\Stdclass::class);
-        $instance6 = $injector->getInstance(\Stdclass::class, "other");
+        $instance5 = $injector->getInstance(Stdclass::class);
+        $instance6 = $injector->getInstance(Stdclass::class, "other");
         $this->assertSame($instance, $instance5, "Default selector should still return same instance");
         $this->assertNotSame($instance, $instance6, "The new selector should now return a different object");
         $this->assertSame($instance4, $instance6, "The new selector should return the instance set using setInstance");
 
-        $injector->clearInstance(\Stdclass::class, "other");
-        $instance7 = $injector->getInstance(\Stdclass::class, "other");
+        $injector->clearInstance(Stdclass::class, "other");
+        $instance7 = $injector->getInstance(Stdclass::class, "other");
         $this->assertSame($instance, $instance7, "The new selector should return the default again after destruction");
     }
 
@@ -153,11 +153,11 @@ final class InjectorTest extends TestCase
     {
         $injector = new Injector();
 
-        $instance = new \Stdclass;
-        $injector->setInstance(\Stdclass::class, $instance);
+        $instance = new Stdclass;
+        $injector->setInstance(Stdclass::class, $instance);
 
         $injector2 = new Injector($injector);
-        $instance2 = $injector2->getInstance(\Stdclass::class);
+        $instance2 = $injector2->getInstance(Stdclass::class);
         
         $this->assertSame($instance2, $instance, "The instance should be copied");
 
@@ -176,20 +176,44 @@ final class InjectorTest extends TestCase
         $injector->getInstance(\DateTimeZone::class);
     }
 
+    public function testNonResuableClasses()
+    {
+        $injector = new Injector();
+
+        $instance = $injector->getInstance(Dictionary::class);
+        $this->assertInstanceOf(Dictionary::class, $instance);
+
+        $instance2 = $injector->getInstance(Dictionary::class);
+        $this->assertNotSame($instance, $instance2, "Classes without WDI_REUSABLE constant should be re-instantiated");
+
+        $injector->setInstance(Dictionary::class, $instance2);
+        $instance3 = $injector->getInstance(Dictionary::class);
+        $this->assertSame($instance2, $instance3, "Non-reusable classes can explicitly be assigned in injector");
+    }
+
     public static function diHook(Dictionary $args)
     {
         $args['instance'] = new InjectorTestMockedClass;
     }
 }
 
+class Stdclass extends \Stdclass
+{
+    const WDI_REUSABLE = true;
+}
+
 class InjectorTestMockClass
-{}
+{
+    const WDI_REUSABLE = true;
+}
 
 class InjectorTestMockedClass extends InjectorTestMockClass
 {}
 
 class InjectorTestComplexConstructorClass
 {
+    const WDI_REUSABLE = true;
+
     public $arg1;
     public $arg2;
 
@@ -202,10 +226,12 @@ class InjectorTestComplexConstructorClass
 
 class InjectorTestComplexerClass
 {
+    const WDI_REUSABLE = true;
+
     public $arg1;
     public $arg2;
 
-    public function __construct(InjectorTestComplexConstructorClass $arg1, \Stdclass $arg2, string $wdiSelector)
+    public function __construct(InjectorTestComplexConstructorClass $arg1, Stdclass $arg2, string $wdiSelector)
     {
         $this->arg1 = $arg1;
         $this->arg2 = $arg2;
