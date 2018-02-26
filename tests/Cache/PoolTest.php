@@ -3,7 +3,7 @@
 This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
-Copyright 2017, Egbert van der Wal
+Copyright 2017-2018, Egbert van der Wal
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -124,13 +124,13 @@ final class PoolTest extends TestCase
         $items = $pool->getItems(['my_item', 'my_second_item']);
         $this->assertEquals(2, count($items));
 
-        $this->assertTrue($items[0]->isHit());
-        $this->assertEquals('my_item', $items[0]->getKey());
-        $this->assertEquals('myvalue', $items[0]->get());
+        $this->assertTrue($items['my_item']->isHit());
+        $this->assertEquals('my_item', $items['my_item']->getKey());
+        $this->assertEquals('myvalue', $items['my_item']->get());
 
-        $this->assertTrue($items[1]->isHit());
-        $this->assertEquals('my_second_item', $items[1]->getKey());
-        $this->assertEquals('foobar', $items[1]->get());
+        $this->assertTrue($items['my_second_item']->isHit());
+        $this->assertEquals('my_second_item', $items['my_second_item']->getKey());
+        $this->assertEquals('foobar', $items['my_second_item']->get());
 
         $this->assertTrue($pool->clear());
 
