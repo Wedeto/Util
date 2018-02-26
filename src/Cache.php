@@ -65,7 +65,7 @@ class Cache extends Dictionary
      */
     public static function setHook()
     {
-        register_shutdown_function(array(Cache::class, 'saveCache'));
+        Hook::subscribe(Hook::SHUTDOWN_HOOK, [Cache::class, 'saveCacheHook'], 10);
 
         foreach (self::$repository as $name => $cache)
             self::checkExpiry($name);
@@ -134,6 +134,16 @@ class Cache extends Dictionary
         }
         self::getLogger()->debug("Cache {0} does not exist - creating", [$cache_file]);
         self::$repository[$name] = [];
+    }
+
+    /**
+     * Shutdown hook called when the script terminates
+     *
+     * @param Dictionary $params The parameters received from Hook. Not used
+     */
+    public static function saveCacheHook(Dictionary $params)
+    {
+        self::saveCache();
     }
 
     /**

@@ -56,6 +56,9 @@ class Hook
     /** Precedence value to suggest hook should run first */
     const RUN_LAST = PHP_INT_MAX;
 
+    /** The hook run at shutdown */
+    const SHUTDOWN_HOOK = 'Wedeto.Util.ShutdownHook';
+
     protected static $logger = null;
 
     /** The registered hooks */
@@ -73,6 +76,8 @@ class Hook
     /** Hooks currently in execution */
     protected static $in_progress = array();
 
+    protected static $shutdown_hook = false;
+
     /**
      * Subscribe to a hook.
      *
@@ -83,7 +88,7 @@ class Hook
      *                           following signature: function (Dictionary $params);
      * @param int $precedence The lower this number, the sooner it will be
      *                        called, the higher the later. Default is 0.
-     *                        Subscribers with equal precendece will be called
+     *                        Subscribers with equal precedence will be called
      *                        in the order they were registered.
      */
     public static function subscribe(string $hook, callable $callback, int $precedence = 0)
@@ -91,6 +96,9 @@ class Hook
         $parts = explode(".", $hook);
         if (count($parts) < 2)
             throw new InvalidArgumentException("Hook name must consist of at least two parts");
+
+        if ($hook === Hook::SHUTDOWN_HOOK)
+            self::registerShutdownHook();
 
         // Make sure the callback is appropriate
         if (is_object($callback))
@@ -113,6 +121,35 @@ class Hook
                 return $l['seq'] - $r['seq'];
             }
         );
+    }
+    
+    /**
+     * Called to register the shutdown hook
+     */
+    private static function registerShutdownHook()
+    {
+        if (self::$shutdown_hook === false)
+        {
+            self::$shutdown_hook = true;
+            register_shutdown_function([static::class, 'executeShutdownHook']);
+        }
+    }
+
+    /**
+     * Called by PHP when the script is about to terminate. 
+     * Executes any registered shutdown hook.
+     */
+    public static function executeShutdownHook()
+    {
+        static::execute(Hook::SHUTDOWN_HOOK, []);
+    }
+
+    /**
+     * @return bool True if the shutdown hook is registered, false if not
+     */
+    public static function isShutdownHookRegistered()
+    {
+        return self::$shutdown_hook;
     }
 
     /**
