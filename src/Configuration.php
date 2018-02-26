@@ -35,4 +35,5 @@ use Wedeto\Log\Logger;
 class Configuration extends Dictionary
 {
     const WDI_REUSABLE = true;
+    const WDI_NO_AUTO = true;
 }
