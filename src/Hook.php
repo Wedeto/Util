@@ -76,6 +76,7 @@ class Hook
     /** Hooks currently in execution */
     protected static $in_progress = array();
 
+    /** True once the shutdown hook as been registered */
     protected static $shutdown_hook = false;
 
     /**
@@ -90,6 +91,7 @@ class Hook
      *                        called, the higher the later. Default is 0.
      *                        Subscribers with equal precedence will be called
      *                        in the order they were registered.
+     * @return int The hook reference number. Can be used to unsubscribe
      */
     public static function subscribe(string $hook, callable $callback, int $precedence = 0)
     {
@@ -112,15 +114,45 @@ class Hook
         if ($params[0]->getType() === null || $params[0]->getType()->__toString() !== Dictionary::class)
             throw new InvalidArgumentException("Hook must accept exactly one argument of type Dictionary");
 
-        self::$hooks[$hook][] = ['precedence' => $precedence, 'callback' => $callback, 'seq' => ++self::$sequence];
+        $ref = ++self::$sequence;
+        self::$hooks[$hook][] = ['precedence' => $precedence, 'callback' => $callback, 'ref' => $ref];
         usort(
             self::$hooks[$hook], 
             function (array $l, array $r) { 
                 if ($l['precedence'] !== $r['precedence'])
                     return $l['precedence'] - $r['precedence']; 
-                return $l['seq'] - $r['seq'];
+                return $l['ref'] - $r['ref'];
             }
         );
+
+        return $ref;
+    }
+
+    /**
+     * Unsubscribe from a hook.
+     *
+     * @param string $hook The hook to unsubscribe from
+     * @param int The hook reference
+     * @return bool True when the hook was removed, false if it was not present
+     */
+    public static function unsubscribe(string $hook, int $hook_reference)
+    {
+        $parts = explode(".", $hook);
+        if (count($parts) < 2)
+            throw new InvalidArgumentException("Hook name must consist of at least two parts");
+
+        if (!isset(self::$hooks[$hook]))
+            throw new InvalidArgumentException("Hook was not set");
+
+        foreach (self::$hooks[$hook] as $idx => $hook_data)
+        {
+            if ($hook_data['ref'] === $hook_reference)
+            {
+                unset(self::$hooks[$hook][$idx]);
+                return true;
+            }
+        }
+        return false;
     }
     
     /**

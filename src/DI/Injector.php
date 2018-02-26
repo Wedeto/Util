@@ -84,7 +84,11 @@ class Injector
         }
 
         if ($class !== array_pop($this->instance_stack))
+        {
+            // @codeCoverageIgnoreStart
             throw new DIException("Unexpected class at top of stack");
+            // @codeCoverageIgnoreEnd
+        }
 
         return $instance;
     }

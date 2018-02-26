@@ -3,7 +3,7 @@
 This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
-Copyright 2017, Egbert van der Wal
+Copyright 2017-2018, Egbert van der Wal
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -44,6 +44,11 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     protected $keys = null;
     protected $iterator = null;
 
+    /**
+     * Create a new Dictionary, optionally pre-filled by the provided array.
+     *
+     * @param array $values The values to pre-fill the Dictionary with
+     */
     public function __construct($values = array())
     {
         if ($values instanceof Dictionary)
@@ -52,6 +57,13 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
             $this->values = WF::to_array($values);
     }
 
+    /**
+     * Wrap an existing array, linking its values to the
+     * values in the Dictionary.
+     *
+     * @param array &$values The values to wrap
+     * @return Dictionary A new dictionary bound to the provided array
+     */
     public static function wrap(array &$values)
     {
         $dict = new Dictionary();

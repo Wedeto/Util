@@ -43,6 +43,7 @@ final class InjectorTest extends TestCase
     public function testHookCanProvideSubclass()
     {
         $injector = new Injector;
+
         $instance = $injector->getInstance(InjectorTestMockClass::class);
         $this->assertEquals(InjectorTestMockClass::class, get_class($instance), "The instance should match the base class");
 
@@ -51,11 +52,16 @@ final class InjectorTest extends TestCase
 
         $instance = $injector->getInstance(InjectorTestMockClass::class);
         $this->assertEquals(InjectorTestMockedClass::class, get_class($instance), "The instance should match the subclass");
+
     }
 
     public function testCanSetAndClearInstance()
     {
         $injector = new Injector;
+
+        // Check that clear instances doesn't thrown an exception when none are present
+        $injector->clearInstance(InjectorTestMockClass::class);
+
         $instance = $injector->getInstance(Stdclass::class);
         $this->assertInstanceOf(\StdClass::class, $instance, "A Stdclass object should be returned");
 
@@ -192,6 +198,51 @@ final class InjectorTest extends TestCase
         $this->assertSame($instance2, $instance3, "Non-reusable classes can explicitly be assigned in injector");
     }
 
+    public function testCyclicDependenciesThrowException()
+    {
+        $injector = new Injector();
+
+        $this->expectException(DIException::class);
+        $this->expectExceptionMessage("Cyclic dependencies");
+        $injector->getInstance(InjectorTestCyclicA::class);
+    }
+    
+    public function testSetInvalidInstanceThrowsException()
+    {
+        $injector = new Injector();
+
+        $this->expectException(DIException::class);
+        $this->expectExceptionMessage("Instance should be a subclass");
+        $injector->setInstance(Stdclass::class, new InjectorTestMockClass);
+    }
+
+    public function testNonExistingClassThrowsException()
+    {
+        $injector = new Injector();
+
+        $this->expectException(DIException::class);
+        $this->expectExceptionMessage("Class FooBarBaz does not exist");
+        $injector->getInstance(\FooBarBaz::class);
+    }
+
+    public function testNoAutoClassShouldNotInstantiate()
+    {
+        $injector = new Injector();
+
+        $this->expectException(DIException::class);
+        $this->expectExceptionMessage("WDI_NO_AUTO is true");
+        $injector->getInstance(InjectorTestMockClassNoAuto::class);
+    }
+
+    public function testClassWithPrivateConstructorDoesNotInstantiate()
+    {
+        $injector = new Injector();
+
+        $this->expectException(DIException::class);
+        $this->expectExceptionMessage("does not have a public constructor");
+        $injector->getInstance(InjectorTestMockClassPrivate::class);
+    }
+
     public static function diHook(Dictionary $args)
     {
         $args['instance'] = new InjectorTestMockedClass;
@@ -206,6 +257,17 @@ class Stdclass extends \Stdclass
 class InjectorTestMockClass
 {
     const WDI_REUSABLE = true;
+}
+
+class InjectorTestMockClassNoAuto
+{
+    const WDI_REUSABLE = true;
+    const WDI_NO_AUTO = true;
+}
+
+class InjectorTestMockClassPrivate
+{
+    private function __construct() {}
 }
 
 class InjectorTestMockedClass extends InjectorTestMockClass
@@ -238,4 +300,16 @@ class InjectorTestComplexerClass
         $this->arg2 = $arg2;
         $this->arg3 = $wdiSelector;
     }
+}
+
+class InjectorTestCyclicA
+{
+    public function __construct(InjectorTestCyclicB $b)
+    {}
+}
+
+class InjectorTestCyclicB
+{
+    public function __construct(InjectorTestCyclicA $b)
+    {}
 }

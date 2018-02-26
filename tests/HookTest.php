@@ -211,6 +211,32 @@ final class HookTest extends TestCase
 
         $this->assertEquals('foo', $response['value']);
     }
+
+    public function testHookUnsubscribe()
+    {
+        $cnt = 0;
+        $ref = Hook::subscribe("foo.bar.hook", function (Dictionary $arg) use (&$cnt) {++$cnt; }, 10);
+
+        Hook::execute("foo.bar.hook", []);
+        $this->assertEquals(1, $cnt, "Hook must be called once");
+
+        Hook::unsubscribe("foo.bar.hook", $ref);
+
+        Hook::execute("foo.bar.hook", []);
+        $this->assertEquals(1, $cnt, "Hook must not be caled again");
+    }
+
+    public function testShutdownHookRegistration()
+    {
+        $called = false;
+        $ref = Hook::subscribe(Hook::SHUTDOWN_HOOK, function (Dictionary $arg) use (&$called) { $called = true;}, 0);
+
+        $this->assertTrue(Hook::isShutdownHookRegistered());
+        Hook::executeShutdownHook();
+
+        $this->assertTrue($called, "The shutdown hook must be called");
+        $this->assertTrue(Hook::unsubscribe(Hook::SHUTDOWN_HOOK, $ref), "Shutdown hook must be unregistered");
+    }
 }
 
 class MockHookFunctionObject

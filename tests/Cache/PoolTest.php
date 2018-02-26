@@ -27,11 +27,11 @@ namespace Wedeto\Util\Cache;
 
 use PHPUnit\Framework\TestCase;
 
+use Wedeto\Util\DI\DI;
+
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;
 use org\bovigo\vfs\vfsStreamDirectory;
-
-use Wedeto\Util\Cache;
 
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
@@ -51,7 +51,14 @@ final class PoolTest extends TestCase
         vfsStreamWrapper::setRoot(new vfsStreamDirectory('cachedir'));
         $this->dir = vfsStream::url('cachedir');
 
-        Cache::setCachePath($this->dir);
+        DI::startNewContext('test', false);
+        $mgr = DI::getInjector()->getInstance(Manager::class);
+        $mgr->setCachePath($this->dir);
+    }
+
+    public function tearDown()
+    {
+        DI::destroyContext('test', false);
     }
 
     public function testConstructWithInvalidName()

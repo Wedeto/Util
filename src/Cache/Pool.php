@@ -28,7 +28,6 @@ namespace Wedeto\Util\Cache;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\CacheItemInterface;
 
-use Wedeto\Util\Cache;
 use Wedeto\Util\Type;
 use Wedeto\Util\Date;
 use Wedeto\Util\Functions as WF;
@@ -60,7 +59,7 @@ class Pool implements CacheItemPoolInterface
             throw new InvalidArgumentException("Invalid identifier: " . $identifier);
 
         $this->identifier = $identifier;
-        $this->cache = new Cache("cachepool_" . $identifier);
+        $this->cache = Manager::getInstance()->getCache("cachepool_" . $identifier);
         $this->cache->setExpiry(Date::SECONDS_IN_YEAR);
         $this->type_spec = new Type(Type::OBJECT, ['class' => Item::class]);
     }
