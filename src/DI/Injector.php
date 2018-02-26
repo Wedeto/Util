@@ -72,14 +72,6 @@ class Injector
         array_push($this->instance_stack, $class);
         if (!isset($this->objects[$class]) || !isset($this->objects[$class][$selector]))
         {
-            if (
-                $selector !== Injector::DEFAULT_SELECTOR 
-                && isset($this->objects[$class][Injector::DEFAULT_SELECTOR])
-            )
-            {
-                return $this->objects[$class][Injector::DEFAULT_SELECTOR];
-            }
-
             $instance = $this->newInstance($class, ['wdiSelector' => $selector]);
             $nclass = get_class($instance);
             $const_name = $nclass . '::WDI_REUSABLE';
@@ -152,6 +144,12 @@ class Injector
         {
             $instance = $hook_data->get('instance');
             return $instance;
+        }
+
+        $const_name = $class . '::WDI_NO_AUTO';
+        if (defined($const_name) && constant($const_name) === true)
+        {
+            throw new DIException("Cannot instantiate $class because $class::WDI_NO_AUTO is true");
         }
 
         $reflect = new ReflectionClass($class);

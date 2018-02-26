@@ -133,7 +133,7 @@ final class InjectorTest extends TestCase
         $instance3 = $injector->getInstance(Stdclass::class, "other");
 
         $this->assertSame($instance, $instance2, "Repeated calls should return the same object");
-        $this->assertSame($instance, $instance3, "A selector should fall back to default when absent");
+        $this->assertNotSame($instance, $instance3, "A selector should return a different object");
 
         $instance4 = new Stdclass;
         $injector->setInstance(Stdclass::class, $instance4, "other");
@@ -146,7 +146,8 @@ final class InjectorTest extends TestCase
 
         $injector->clearInstance(Stdclass::class, "other");
         $instance7 = $injector->getInstance(Stdclass::class, "other");
-        $this->assertSame($instance, $instance7, "The new selector should return the default again after destruction");
+        $this->assertNotSame($instance, $instance7, "The new selector should return the a new instance after clearing");
+        $this->assertNotSame($instance5, $instance7, "The new selector should return not return the same instance as the default selector");
     }
 
     public function testCopyConstructor()
