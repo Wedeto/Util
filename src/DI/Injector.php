@@ -40,6 +40,7 @@ use Wedeto\Util\Functions as WF;
 class Injector
 {
     const DEFAULT_SELECTOR = "_DEFAULT_";
+    const SHARED_SELECTOR = "_SHARED_";
 
     /** The list of instantiated objects */
     protected $objects = [];
@@ -72,11 +73,21 @@ class Injector
         array_push($this->instance_stack, $class);
         if (!isset($this->objects[$class]) || !isset($this->objects[$class][$selector]))
         {
-            $instance = $this->newInstance($class, ['wdiSelector' => $selector]);
-            $nclass = get_class($instance);
-            $const_name = $nclass . '::WDI_REUSABLE';
-            if (defined($const_name) && constant($const_name) === true)
-                $this->setInstance($class, $instance, $selector);
+            if ($selector === Injector::SHARED_SELECTOR)
+                throw new DIException("Refusing to instantiate shared instance");
+
+            if (isset($this->objects[$class][Injector::SHARED_SELECTOR]))
+            {
+                $instance = $this->objects[$class][Injector::SHARED_SELECTOR];
+            }
+            else
+            {
+                $instance = $this->newInstance($class, ['wdiSelector' => $selector]);
+                $nclass = get_class($instance);
+                $const_name = $nclass . '::WDI_REUSABLE';
+                if (defined($const_name) && constant($const_name) === true)
+                    $this->setInstance($class, $instance, $selector);
+            }
         }
         else
         {

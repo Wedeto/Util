@@ -156,6 +156,35 @@ final class InjectorTest extends TestCase
         $this->assertNotSame($instance5, $instance7, "The new selector should return not return the same instance as the default selector");
     }
 
+    public function testSharedSelector()
+    {
+        $injector = new Injector();
+
+        $instance = $injector->getInstance(\Stdclass::class);
+        $instance2 = $injector->getInstance(\Stdclass::class);
+
+        $this->assertNotSame($instance, $instance2, "\Stdclass is not reusable and should thus return separate instances");
+
+        $instance->shared = true;
+        $injector->setInstance(\Stdclass::class, $instance, Injector::SHARED_SELECTOR);
+        
+        $instance3 = $injector->getInstance(\Stdclass::class);
+        $this->assertSame($instance, $instance3, "The shared instance should be returned when a direct match is found");
+        $this->assertTrue($instance3->shared);
+
+        $instance4 = $injector->getInstance(\Stdclass::class, Injector::SHARED_SELECTOR);
+        $this->assertSame($instance, $instance4, "The shared instance can also be retrieved directly");
+        $this->assertTrue($instance4->shared);
+
+        $injector->clearInstance(\Stdclass::class, Injector::SHARED_SELECTOR);
+        $instance5 = $injector->getInstance(\Stdclass::class);
+        $this->assertNotSame($instance, $instance5, "After clearing the shared instance, a new one should be returned");
+
+        $this->expectException(DIException::class);
+        $this->expectExceptionMessage("Refusing to instantiate");
+        $injector->getInstance(\Stdclass::class, Injector::SHARED_SELECTOR);
+    }
+
     public function testCopyConstructor()
     {
         $injector = new Injector();
