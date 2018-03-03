@@ -48,6 +48,9 @@ class Injector
     /** A stack keeping track of newInstance calls - used to detect cyclic dependencies */
     protected $instance_stack = [];
 
+    /** A list of classnames that are remapped to another class */
+    protected $class_remap = [];
+
     /**
      * Create a new injector.
      *
@@ -56,7 +59,10 @@ class Injector
     public function __construct(Injector $other = null)
     {
         if (null !== $other)
+        {
             $this->objects = $other->objects;
+            $this->class_remap = $other->class_remap;
+        }
     }
 
     /**
@@ -105,6 +111,19 @@ class Injector
     }
 
     /**
+     * Remap a class to another when using newInstance
+     *
+     * @param string $from_class The class to remap
+     * @param string $to_class What to remap the class to. Should subclass $from_class
+     * @return $this Provides fluent interface
+     */
+    public function remap(string $from_class, string $to_class)
+    {
+        $this->class_remap[$from_class] = $to_class;
+        return $this;
+    }
+
+    /**
      * Set a specific instance of class
      * 
      * @param string $class The name of the class
@@ -145,6 +164,7 @@ class Injector
      */
     public function newInstance(string $class, $args = [], string $selector = Injector::DEFAULT_SELECTOR)
     {
+        $class = $this->class_remap[$class] ?? $class;
         if (!class_exists($class))
             throw new DIException("Class $class does not exist");
 

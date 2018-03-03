@@ -272,6 +272,16 @@ final class InjectorTest extends TestCase
         $injector->getInstance(InjectorTestMockClassPrivate::class);
     }
 
+    public function testClassRemap()
+    {
+        $injector = new Injector();
+
+        $injector->remap(\Stdclass::class, Stdclass::class);
+        
+        $instance = $injector->newInstance(\Stdclass::class);
+        $this->assertInstanceOf(Stdclass::class, $instance);
+    }
+
     public static function diHook(Dictionary $args)
     {
         $args['instance'] = new InjectorTestMockedClass;
