@@ -48,8 +48,8 @@ class Injector
     /** A stack keeping track of newInstance calls - used to detect cyclic dependencies */
     protected $instance_stack = [];
 
-    /** A list of classnames that are remapped to another class */
-    protected $class_remap = [];
+    /** A map of classnames to factories, used in place of the default instance creator */
+    protected $factories = [];
 
     /**
      * Create a new injector.
@@ -61,7 +61,7 @@ class Injector
         if (null !== $other)
         {
             $this->objects = $other->objects;
-            $this->class_remap = $other->class_remap;
+            $this->factories = $other->factories;
         }
     }
 
@@ -111,15 +111,15 @@ class Injector
     }
 
     /**
-     * Remap a class to another when using newInstance
+     * Register a factory for a class name
      *
-     * @param string $from_class The class to remap
-     * @param string $to_class What to remap the class to. Should subclass $from_class
+     * @param string $produced_class The class produced by the factory
+     * @param Wedeto\Util\DI\Factory $factory The factory to register
      * @return $this Provides fluent interface
      */
-    public function remap(string $from_class, string $to_class)
+    public function registerFactory(string $produced_class, Factory $factory)
     {
-        $this->class_remap[$from_class] = $to_class;
+        $this->factories[$produced_class] = $factory;
         return $this;
     }
 
@@ -164,22 +164,11 @@ class Injector
      */
     public function newInstance(string $class, $args = [], string $selector = Injector::DEFAULT_SELECTOR)
     {
-        $class = $this->class_remap[$class] ?? $class;
         if (!class_exists($class))
             throw new DIException("Class $class does not exist");
 
-        // Execute hook to allow plugins to provide instances
-        $instance_type = new Type(Type::OBJECT, ['instanceof' => $class]);
-        $hook_data = new TypedDictionary(
-            ['instance' => $instance_type, 'class' => Type::STRING, 'args' => Type::ARRAY, 'selector' => Type::STRING],
-            ['class' => $class, 'args' => $args, 'selector' => $selector]
-        );
-        Hook::execute('Wedeto.Util.DI.Injector.newInstance', $hook_data);
-        if ($hook_data->has('instance', Type::OBJECT))
-        {
-            $instance = $hook_data->get('instance');
-            return $instance;
-        }
+        if (isset($this->factories[$class]))
+            return $this->factories[$class]->produce($args, $selector);
 
         $const_name = $class . '::WDI_NO_AUTO';
         if (defined($const_name) && constant($const_name) === true)

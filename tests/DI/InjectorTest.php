@@ -26,28 +26,27 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\Util\DI;
 
 use PHPUnit\Framework\TestCase;
-use Wedeto\Util\Hook;
 use Wedeto\Util\TypedDictionary;
 use Wedeto\Util\Dictionary;
 
 /**
  * @covers Wedeto\Util\DI\Injector
+ * @covers Wedeto\Util\DI\Factory
+ * @covers Wedeto\Util\DI\BasicFactory
  */
 final class InjectorTest extends TestCase
 {
-    public function tearDown()
-    {
-        Hook::resetHook('Wedeto.Util.DI.Injector.newInstance');
-    }
-
-    public function testHookCanProvideSubclass()
+    public function testFactoryCanProvideSubclass()
     {
         $injector = new Injector;
 
         $instance = $injector->getInstance(InjectorTestMockClass::class);
         $this->assertEquals(InjectorTestMockClass::class, get_class($instance), "The instance should match the base class");
 
-        Hook::subscribe('Wedeto.Util.DI.Injector.newInstance', [static::class, 'diHook']);
+        $factory = new BasicFactory(function (array $args) {
+            return new InjectorTestMockedClass;
+        });
+        $injector->registerFactory(InjectorTestMockClass::class, $factory);
         $injector->clearInstance(InjectorTestMockClass::class);
 
         $instance = $injector->getInstance(InjectorTestMockClass::class);
@@ -270,16 +269,6 @@ final class InjectorTest extends TestCase
         $this->expectException(DIException::class);
         $this->expectExceptionMessage("does not have a public constructor");
         $injector->getInstance(InjectorTestMockClassPrivate::class);
-    }
-
-    public function testClassRemap()
-    {
-        $injector = new Injector();
-
-        $injector->remap(\Stdclass::class, Stdclass::class);
-        
-        $instance = $injector->newInstance(\Stdclass::class);
-        $this->assertInstanceOf(Stdclass::class, $instance);
     }
 
     public static function diHook(Dictionary $args)
