@@ -29,10 +29,13 @@ use PHPUnit\Framework\TestCase;
 use Wedeto\Util\TypedDictionary;
 use Wedeto\Util\Dictionary;
 
+use Prophecy\Argument;
+
 /**
  * @covers Wedeto\Util\DI\Injector
  * @covers Wedeto\Util\DI\Factory
  * @covers Wedeto\Util\DI\BasicFactory
+ * @covers Wedeto\Util\DI\DefaultFactory
  */
 final class InjectorTest extends TestCase
 {
@@ -271,9 +274,20 @@ final class InjectorTest extends TestCase
         $injector->getInstance(InjectorTestMockClassPrivate::class);
     }
 
-    public static function diHook(Dictionary $args)
+    public function testSettingDefaultFactory()
     {
-        $args['instance'] = new InjectorTestMockedClass;
+        $injector = new Injector();
+
+        $mocker = $this->prophesize(DefaultFactory::class);
+        $mocker->produce("Stdclass", Argument::any(), Injector::DEFAULT_SELECTOR, $injector)->willThrow(new \RuntimeException("called"));
+        $factory = $mocker->reveal();
+
+        $injector->setDefaultFactory($factory);
+
+        $this->assertSame($factory, $injector->getDefaultFactory());
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage("called");
+        $injector->getInstance(\Stdclass::class);
     }
 }
 

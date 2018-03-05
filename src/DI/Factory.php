@@ -35,10 +35,12 @@ interface Factory
 {
     /** 
      * Produce an instance of the registered type
+     * @param string $class The class to be instantiated
      * @param array $args An associative array of arguments the factory should use to
      *                    produce an instance.
      * @param string $selector The selector provided to the injector.
+     * @param Injector $injector The injector to use to produce dependencies
      * @return mixed An instance of the factory
      */
-    public function produce(array $args, string $selector = Injector::DEFAULT_SELECTOR);
+    public function produce(string $class, array $args, string $selector, Injector $injector);
 }

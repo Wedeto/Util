@@ -26,11 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\Util\DI;
 
 use InvalidArgumentException;
-use ReflectionClass;
 
-use Wedeto\Util\Hook;
-use Wedeto\Util\TypedDictionary;
-use Wedeto\Util\Type;
 use Wedeto\Util\Functions as WF;
 
 /**
@@ -51,6 +47,8 @@ class Injector
     /** A map of classnames to factories, used in place of the default instance creator */
     protected $factories = [];
 
+    protected $default_factory;
+
     /**
      * Create a new injector.
      *
@@ -62,6 +60,11 @@ class Injector
         {
             $this->objects = $other->objects;
             $this->factories = $other->factories;
+            $this->default_factory = $other->default_factory;
+        }
+        else
+        {
+            $this->default_factory = new DefaultFactory;
         }
     }
 
@@ -108,6 +111,26 @@ class Injector
         }
 
         return $instance;
+    }
+
+    /**
+     * Set a factory as the default, used when no specific factory is available.
+     *
+     * @param Factory $factory The factory to use as default
+     * @return $this Provides fluent interface
+     */
+    public function setDefaultFactory(Factory $factory)
+    {
+        $this->default_factory = $factory;
+        return $this;
+    }
+
+    /**
+     * @return Factory the default factory instance
+     */
+    public function getDefaultFactory()
+    {
+        return $this->default_factory;
     }
 
     /**
@@ -168,65 +191,8 @@ class Injector
             throw new DIException("Class $class does not exist");
 
         if (isset($this->factories[$class]))
-            return $this->factories[$class]->produce($args, $selector);
+            return $this->factories[$class]->produce($class, $args, $selector, $this);
 
-        $const_name = $class . '::WDI_NO_AUTO';
-        if (defined($const_name) && constant($const_name) === true)
-        {
-            throw new DIException("Cannot instantiate $class because $class::WDI_NO_AUTO is true");
-        }
-
-        $reflect = new ReflectionClass($class);
-        $constructor = $reflect->getConstructor();
-
-        if (null === $constructor)
-            return $reflect->newInstance();
-
-        if (!$constructor->isPublic())
-            throw new DIException("Class $class does not have a public constructor");
-
-        $params = $constructor->getParameters();
-        $constructor_args = [];
-
-        // Determine values for each parameter
-        $used_optional = false;
-        foreach ($params as $param)
-        {
-            $name = $param->getName();
-
-            if (array_key_exists($name, $args))
-            {
-                $constructor_args[] = $args[$name];
-                continue;
-            }
-
-            $pclass = $param->getClass();
-            if (null !== $pclass)
-            {
-                $instance = $this->getInstance($pclass->getName(), $selector);
-                $constructor_args[] = $instance;
-                continue;
-            }
-
-            if ($param->isDefaultValueAvailable())
-            {
-                $default = $param->getDefaultValue();
-                $constructor_args[] = $default;
-                continue;
-            }
-
-            if ($param->isOptional())
-            {
-                // This and all remaining parameters have a default value
-                break;
-            }
-
-            throw new DIException("Unable to determine value for parameter $name for constructor of '$class'");
-
-        }
-
-        // There should be a argument for every parameter
-        $instance = $reflect->newInstanceArgs($constructor_args);
-        return $instance;
+        return $this->default_factory->produce($class, $args, $selector, $this);
     }
 }

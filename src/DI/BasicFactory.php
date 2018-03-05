@@ -48,7 +48,7 @@ class BasicFactory implements Factory
      * The Factory interface: call the provided function to
      * do the factory job.
      */
-    public function produce(array $args, string $selector = Injector::DEFAULT_INJECTOR)
+    public function produce(string $class, array $args, string $selector, Injector $injector)
     {
         return call_user_func($this->function, $args);
     }
