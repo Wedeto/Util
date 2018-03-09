@@ -294,4 +294,67 @@ final class EncodingTest extends TestCase
         $encoded = Encoding::toUTF8($str);
         $this->assertEquals($str, $encoded);
     }
+
+    public function testGetBOM()
+    {
+        $bom_chars = Encoding::UTF8_BOM;
+        $bom = Encoding::getBOM('UTF8');
+
+        $expected = '';
+        foreach ($bom_chars as $chr)
+            $expected .= chr($chr);
+
+        $this->assertEquals($expected, $bom);
+
+        $expected = chr(0xEF) . chr(0xBB) . chr(0xBF);
+        $this->assertEquals($expected, $bom, "The UTF8 BOM Should be as expected");
+
+        $bom_chars = Encoding::UTF16LE_BOM;
+        $bom = Encoding::getBOM('UTF16LE');
+
+        $expected = '';
+        foreach ($bom_chars as $chr)
+            $expected .= chr($chr);
+
+        $this->assertEquals($expected, $bom);
+
+        $expected = chr(0xFF) . chr(0xFE);
+        $this->assertEquals($expected, $bom, "The UTF16LE BOM Should be as expected");
+
+        $bom_chars = Encoding::UTF16BE_BOM;
+        $bom = Encoding::getBOM('UTF16BE');
+
+        $expected = '';
+        foreach ($bom_chars as $chr)
+            $expected .= chr($chr);
+
+        $this->assertEquals($expected, $bom);
+
+        $expected = chr(0xFE) . chr(0xFF);
+        $this->assertEquals($expected, $bom, "The UTF16BE BOM Should be as expected");
+
+        $bom_chars = Encoding::UTF32LE_BOM;
+        $bom = Encoding::getBOM('UTF32LE');
+
+        $expected = '';
+        foreach ($bom_chars as $chr)
+            $expected .= chr($chr);
+
+        $this->assertEquals($expected, $bom);
+
+        $expected = chr(0xFF) . chr(0xFE) . chr(0x00) . chr(0x00);
+        $this->assertEquals($expected, $bom, "The UTF32LE BOM Should be as expected");
+
+        $bom_chars = Encoding::UTF32BE_BOM;
+        $bom = Encoding::getBOM('UTF32BE');
+
+        $expected = '';
+        foreach ($bom_chars as $chr)
+            $expected .= chr($chr);
+
+        $this->assertEquals($expected, $bom);
+
+        $expected = chr(0x00) . chr(0x00). chr(0xFE) . chr(0xFF);
+        $this->assertEquals($expected, $bom, "The UTF32BE BOM Should be as expected");
+    }
 }

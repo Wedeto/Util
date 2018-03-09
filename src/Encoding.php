@@ -54,6 +54,12 @@ class Encoding
     const ICONV_TRANSLIT = "TRANSLIT";
     const ICONV_IGNORE = "IGNORE";
     const WITHOUT_ICONV = "";
+
+    const UTF8_BOM = [0xEF, 0xBB, 0xBF];
+    const UTF16BE_BOM = [0xFE, 0xFF];
+    const UTF16LE_BOM = [0xFF, 0xFE];
+    const UTF32BE_BOM = [0x00, 0x00, 0xFE, 0xFF];
+    const UTF32LE_BOM = [0xFF, 0xFE, 0x00, 0x00];
     
     protected static $win1252ToUtf8 = array(
           128 => "\xe2\x82\xac",
@@ -419,5 +425,24 @@ class Encoding
            $o = iconv("UTF-8", "Windows-1252" . ($option == self::ICONV_TRANSLIT ? '//TRANSLIT' : ($option == self::ICONV_IGNORE ? '//IGNORE' : '')), $text);
         }
         return $o;
+    }
+
+    /**
+     * Get a BOM for a supported encoding
+     *
+     * @param string $which One of UTF8, UTF16LE, UTF16BE, UTF32LE or UTF32BE
+     * @return string The correct BOM
+     */
+    public static function getBOM(string $which)
+    {
+        $cname = self::class . '::' . strtoupper($which) . '_BOM';
+        if (!defined($cname))
+            return null;
+
+        $bytes = constant($cname);
+        $bom = '';
+        foreach ($bytes as $ord)
+            $bom .= chr($ord);
+        return $bom;
     }
 }
