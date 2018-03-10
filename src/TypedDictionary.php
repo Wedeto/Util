@@ -73,9 +73,9 @@ class TypedDictionary extends Dictionary
             }
             elseif (is_string($value))
             {
-                $types[$key] = new Type($value);
+                $types[$key] = new Validator($value);
             }
-            elseif (!($value instanceof Type))
+            elseif (!($value instanceof Validator))
             {
                 throw new \InvalidArgumentException(
                     "Unknown type: " . Functions::str($value) . " for " . $kpath
@@ -87,7 +87,7 @@ class TypedDictionary extends Dictionary
     /** 
      * Add a type for a parameter
      * @param string $key The key to set a type for. Can be repeated to go deeper
-     * @param Type $type The type for the parameter
+     * @param Validator $type The type for the parameter
      * @return TypedDictionary Provides fluent interface
      */
     public function setType($key, $type)
@@ -95,8 +95,8 @@ class TypedDictionary extends Dictionary
         $args = func_get_args();
         $type = array_pop($args);
 
-        if (!($type instanceof Type))
-            $type = new Type($type);
+        if (!($type instanceof Validator))
+            $type = new Validator($type);
 
         if ($this->types->has($args))
         {
@@ -138,7 +138,7 @@ class TypedDictionary extends Dictionary
             {
                 $last = array_pop($cpy);
                 $subtype = $this->types->dget($cpy);
-                if ($subtype instanceof Type && $subtype->getType() === Type::ARRAY)
+                if ($subtype instanceof Validator && $subtype->getType() === Type::ARRAY)
                     return parent::set($args, null);
             }
         }
@@ -317,7 +317,7 @@ class TypedDictionary extends Dictionary
                 if ($tp === "OBJECT")
                     $opts['instanceof'] = get_class($value);
                 
-                $type = new Type($tp, $opts);
+                $type = new Validator($tp, $opts);
                 $types[$key] = $type;
             }
         }

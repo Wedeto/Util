@@ -30,11 +30,11 @@ use PHPUnit\Framework\TestCase;
 use DateTimeImmutable;
 use DateInterval;
 
-final class TypeTest extends TestCase
+final class ValidatorTest extends TestCase
 {
     public function testNumericTypes()
     {
-        $a = new Type(Type::INT);
+        $a = new Validator(Type::INT);
         $this->assertEquals(Type::INT, $a->getType());
         $this->assertFalse($a->isNullable());
 
@@ -50,7 +50,7 @@ final class TypeTest extends TestCase
         $this->assertFalse($a->validate(false));
         $this->assertFalse($a->validate(true));
 
-        $a = new Type(Type::INT, ['min_range' => 3, 'max_range' => 15]);
+        $a = new Validator(Type::INT, ['min_range' => 3, 'max_range' => 15]);
         $this->assertFalse($a->isNullable());
         $this->assertFalse($a->validate(1));
         $this->assertFalse($a->validate(2));
@@ -60,7 +60,7 @@ final class TypeTest extends TestCase
         $this->assertTrue($a->validate(15));
         $this->assertFalse($a->validate(16));
 
-        $a = new Type(Type::INT, ['min_range' => -3, 'max_range' => 3]);
+        $a = new Validator(Type::INT, ['min_range' => -3, 'max_range' => 3]);
         $this->assertFalse($a->isNullable());
         $this->assertFalse($a->validate(-4));
         $this->assertTrue($a->validate(-3));
@@ -69,7 +69,7 @@ final class TypeTest extends TestCase
         $this->assertTrue($a->validate(3));
         $this->assertFalse($a->validate(4));
 
-        $a = new Type(Type::FLOAT);
+        $a = new Validator(Type::FLOAT);
         $this->assertFalse($a->isNullable());
         $this->assertTrue($a->validate(0));
         $this->assertTrue($a->validate(1));
@@ -81,7 +81,7 @@ final class TypeTest extends TestCase
         $this->assertFalse($a->validate("1.0"));
         $this->assertFalse($a->validate([]));
 
-        $a = new Type(Type::FLOAT, ['min_range' => 3, 'max_range' => 15]);
+        $a = new Validator(Type::FLOAT, ['min_range' => 3, 'max_range' => 15]);
         $this->assertFalse($a->isNullable());
         $this->assertFalse($a->validate(1));
         $this->assertFalse($a->validate(2));
@@ -91,7 +91,7 @@ final class TypeTest extends TestCase
         $this->assertTrue($a->validate(15));
         $this->assertFalse($a->validate(16));
 
-        $a = new Type(Type::FLOAT, ['min_range' => -3, 'max_range' => 3]);
+        $a = new Validator(Type::FLOAT, ['min_range' => -3, 'max_range' => 3]);
         $this->assertFalse($a->isNullable());
         $this->assertEquals(Type::FLOAT, $a->getType());
         $this->assertFalse($a->validate(-4));
@@ -101,7 +101,7 @@ final class TypeTest extends TestCase
         $this->assertTrue($a->validate(3));
         $this->assertFalse($a->validate(4));
 
-        $a = new Type(Type::NUMERIC);
+        $a = new Validator(Type::NUMERIC);
         $this->assertFalse($a->isNullable());
         $this->assertTrue($a->validate(0));
         $this->assertTrue($a->validate(1));
@@ -113,7 +113,7 @@ final class TypeTest extends TestCase
         $this->assertTrue($a->validate("1.0"));
         $this->assertFalse($a->validate([]));
 
-        $a = new Type(Type::NUMERIC, ['min_range' => 3, 'max_range' => 15]);
+        $a = new Validator(Type::NUMERIC, ['min_range' => 3, 'max_range' => 15]);
         $this->assertFalse($a->isNullable());
         $this->assertFalse($a->validate(1));
         $this->assertFalse($a->validate(2));
@@ -125,7 +125,7 @@ final class TypeTest extends TestCase
         $this->assertFalse($a->validate(16));
         $this->assertFalse($a->validate("16"));
 
-        $a = new Type(Type::NUMERIC, ['min_range' => -3, 'max_range' => 3]);
+        $a = new Validator(Type::NUMERIC, ['min_range' => -3, 'max_range' => 3]);
         $this->assertFalse($a->isNullable());
         $this->assertEquals(Type::NUMERIC, $a->getType());
         $this->assertFalse($a->validate("-4"));
@@ -142,7 +142,7 @@ final class TypeTest extends TestCase
 
     public function testStrings()
     {
-        $a = new Type(Type::STRING);
+        $a = new Validator(Type::STRING);
         $this->assertEquals(Type::STRING, $a->getType());
         $this->assertFalse($a->isNullable());
         $this->assertFalse($a->validate(0));
@@ -158,13 +158,13 @@ final class TypeTest extends TestCase
         $this->assertFalse($a->validate([]));
         $this->assertFalse($a->validate(new \StdClass));
 
-        $a = new Type(Type::STRING, ['min_range' => 3, 'max_range' => 5]);
+        $a = new Validator(Type::STRING, ['min_range' => 3, 'max_range' => 5]);
         $this->assertTrue($a->validate('123'));
         $this->assertTrue($a->validate('12345'));
         $this->assertFalse($a->validate('12'));
         $this->assertFalse($a->validate('123456'));
 
-        $a = new Type(Type::STRING, ['regex' => '/^[a-zA-Z]*$/']);
+        $a = new Validator(Type::STRING, ['regex' => '/^[a-zA-Z]*$/']);
         $this->assertFalse($a->validate('123456'));
         $this->assertFalse($a->validate('1'));
         $this->assertTrue($a->validate(''));
@@ -172,7 +172,7 @@ final class TypeTest extends TestCase
         $this->assertTrue($a->validate('xyz'));
         $this->assertFalse($a->validate('xyz!'));
 
-        $a = new Type(Type::STRING, ['regex' => '/^\w*$/', 'min_range' => 1]);
+        $a = new Validator(Type::STRING, ['regex' => '/^\w*$/', 'min_range' => 1]);
         $this->assertFalse($a->validate(''));
         $this->assertFalse($a->validate('xyz!'));
         $this->assertTrue($a->validate('a'));
@@ -181,7 +181,7 @@ final class TypeTest extends TestCase
 
     public function testDates()
     {
-        $a = new Type(Type::DATE);
+        $a = new Validator(Type::DATE);
         $this->assertEquals(Type::DATE, $a->getType());
 
         $now = new DateTimeImmutable();
@@ -199,11 +199,11 @@ final class TypeTest extends TestCase
         $this->assertFalse($a->validate(3));
         $this->assertFalse($a->validate(null));
 
-        $a = new Type(Type::DATE, ['nullable' => true]);
+        $a = new Validator(Type::DATE, ['nullable' => true]);
         $this->assertTrue($a->isNullable());
         $this->assertTrue($a->validate(null));
 
-        $a = new Type(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow]);
+        $a = new Validator(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow]);
         $this->assertTrue($a->validate($now));
         $this->assertTrue($a->validate($yesterday));
         $this->assertTrue($a->validate($tomorrow));
@@ -214,7 +214,7 @@ final class TypeTest extends TestCase
         {
             $cal = \IntlCalendar::createInstance();
 
-            $a = new Type(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow]);
+            $a = new Validator(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow]);
             $this->assertTrue($a->validate($cal));
 
             $cal->add(\IntlCalendar::FIELD_DATE, 5);
@@ -222,10 +222,10 @@ final class TypeTest extends TestCase
         }
 
         $str = date('Y-m-d');
-        $a = new Type(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow, 'unstrict' => false]);
+        $a = new Validator(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow, 'unstrict' => false]);
         $this->assertFalse($a->validate($str));
 
-        $a = new Type(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow, 'unstrict' => true]);
+        $a = new Validator(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow, 'unstrict' => true]);
         $this->assertTrue($a->validate($str));
 
         $str = date('Y-m-d', time() + 86400 * 7);
@@ -242,96 +242,96 @@ final class TypeTest extends TestCase
     {
         $expected = ['msg' => '', 'context' => ['min' => null, 'max' => null, 'type' => 'Integral value']];
 
-        $a = new Type(Type::INT);
+        $a = new Validator(Type::INT);
         $this->assertEquals(['msg' => 'Required field'], $a->getErrorMessage(null));
         $expected['msg'] = '{type} required';
         $this->assertEquals($expected, $a->getErrorMessage(1));
 
-        $a = new Type(Type::INT, ['min_range' => 5, 'max_range' => 10]);
+        $a = new Validator(Type::INT, ['min_range' => 5, 'max_range' => 10]);
         $expected['msg'] = '{type} between {min} and {max} is required';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(1));
 
-        $a = new Type(Type::INT, ['min_range' => 5, 'max_range' => null]);
+        $a = new Validator(Type::INT, ['min_range' => 5, 'max_range' => null]);
         $expected['msg'] = '{type} equal to or greater than {min} is required';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = null;
         $this->assertEquals($expected, $a->getErrorMessage(1));
 
-        $a = new Type(Type::INT, ['min_range' => null, 'max_range' => 10]);
+        $a = new Validator(Type::INT, ['min_range' => null, 'max_range' => 10]);
         $expected['msg'] = '{type} less than or equal to {max} is required';
         $expected['context']['min'] = null;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(1));
         
-        $a = new Type(Type::FLOAT);
+        $a = new Validator(Type::FLOAT);
         $this->assertEquals(['msg' => 'Required field'], $a->getErrorMessage(null));
         $expected['context']['type'] = 'Number';
         $expected['context']['max'] = null;
         $expected['msg'] = '{type} required';
         $this->assertEquals($expected, $a->getErrorMessage(1));
 
-        $a = new Type(Type::FLOAT, ['min_range' => 5, 'max_range' => 10]);
+        $a = new Validator(Type::FLOAT, ['min_range' => 5, 'max_range' => 10]);
         $expected['msg'] = '{type} between {min} and {max} is required';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(1));
 
-        $a = new Type(Type::FLOAT, ['min_range' => 5, 'max_range' => null]);
+        $a = new Validator(Type::FLOAT, ['min_range' => 5, 'max_range' => null]);
         $expected['msg'] = '{type} equal to or greater than {min} is required';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = null;
         $this->assertEquals($expected, $a->getErrorMessage(1));
 
-        $a = new Type(Type::FLOAT, ['min_range' => null, 'max_range' => 10]);
+        $a = new Validator(Type::FLOAT, ['min_range' => null, 'max_range' => 10]);
         $expected['msg'] = '{type} less than or equal to {max} is required';
         $expected['context']['min'] = null;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(1));
 
-        $a = new Type(Type::BOOL, ['min_range' => null, 'max_range' => 10]);
+        $a = new Validator(Type::BOOL, ['min_range' => null, 'max_range' => 10]);
         $this->assertEquals(['msg' => 'True or false required'], $a->getErrorMessage(1));
 
-        $a = new Type(Type::STRING, ['min_range' => null, 'max_range' => null]);
+        $a = new Validator(Type::STRING, ['min_range' => null, 'max_range' => null]);
         $this->assertEquals(['msg' => 'Please enter a value'], $a->getErrorMessage(''));
 
-        $a = new Type(Type::STRING, ['min_range' => 5, 'max_range' => null]);
+        $a = new Validator(Type::STRING, ['min_range' => 5, 'max_range' => null]);
         $expected['msg'] = 'At least {min} characters expected';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = null;
         $expected['context']['type'] = 'string';
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
-        $a = new Type(Type::STRING, ['min_range' => null, 'max_range' => 10]);
+        $a = new Validator(Type::STRING, ['min_range' => null, 'max_range' => 10]);
         $expected['msg'] = 'At most {max} characters expected';
         $expected['context']['min'] = null;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
-        $a = new Type(Type::STRING, ['min_range' => 5, 'max_range' => 10]);
+        $a = new Validator(Type::STRING, ['min_range' => 5, 'max_range' => 10]);
         $expected['msg'] = 'Between {min} and {max} characters expected';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
-        $a = new Type(Type::SCALAR, ['min_range' => null, 'max_range' => null]);
+        $a = new Validator(Type::SCALAR, ['min_range' => null, 'max_range' => null]);
         $this->assertEquals(['msg' => 'Please enter a value'], $a->getErrorMessage(''));
 
-        $a = new Type(Type::SCALAR, ['min_range' => 5, 'max_range' => null]);
+        $a = new Validator(Type::SCALAR, ['min_range' => 5, 'max_range' => null]);
         $expected['msg'] = 'At least {min} characters expected';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = null;
         $expected['context']['type'] = 'scalar';
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
-        $a = new Type(Type::SCALAR, ['min_range' => null, 'max_range' => 10]);
+        $a = new Validator(Type::SCALAR, ['min_range' => null, 'max_range' => 10]);
         $expected['msg'] = 'At most {max} characters expected';
         $expected['context']['min'] = null;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
-        $a = new Type(Type::SCALAR, ['min_range' => 5, 'max_range' => 10]);
+        $a = new Validator(Type::SCALAR, ['min_range' => 5, 'max_range' => 10]);
         $expected['msg'] = 'Between {min} and {max} characters expected';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = 10;
@@ -341,39 +341,39 @@ final class TypeTest extends TestCase
         $yesterday = $today->sub(new DateInterval('P1D'));
         $tomorrow = $today->add(new DateInterval('P1D'));
 
-        $a = new Type(Type::DATE, ['min_range' => null, 'max_range' => null]);
+        $a = new Validator(Type::DATE, ['min_range' => null, 'max_range' => null]);
         $this->assertEquals(['msg' => 'Date expected'], $a->getErrorMessage(''));
 
-        $a = new Type(Type::DATE, ['min_range' => $yesterday, 'max_range' => null]);
+        $a = new Validator(Type::DATE, ['min_range' => $yesterday, 'max_range' => null]);
         $expected['msg'] = 'Date after {min} expected';
         $expected['context']['min'] = $yesterday;
         $expected['context']['max'] = null;
         $expected['context']['type'] = "date";
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
-        $a = new Type(Type::DATE, ['min_range' => null, 'max_range' => $tomorrow]);
+        $a = new Validator(Type::DATE, ['min_range' => null, 'max_range' => $tomorrow]);
         $expected['msg'] = 'Date before {max} expected';
         $expected['context']['min'] = null;
         $expected['context']['max'] = $tomorrow;
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
-        $a = new Type(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow]);
+        $a = new Validator(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow]);
         $expected['msg'] = 'Date between {min} and {max} expected';
         $expected['context']['min'] = $yesterday;
         $expected['context']['max'] = $tomorrow;
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
-        $a = new Type(Type::ARRAY);
+        $a = new Validator(Type::ARRAY);
         $this->assertEquals(['msg' => 'Array expected'], $a->getErrorMessage(''));
 
-        $a = new Type(Type::OBJECT);
+        $a = new Validator(Type::OBJECT);
         $expected['msg'] = "Value matching filter {type} expected";
         $expected['context']['min'] = null;
         $expected['context']['max'] = null;
         $expected['context']['type'] = 'object';
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
-        $a = new Type(Type::OBJECT, ['error' => ['msg' => 'Foo barred']]);
+        $a = new Validator(Type::OBJECT, ['error' => ['msg' => 'Foo barred']]);
         $expected['msg'] = "Foo barred";
         $expected['context']['min'] = null;
         $expected['context']['max'] = null;
@@ -383,7 +383,7 @@ final class TypeTest extends TestCase
 
     public function testBool()
     {
-        $a = new Type(Type::BOOL);
+        $a = new Validator(Type::BOOL);
         $this->assertEquals(Type::BOOL, $a->getType());
 
         $this->assertTrue($a->validate(true));
@@ -397,7 +397,7 @@ final class TypeTest extends TestCase
 
     public function testArray()
     {
-        $a = new Type(Type::ARRAY);
+        $a = new Validator(Type::ARRAY);
         $this->assertEquals(Type::ARRAY, $a->getType());
 
         $dict = new Dictionary;
@@ -414,7 +414,7 @@ final class TypeTest extends TestCase
 
     public function testObject()
     {
-        $a = new Type(Type::OBJECT);
+        $a = new Validator(Type::OBJECT);
         $this->assertEquals(Type::OBJECT, $a->getType());
 
         $dict = new Dictionary;
@@ -429,14 +429,14 @@ final class TypeTest extends TestCase
         $this->assertTrue($a->validate($dt)); 
         $this->assertTrue($a->validate($dti)); 
 
-        $a = new Type(Type::OBJECT, ['instanceof' => Dictionary::class]);
+        $a = new Validator(Type::OBJECT, ['instanceof' => Dictionary::class]);
         $this->assertTrue($a->validate($dict));
         $this->assertTrue($a->validate($dict2));
         $this->assertFalse($a->validate($std));
         $this->assertFalse($a->validate($dt));
         $this->assertFalse($a->validate($dti));
 
-        $a = new Type(Type::OBJECT, ['class' => Dictionary::class]);
+        $a = new Validator(Type::OBJECT, ['class' => Dictionary::class]);
         $this->assertTrue($a->validate($dict));
         $this->assertFalse($a->validate($dict2));
         $this->assertFalse($a->validate($std));
@@ -448,7 +448,7 @@ final class TypeTest extends TestCase
 
     public function testCustom()
     {
-        $a = new Type(Type::VALIDATE_CUSTOM, ['nullable' => true, 'custom' => function ($val) {
+        $a = new Validator(Type::VALIDATE_CUSTOM, ['nullable' => true, 'custom' => function ($val) {
             return is_scalar($val);
         }]);
         $this->assertTrue($a->isNullable());
@@ -465,7 +465,7 @@ final class TypeTest extends TestCase
 
     public function testFilters()
     {
-        $a = new Type(Type::VALIDATE_FILTER, ['filter' => FILTER_VALIDATE_EMAIL]);
+        $a = new Validator(Type::VALIDATE_FILTER, ['filter' => FILTER_VALIDATE_EMAIL]);
 
         $this->assertTrue($a->validate('test@example.com'));
         $this->assertFalse($a->validate('foo@bar'));
@@ -474,7 +474,7 @@ final class TypeTest extends TestCase
 
     public function testScalar()
     {
-        $a = new Type(Type::SCALAR);
+        $a = new Validator(Type::SCALAR);
         
         $this->assertTrue($a->validate(1));
         $this->assertTrue($a->validate(1.0));
@@ -489,15 +489,15 @@ final class TypeTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("Unknown type: foo");
-        $a = new Type("foo");
+        $a = new Validator("foo");
     }
 
     public function testFilter()
     {
-        $a = new Type(Type::INT, ['unstrict' => true]);
+        $a = new Validator(Type::INT, ['unstrict' => true]);
         $this->assertTrue(is_int($a->filter('3')));
 
-        $a = new Type(Type::VALIDATE_FILTER, ['filter' => FILTER_VALIDATE_BOOLEAN]);
+        $a = new Validator(Type::VALIDATE_FILTER, ['filter' => FILTER_VALIDATE_BOOLEAN]);
         $this->assertTrue(is_bool($a->filter('true')));
 
         $this->expectException(\InvalidArgumentException::class);

@@ -78,13 +78,13 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
      * @param $type The type check. Defaults to Type::NOTEMPTY
      * @return boolean If the key exists
      */
-    public function has($key, $type = Type::EXISTS)
+    public function has($key, $type = Validator::EXISTS)
     {
         $args = WF::flatten_array(func_get_args());
 
         $last = end($args);     
-        $type = Type::EXISTS;
-        if ((is_string($last) && defined(Type::class . '::' . $last)) || $last instanceof Type)
+        $type = Validator::EXISTS;
+        if ((is_string($last) && defined(Type::class . '::' . $last)) || $last instanceof Validator)
             $type = array_pop($args);
 
         foreach ($args as $arg)
@@ -103,7 +103,7 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
         if (is_string($type))
         {
             $unstrict = in_array($type, [Type::INT, Type::FLOAT, Type::BOOL]);
-            $checker = new Type($type, ['unstrict' => $unstrict]);
+            $checker = new Validator($type, ['unstrict' => $unstrict]);
         }
         else
             $checker = $type;
