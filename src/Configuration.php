@@ -32,8 +32,13 @@ use Wedeto\Log\Logger;
  * Configuration subclasses Dictionary with the addition that it is annotated
  * with WDI_REUSABLE to have the DI re-use the same instance.
  */
-class Configuration extends Dictionary
+class Configuration extends TypedDictionary
 {
     const WDI_REUSABLE = true;
     const WDI_NO_AUTO = true;
+
+    public function __construct(array $types = [], $values = [])
+    {
+        parent::__construct($types, $values);
+    }
 }

@@ -38,7 +38,7 @@ class TypedDictionary extends Dictionary
      * @param Dictionary $types The keys and types to allow. Can be nested
      * @param array $values The initial values to set
      */
-    public function __construct($types, $values = array())
+    public function __construct($types, $values = [])
     {
         if (!($types instanceof Dictionary))
             $types = new Dictionary($types);
@@ -268,8 +268,17 @@ class TypedDictionary extends Dictionary
     }
 
     /**
-     * Disallow wrapping in the TypedDictionary - the wrapped array can still
-     * be modified externally defeating the type safety purpose.
+     * Disallowed - TypedDictionary cannot provide a reference to its internal array
+     */
+    public function &getAll()
+    {
+        throw new \RuntimeException("TypedDictionary does not give a reference to its internal array");
+    }
+
+    /**
+     * Customize wrapping of the TypedDictionary - the wrapped array can still
+     * be modified externally so we need to make sure the appropriate types are
+     * propagated
      *
      * @throws RuntimeException Always
      */
