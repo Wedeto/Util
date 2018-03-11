@@ -112,6 +112,8 @@ class Validator
      */
     public function validate($value, &$filtered = null)
     {
+        $this->error = null;
+
         if ($value === null)
             return $this->options['nullable'] ?? false;
         
@@ -123,8 +125,19 @@ class Validator
         if ($this->type !== Validator::VALIDATE_CUSTOM && !$this->matchType($value, $filtered))
             return false;
 
-        if (isset($o['custom']) && is_callable($o['custom']) && !$o['custom']($value))
-            return false;
+        if (isset($o['custom']) && is_callable($o['custom']))
+        {
+            try
+            {
+                $valid = $o['custom']($value);
+            }
+            catch (DomainException $e)
+            {
+                $this->error = ['msg' => $e->getMessage()];
+                $valid = false;
+            }
+            return $valid;
+        }
 
         return true;
     }
@@ -279,6 +292,9 @@ class Validator
      */
     public function getErrorMessage($value)
     {
+        if (null !== $this->error)
+            return $this->error;
+
         if ($value === null)
             return ['msg' => "Required field"];
 
@@ -343,12 +359,12 @@ class Validator
                     'msg' => '{type} required',
                     'context' => $context
                 ];
-            case "BOOL":
+            case Type::BOOL:
                 return [
                     'msg' => 'True or false required'
                 ];
-            case "STRING":
-            case "SCALAR":
+            case Type::STRING:
+            case Type::SCALAR:
                 if ($min !== null && $max !== null)
                 {
                     return [
@@ -376,7 +392,7 @@ class Validator
                 return [
                     'msg' => 'Please enter a value'
                 ];
-            case "DATE":
+            case Type::DATE:
                 if ($min !== null && $max !== null)
                 {
                     return [
@@ -404,7 +420,7 @@ class Validator
                 return [
                     'msg' => 'Date expected'
                 ];
-            case "ARRAY":
+            case Type::ARRAY:
                 return ['msg' => 'Array expected'];
         }
 
