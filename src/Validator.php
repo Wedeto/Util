@@ -25,6 +25,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Wedeto\Util;
 
+use DomainException;
+
 /**
  * Validator is a class checking validity for built-in types, but can also be
  * extended with custom rules and validation.
