@@ -82,6 +82,11 @@ final class LoggerAwareStaticTraitTest extends TestCase
         }
         throw new RecursionException('Oops');
     }
+
+    public function tearDown()
+    {
+        Hook::resetHook("Wedeto.Util.GetLogger");
+    }
 }
 
 class TestLoggerAwareStaticTrait
