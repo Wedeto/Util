@@ -27,6 +27,8 @@ namespace Wedeto\Util;
 
 use PHPUnit\Framework\TestCase;
 
+use Wedeto\Util\Validation\Type;
+
 /**
  * @covers Wedeto\Util\Hook
  */

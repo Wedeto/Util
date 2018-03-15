@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\Util;
 
 use InvalidArgumentException;
+use Wedeto\Util\Validation\Type;
 
 /**
  * Provide hook interface.

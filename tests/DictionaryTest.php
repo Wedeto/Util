@@ -31,6 +31,8 @@ use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamWrapper;
 use org\bovigo\vfs\vfsStreamDirectory;
 
+use Wedeto\Util\Validation\Type;
+
 /**
  * @covers Wedeto\Util\Dictionary
  */

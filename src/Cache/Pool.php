@@ -28,7 +28,7 @@ namespace Wedeto\Util\Cache;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\CacheItemInterface;
 
-use Wedeto\Util\Type;
+use Wedeto\Util\Validation\Type;
 use Wedeto\Util\Date;
 use Wedeto\Util\Functions as WF;
 

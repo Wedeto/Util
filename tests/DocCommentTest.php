@@ -40,7 +40,7 @@ final class DocCommentTest extends TestCase
  *
  * @var string A nice value
  * @return string Another return
- * @misc One misc
+ * @misc One        misc
  * @misc Another misc
  * @foo
  */
@@ -50,12 +50,13 @@ EOC;
 
         $preamble = $comment->getPreamble();
         $this->assertContains('My preamble', $preamble);
-        $this->assertEquals('string', $comment->getAnnotationFirst('var'));
+        $this->assertEquals(['string', 'A', 'nice', 'value'], $comment->getAnnotationTokens('var'));
+        $this->assertEquals(['One', 'misc'], $comment->getAnnotationTokens('misc'));
         $this->assertEquals('string A nice value', $comment->getAnnotation('var'));
         $this->assertEquals('string Another return', $comment->getAnnotation('return'));
-        $this->assertEquals('', $comment->getAnnotationFirst('foo'));
+        $this->assertEquals([''], $comment->getAnnotationTokens('foo'));
 
-        $expected = ['One misc', 'Another misc'];
+        $expected = ['One        misc', 'Another misc'];
         $this->assertEquals($expected, $comment->getAnnotations('misc'));
 
         $all = [

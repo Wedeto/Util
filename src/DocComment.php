@@ -102,19 +102,17 @@ class DocComment
     }
 
     /**
-     * Get the first word / value of an annotation
+     * Get the tokenized annotation - split by whitespace
      *
      * @param string $name The annotation to get the first word from
-     * @return string The first word, or null if not available
+     * @return array The tokens in the annotation
      */
-    public function getAnnotationFirst(string $name)
+    public function getAnnotationTokens(string $name)
     {
         $val = $this->getAnnotation($name, true);
-        $sep = strpos($val, " ");
-        if ($sep > 0)
-            return substr($val, 0, $sep);
+        $val = preg_replace("/\s{1,}/", " ", $val);
 
-        return $val;
+        return explode(" ", $val);
     }
 
     /**

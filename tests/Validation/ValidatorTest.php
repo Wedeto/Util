@@ -23,9 +23,12 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace Wedeto\Util;
+namespace Wedeto\Util\Validation;
 
 use PHPUnit\Framework\TestCase;
+
+use Wedeto\Util\Dictionary;
+use Wedeto\Util\TypedDictionary;
 
 use DateTimeImmutable;
 use DateInterval;

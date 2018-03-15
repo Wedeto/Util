@@ -26,6 +26,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\Util;
 
 use Wedeto\Util\Functions as WF;
+use Wedeto\Util\Validation\Type;
+use Wedeto\Util\Validation\Validator;
 
 class TypedDictionary extends Dictionary
 {

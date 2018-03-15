@@ -30,6 +30,12 @@ use PHPUnit\Framework\TestCase;
 use DateTimeImmutable;
 use DateInterval;
 
+use Wedeto\Util\Validation\Type;
+use Wedeto\Util\Validation\Validator;
+
+/**
+ * @covers Wedeto\Util\TypedDictionary
+ */
 final class TypedDictionaryTest extends TestCase
 {
     public function testBasics()

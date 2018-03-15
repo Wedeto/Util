@@ -3,7 +3,7 @@
 This is part of Wedeto, The WEb DEvelopment TOolkit.
 It is published under the MIT Open Source License.
 
-Copyright 2017, Egbert van der Wal
+Copyright 2017-2018, Egbert van der Wal
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -23,9 +23,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace Wedeto\Util;
+namespace Wedeto\Util\Validation;
 
-use DomainException;
+use Wedeto\Util\Functions as WF;
 
 /**
  * Validator is a class checking validity for built-in types, but can also be
@@ -100,7 +100,7 @@ class Validator
         if (!$this->validate($value, $filtered))
         {
             throw new \InvalidArgumentException(
-                "Not a valid value for " . $this->__toString() . ": " . Functions::str($value)
+                "Not a valid value for " . $this->__toString() . ": " . WF::str($value)
             );
         }
 
@@ -133,7 +133,7 @@ class Validator
             {
                 $valid = $o['custom']($value);
             }
-            catch (DomainException $e)
+            catch (ValidationException $e)
             {
                 $this->error = ['msg' => $e->getMessage()];
                 $valid = false;
@@ -161,12 +161,12 @@ class Validator
             case Type::BOOL:
                 if ($strict && !is_bool($value))
                     return false;
-                $filtered = Functions::parse_bool($value);
+                $filtered = WF::parse_bool($value);
                 return true;
             case Type::NUMERIC:
                 if (!is_numeric($value))
                     return false;
-                $filtered = Functions::is_int_val($value) ? (int)$value : (float)$value;
+                $filtered = WF::is_int_val($value) ? (int)$value : (float)$value;
                 return $this->numRangeCheck($filtered, $min, $max);
             case Type::FLOAT:
                 if ($strict && !is_float($value) && !is_int($value))
@@ -174,7 +174,7 @@ class Validator
                 $filtered = filter_var($value, FILTER_VALIDATE_FLOAT);
                 return ($filtered !== false) && $this->numRangeCheck($filtered, $min, $max);
             case Type::INT:
-                if (!is_int($value) && ($strict || !Functions::is_int_val($value)))
+                if (!is_int($value) && ($strict || !WF::is_int_val($value)))
                     return false;
                 $filtered = (int)$value;
                 return $this->numRangeCheck($filtered, $min, $max);
@@ -226,9 +226,9 @@ class Validator
                     return false;
                 return true;
             case Type::ARRAY:
-                if (!Functions::is_array_like($value))
+                if (!WF::is_array_like($value))
                     return false;
-                $filtered = Functions::to_array($value);
+                $filtered = WF::to_array($value);
                 return true;
             case Validator::VALIDATE_FILTER:
                 $ft = $o['filter'];
@@ -280,7 +280,7 @@ class Validator
     {
         $desc = $this->type;
         if (!empty($this->options))
-            $desc .= Functions::str($this->options);
+            $desc .= WF::str($this->options);
         return $desc;
     }
 

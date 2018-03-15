@@ -27,6 +27,8 @@ namespace Wedeto\Util;
 
 use Wedeto\Util\Functions as WF;
 use Wedeto\Log\Logger;
+use Wedeto\Util\Validation\Type;
+use Wedeto\Util\Validation\Validator;
 
 /**
  * Dictionary provides a flexible way to use arrays as objects. The getters and
