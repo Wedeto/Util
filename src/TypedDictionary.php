@@ -270,11 +270,13 @@ class TypedDictionary extends Dictionary
     }
 
     /**
-     * Disallowed - TypedDictionary cannot provide a reference to its internal array
+     * Even though this method returns a reference, a reference to a copy is
+     * returned to prevent external modification.
      */
     public function &getAll()
     {
-        throw new \RuntimeException("TypedDictionary does not give a reference to its internal array");
+        $all = parent::getAll();
+        return $all;
     }
 
     /**
