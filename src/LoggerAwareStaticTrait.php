@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Wedeto\Util;
 
+use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 use Psr\Log\LoggerInterface;
 
@@ -67,13 +68,42 @@ trait LoggerAwareStaticTrait
     {
         if (self::$logger === null)
         {
-            $result = Hook::execute(
-                "Wedeto.Util.GetLogger", 
-                ["logger" => null, "class" => static::class]
-            );
+            try
+            {
+                $result = Hook::execute(
+                    "Wedeto.Util.GetLogger", 
+                    ["logger" => null, "class" => static::class]
+                );
+            }
+            catch (RecursionException $e)
+            {
+                // Apparently the hook is calling getLogger which is failing, so
+                // use an emergency logger to log anyway.
+                $result = ['logger' => new EmergencyLogger];
+            }
 
             self::$logger = $result['logger'] ?? new NullLogger();
         }
         return self::$logger;
+    }
+}
+
+class EmergencyLogger extends AbstractLogger
+{
+    private $fh;
+
+    public function __construct()
+    {
+        $this->fh = PHP_SAPI === "foo" ? fopen("php://stderr", "w") : fopen("php://output", "w");
+        $this->log('error', "error");
+        $this->log('error', "The logging system is malfunctioning. Falling back to emergency logger");
+    }
+
+    public function log($level, $message, array $context = [])
+    {
+        foreach ($context as $k => $v)
+            $message = str_replace('{' . $k . '}', $v, $message);
+
+        fwrite($this->fh, '[' . $level . '] ' . $message . "<br>\n");
     }
 }

@@ -31,6 +31,7 @@ use Psr\Log\AbstractLogger;
 
 /**
  * @covers Wedeto\Util\LoggerAwareStaticTrait
+ * @covers Wedeto\Util\EmergencyLogger
  */
 final class LoggerAwareStaticTraitTest extends TestCase
 {
@@ -57,9 +58,38 @@ final class LoggerAwareStaticTraitTest extends TestCase
         $l = $a->getLogger();
         $this->assertInstanceOf(NullLogger::class, $l);
     }
+
+    public function testEmergencyLogger()
+    {
+        Hook::subscribe('Wedeto.Util.GetLogger', [$this, 'getLogger']);
+
+        ob_start();
+        $log = TestLoggerAwareStaticTrait2::getLogger();
+        $res = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertContains('Falling back to emergency logger', $res);
+    }
+
+    public function getLogger(Dictionary $args)
+    {
+        Hook::resetLogger();
+        try
+        {
+            $res = Hook::execute('Wedeto.Util.GetLogger', ['class' => $this]);
+        }
+        catch (\Exception $e){
+        }
+        throw new RecursionException('Oops');
+    }
 }
 
 class TestLoggerAwareStaticTrait
+{
+    use LoggerAwareStaticTrait;
+}
+
+class TestLoggerAwareStaticTrait2
 {
     use LoggerAwareStaticTrait;
 }
