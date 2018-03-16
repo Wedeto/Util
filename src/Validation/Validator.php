@@ -132,6 +132,8 @@ class Validator
             try
             {
                 $valid = $o['custom']($value);
+                if (!is_bool($valid))
+                    throw new \RuntimeException("Validator did not return boolean: " . WF::str($valid));
             }
             catch (ValidationException $e)
             {
@@ -298,7 +300,7 @@ class Validator
             return $this->error;
 
         if ($value === null)
-            return ['msg' => "Required field"];
+            return ['msg' => "Field required"];
 
         $o = $this->options;
         $min = $o['min_range'] ?? null;
@@ -370,7 +372,7 @@ class Validator
                 if ($min !== null && $max !== null)
                 {
                     return [
-                        'msg' => "Between {min} and {max} characters expected",
+                        'msg' => "Between {min} and {max} characters required",
                         'context' => $context
                     ];
                 }
@@ -378,7 +380,7 @@ class Validator
                 if ($min !== null)
                 {
                     return [
-                        'msg' => 'At least {min} characters expected',
+                        'msg' => 'At least {min} characters required',
                         'context' => $context
                     ];
                 }
@@ -386,19 +388,19 @@ class Validator
                 if ($max !== null)
                 {
                     return [
-                        'msg' => 'At most {max} characters expected',
+                        'msg' => 'At most {max} characters required',
                         'context' => $context
                     ];
                 }
 
                 return [
-                    'msg' => 'Please enter a value'
+                    'msg' => 'Field required'
                 ];
             case Type::DATE:
                 if ($min !== null && $max !== null)
                 {
                     return [
-                        'msg' => 'Date between {min} and {max} expected',
+                        'msg' => 'Date between {min} and {max} required',
                         'context' => $context
                     ];
                 }
@@ -406,7 +408,7 @@ class Validator
                 if ($min !== null)
                 {
                     return [
-                        'msg' => 'Date after {min} expected',
+                        'msg' => 'Date after {min} required',
                         'context' => $context
                     ];
                 }
@@ -414,20 +416,20 @@ class Validator
                 if ($max !== null)
                 {
                     return [
-                        'msg' => 'Date before {max} expected',
+                        'msg' => 'Date before {max} required',
                         'context' => $context
                     ];
                 }
                 
                 return [
-                    'msg' => 'Date expected'
+                    'msg' => 'Date required'
                 ];
             case Type::ARRAY:
-                return ['msg' => 'Array expected'];
+                return ['msg' => 'Array required'];
         }
 
         return [
-            'msg' => 'Value matching filter {type} expected',
+            'msg' => 'Value matching filter {type} required',
             'context' => $context
         ];
     }

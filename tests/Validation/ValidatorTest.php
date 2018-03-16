@@ -246,7 +246,7 @@ final class ValidatorTest extends TestCase
         $expected = ['msg' => '', 'context' => ['min' => null, 'max' => null, 'type' => 'Integral value']];
 
         $a = new Validator(Type::INT);
-        $this->assertEquals(['msg' => 'Required field'], $a->getErrorMessage(null));
+        $this->assertEquals(['msg' => 'Field required'], $a->getErrorMessage(null));
         $expected['msg'] = '{type} required';
         $this->assertEquals($expected, $a->getErrorMessage(1));
 
@@ -269,7 +269,7 @@ final class ValidatorTest extends TestCase
         $this->assertEquals($expected, $a->getErrorMessage(1));
         
         $a = new Validator(Type::FLOAT);
-        $this->assertEquals(['msg' => 'Required field'], $a->getErrorMessage(null));
+        $this->assertEquals(['msg' => 'Field required'], $a->getErrorMessage(null));
         $expected['context']['type'] = 'Number';
         $expected['context']['max'] = null;
         $expected['msg'] = '{type} required';
@@ -297,45 +297,45 @@ final class ValidatorTest extends TestCase
         $this->assertEquals(['msg' => 'True or false required'], $a->getErrorMessage(1));
 
         $a = new Validator(Type::STRING, ['min_range' => null, 'max_range' => null]);
-        $this->assertEquals(['msg' => 'Please enter a value'], $a->getErrorMessage(''));
+        $this->assertEquals(['msg' => 'Field required'], $a->getErrorMessage(''));
 
         $a = new Validator(Type::STRING, ['min_range' => 5, 'max_range' => null]);
-        $expected['msg'] = 'At least {min} characters expected';
+        $expected['msg'] = 'At least {min} characters required';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = null;
         $expected['context']['type'] = 'string';
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::STRING, ['min_range' => null, 'max_range' => 10]);
-        $expected['msg'] = 'At most {max} characters expected';
+        $expected['msg'] = 'At most {max} characters required';
         $expected['context']['min'] = null;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::STRING, ['min_range' => 5, 'max_range' => 10]);
-        $expected['msg'] = 'Between {min} and {max} characters expected';
+        $expected['msg'] = 'Between {min} and {max} characters required';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::SCALAR, ['min_range' => null, 'max_range' => null]);
-        $this->assertEquals(['msg' => 'Please enter a value'], $a->getErrorMessage(''));
+        $this->assertEquals(['msg' => 'Field required'], $a->getErrorMessage(''));
 
         $a = new Validator(Type::SCALAR, ['min_range' => 5, 'max_range' => null]);
-        $expected['msg'] = 'At least {min} characters expected';
+        $expected['msg'] = 'At least {min} characters required';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = null;
         $expected['context']['type'] = 'scalar';
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::SCALAR, ['min_range' => null, 'max_range' => 10]);
-        $expected['msg'] = 'At most {max} characters expected';
+        $expected['msg'] = 'At most {max} characters required';
         $expected['context']['min'] = null;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::SCALAR, ['min_range' => 5, 'max_range' => 10]);
-        $expected['msg'] = 'Between {min} and {max} characters expected';
+        $expected['msg'] = 'Between {min} and {max} characters required';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = 10;
         $this->assertEquals($expected, $a->getErrorMessage(''));
@@ -345,32 +345,32 @@ final class ValidatorTest extends TestCase
         $tomorrow = $today->add(new DateInterval('P1D'));
 
         $a = new Validator(Type::DATE, ['min_range' => null, 'max_range' => null]);
-        $this->assertEquals(['msg' => 'Date expected'], $a->getErrorMessage(''));
+        $this->assertEquals(['msg' => 'Date required'], $a->getErrorMessage(''));
 
         $a = new Validator(Type::DATE, ['min_range' => $yesterday, 'max_range' => null]);
-        $expected['msg'] = 'Date after {min} expected';
+        $expected['msg'] = 'Date after {min} required';
         $expected['context']['min'] = $yesterday;
         $expected['context']['max'] = null;
         $expected['context']['type'] = "date";
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::DATE, ['min_range' => null, 'max_range' => $tomorrow]);
-        $expected['msg'] = 'Date before {max} expected';
+        $expected['msg'] = 'Date before {max} required';
         $expected['context']['min'] = null;
         $expected['context']['max'] = $tomorrow;
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::DATE, ['min_range' => $yesterday, 'max_range' => $tomorrow]);
-        $expected['msg'] = 'Date between {min} and {max} expected';
+        $expected['msg'] = 'Date between {min} and {max} required';
         $expected['context']['min'] = $yesterday;
         $expected['context']['max'] = $tomorrow;
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::ARRAY);
-        $this->assertEquals(['msg' => 'Array expected'], $a->getErrorMessage(''));
+        $this->assertEquals(['msg' => 'Array required'], $a->getErrorMessage(''));
 
         $a = new Validator(Type::OBJECT);
-        $expected['msg'] = "Value matching filter {type} expected";
+        $expected['msg'] = "Value matching filter {type} required";
         $expected['context']['min'] = null;
         $expected['context']['max'] = null;
         $expected['context']['type'] = 'object';

@@ -132,7 +132,7 @@ final class TypedDictionaryTest extends TestCase
         $this->assertEquals('foo@bar.com', $dict->get('l3', 'email'));
         
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage("Value must be FLOAT at: l1.float");
+        $this->expectExceptionMessage("Field required");
         $dict = new TypedDictionary($a, ['l1' => ['float' => null], 'l3' => ['email' => 'foo@bar.com']]);
     }
 
@@ -199,7 +199,7 @@ final class TypedDictionaryTest extends TestCase
         }
         catch (\InvalidArgumentException $e)
         {
-            $this->assertContains("Value must be", $e->getMessage());
+            $this->assertContains("required", $e->getMessage());
         }
         $this->assertEquals($should_work, $worked);
     }

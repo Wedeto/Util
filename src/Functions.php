@@ -293,6 +293,7 @@ class Functions
         if (is_scalar($obj))
             return (string)$obj;
 
+
         $str = "";
         if ($obj instanceof Throwable)
         {
@@ -302,7 +303,12 @@ class Functions
         {
             $str = (string)$obj;
         }
-        elseif (is_array($obj))
+        else if (is_object($obj) && $obj instanceof \JsonSerializable)
+        {
+            $obj = $obj->jsonSerialize();
+        }
+
+        if (empty($str) && is_array($obj))
         {
             if ($depth > 1)
                 return '[...]';
@@ -318,12 +324,9 @@ class Functions
             }
             return '[' . implode(', ', $vals) . ']';
         }
-        else
+        elseif (empty($str))
         {
-            ob_start();
-            var_dump($obj);
-            $str = ob_get_contents();
-            ob_end_clean();
+            $str = self::sprint_r($obj);
         }
 
         if ($html)
@@ -338,6 +341,22 @@ class Functions
     public static function html($obj)
     {
         return self::str($obj, true);
+    }
+
+    /**
+     * Format an object using print_r, formatting to a singe line object notation
+     */
+    public static function sprint_r($obj)
+    {
+        ob_start();
+        print_r($obj);
+        $str = ob_get_contents();
+        ob_end_clean();
+
+        $str = preg_replace("/\s+\\(\s+/", " ( ", $str);
+        $str = preg_replace("/\n\s+/", ", ", $str);
+        $str = preg_replace("/\n\s*\\)/", " )", $str);
+        return $str;
     }
 
     public static function exceptionToString(Throwable $ex, $buf = null, int $depth = 0)
@@ -413,5 +432,19 @@ class Functions
     public static function setDebugStream($stream)
     {
         self::$debug_stream = is_resource($stream) ? $stream : null;
+    }
+
+    /**
+     * Fill a placeholder string
+     * 
+     * @param string $msg The message to replace placeholder in
+     * @param array $values The assocative array containing the placeholders
+     * @return string The filled string
+     */
+    public static function fillPlaceholders(string $msg, array $values)
+    {
+        foreach ($values as $key => $value)
+            $msg = str_replace('{' . $key . '}', $value, self::str($msg));
+        return $msg;
     }
 }

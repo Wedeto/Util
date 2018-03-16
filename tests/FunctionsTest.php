@@ -228,8 +228,8 @@ final class FunctionsTest extends TestCase
         $this->assertEquals($expected, WF::html($a));
 
         $actual = WF::str(new \stdClass);
-        $expected = "class stdClass#";
-        $this->assertTrue(strpos($actual, $expected) !== false);
+        $expected = "stdClass Object ( )";
+        $this->assertContains($expected, $actual);
     }
 
     public function testExceptionToString()
@@ -259,7 +259,7 @@ final class FunctionsTest extends TestCase
         WF::setDebugStream($h);
         WF::debug("%s", new \stdClass);
         rewind($h);
-        $this->assertContains("class stdClass", stream_get_contents($h));
+        $this->assertContains("stdClass Object ( )", stream_get_contents($h));
 
         $h = fopen('php://memory', 'rw');
         WF::setDebugStream($h);

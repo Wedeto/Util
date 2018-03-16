@@ -165,7 +165,11 @@ class TypedDictionary extends Dictionary
         }
 
         if (!$type->validate($value))
-            throw new \InvalidArgumentException("Value must be " . (string)$type . " at: " . $kpath);
+        {
+            $error = $type->getErrorMessage($value);
+            $msg = WF::fillPlaceholders($error['msg'], $error['context'] ?? []);
+            throw new \InvalidArgumentException($msg);
+        }
 
         return parent::set($args, null);
     }
