@@ -302,7 +302,7 @@ class TypedDictionary extends Dictionary
     {
         foreach ($values as $key => $value)
         {
-            if (WF::is_array_like($value))
+            if (is_array($value) || (is_object($value) && get_class($value) === Dictionary::class))
             {
                 $subarray = WF::to_array($value);
                 $subtypes = new Dictionary;
