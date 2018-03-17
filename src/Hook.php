@@ -27,6 +27,7 @@ namespace Wedeto\Util;
 
 use InvalidArgumentException;
 use Wedeto\Util\Validation\Type;
+use Psr\Log\NullLogger;
 
 /**
  * Provide hook interface.
@@ -232,7 +233,17 @@ class Hook
                 }
                 catch (\Throwable $e)
                 {
-                    self::getLogger()->error("Callback to {0} throw an exception: {1}", [$hook, $e]);
+                    $logger = self::getLogger();
+                    if (!($logger instanceof NullLogger))
+                    { 
+                        // Log the error when a logger is available
+                        self::getLogger()->error("Callback to {0} throw an exception: {1}", [$hook, $e]);
+                    }
+                    else
+                    { 
+                        // Otherwise debug. Doing this because otherwise exceptions go completely unnoticed
+                        Functions::debug($e);
+                    }
                 }
             }
         }
