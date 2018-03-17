@@ -170,9 +170,14 @@ final class HookTest extends TestCase
             Hook::execute("foo.hook", []);
         });
 
+        ob_start();
         $response = Hook::execute("foo.hook", []);
+        $contents = ob_get_contents();
+        ob_end_clean();
+
         $this->assertEquals(1, count($response));
         $this->assertEquals('foo.hook', $response['hook']);
+        $this->assertContains('RecursionException', $contents);
     }
 
     public function testInterruptHook()
