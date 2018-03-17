@@ -84,11 +84,13 @@ class DocComment
      *
      * @param string $name The name of the annotation
      * @param bool $single Return either the first or all values
+     * @return string|array The string when single = true, otherwise all annotations. When single is true, and
+     *                      no annotation was found, null is returned.
      */
     public function getAnnotation(string $name, bool $single = true)
     {
         $val = $this->annotations[$name] ?? [];
-        return $single ? reset($val) : $val;
+        return $single ? (count($val) ? reset($val) : null) : $val;
     }
 
     /**
