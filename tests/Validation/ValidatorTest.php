@@ -507,4 +507,21 @@ final class ValidatorTest extends TestCase
         $this->expectExceptionMessage('Not a valid value for ');
         $a->filter('3');
     }
+
+    public function testWithCustomValidatorLocalizedAndUnlocalized()
+    {
+        $a = new Validator(Validator::VALIDATE_CUSTOM, ['custom' => function ($value) { 
+            throw new ValidationException(['msg' => "Message {arg}", 'context' => ['arg' => 'foo']]);
+        }]);
+
+        $this->assertFalse($a->validate('bar'));
+        $this->assertEquals(['msg' => 'Message {arg}', 'context' => ['arg' => 'foo']], $a->getErrorMessage('bar'));
+
+        $a = new Validator(Type::STRING, ['custom' => function ($value) { 
+            throw new ValidationException('Message bar');
+        }]);
+
+        $this->assertFalse($a->validate('bar'));
+        $this->assertEquals(['msg' => 'Message bar'], $a->getErrorMessage('bar'));
+    }
 }

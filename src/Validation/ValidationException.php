@@ -26,6 +26,32 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\Util\Validation;
 
 use DomainException;
+use Wedeto\Util\Functions as WF;
 
 class ValidationException extends DomainException
-{ }
+{ 
+    protected $error;
+
+    public function __construct($error)
+    {
+        if (is_string($error))
+        {
+            $this->error = ['msg' => $error];
+        }
+        elseif (is_array($error) && isset($error['msg']))
+        {
+            $this->error = $error;
+        }
+        else
+        {
+            throw new DomainException("Invalid arguments to ValdationException: " . WF::str($error));
+        }
+        $str_msg = isset($this->error['context']) ? WF::fillPlaceholders($this->error['msg'], $this->error['context']) : $this->error['msg'];
+        parent::__construct($str_msg);
+    }
+    
+    public function getError()
+    {
+        return $this->error;
+    }
+}

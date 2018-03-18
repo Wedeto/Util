@@ -137,7 +137,7 @@ class Validator
             }
             catch (ValidationException $e)
             {
-                $this->error = ['msg' => $e->getMessage()];
+                $this->error = $e->getError();
                 $valid = false;
             }
             return $valid;
