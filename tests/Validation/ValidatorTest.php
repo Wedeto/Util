@@ -303,7 +303,7 @@ final class ValidatorTest extends TestCase
         $expected['msg'] = 'At least {min} characters required';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = null;
-        $expected['context']['type'] = 'string';
+        $expected['context']['type'] = 'String';
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::STRING, ['min_range' => null, 'max_range' => 10]);
@@ -325,7 +325,7 @@ final class ValidatorTest extends TestCase
         $expected['msg'] = 'At least {min} characters required';
         $expected['context']['min'] = 5;
         $expected['context']['max'] = null;
-        $expected['context']['type'] = 'scalar';
+        $expected['context']['type'] = 'Scalar';
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::SCALAR, ['min_range' => null, 'max_range' => 10]);
@@ -351,7 +351,7 @@ final class ValidatorTest extends TestCase
         $expected['msg'] = 'Date after {min} required';
         $expected['context']['min'] = $yesterday;
         $expected['context']['max'] = null;
-        $expected['context']['type'] = "date";
+        $expected['context']['type'] = "Date";
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::DATE, ['min_range' => null, 'max_range' => $tomorrow]);
@@ -373,14 +373,14 @@ final class ValidatorTest extends TestCase
         $expected['msg'] = "Value matching filter {type} required";
         $expected['context']['min'] = null;
         $expected['context']['max'] = null;
-        $expected['context']['type'] = 'object';
+        $expected['context']['type'] = 'Object';
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::OBJECT, ['error' => ['msg' => 'Foo barred']]);
         $expected['msg'] = "Foo barred";
         $expected['context']['min'] = null;
         $expected['context']['max'] = null;
-        $expected['context']['type'] = 'object';
+        $expected['context']['type'] = 'Object';
         $this->assertEquals($expected, $a->getErrorMessage(''));
     }
 

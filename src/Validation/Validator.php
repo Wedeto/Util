@@ -310,7 +310,7 @@ class Validator
         $context = [
             'min' => $min,
             'max' => $max,
-            'type' => strtolower($this->type)
+            'type' => ucfirst(strtolower($this->type))
         ];
 
         // Allow error messages to be user-defined
