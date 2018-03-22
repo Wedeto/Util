@@ -371,10 +371,20 @@ class Validator
             case Type::SCALAR:
                 if ($min !== null && $max !== null)
                 {
-                    return [
-                        'msg' => "Between {min} and {max} characters required",
-                        'context' => $context
-                    ];
+                    if ($min === $max)
+                    {
+                        return [
+                            'msg' => "Exactly {max} characters required",
+                            'context' => $context
+                        ];
+                    }
+                    else
+                    {
+                        return [
+                            'msg' => "Between {min} and {max} characters required",
+                            'context' => $context
+                        ];
+                    }
                 }
 
                 if ($min !== null)
