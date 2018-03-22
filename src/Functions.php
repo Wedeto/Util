@@ -444,7 +444,7 @@ class Functions
     public static function fillPlaceholders(string $msg, array $values)
     {
         foreach ($values as $key => $value)
-            $msg = str_replace('{' . $key . '}', $value, self::str($msg));
+            $msg = str_replace('{' . $key . '}', self::str($value), $msg);
         return $msg;
     }
 }

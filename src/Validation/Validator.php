@@ -389,7 +389,9 @@ class Validator
                     'msg' => 'True or false required'
                 ];
             case Type::STRING:
+                $type = "String";
             case Type::SCALAR:
+                $type = $type ?? "Scalar";
                 if ($min !== null && $max !== null)
                 {
                     if ($min === $max)
@@ -425,7 +427,11 @@ class Validator
                 }
 
                 return [
-                    'msg' => 'Field required'
+                    'msg' => '{type} required',
+                    'context' => [
+                        'value' => $value,
+                        'type' => $type
+                    ]
                 ];
             case Type::DATE:
                 if ($min !== null && $max !== null)

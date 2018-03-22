@@ -297,7 +297,7 @@ final class ValidatorTest extends TestCase
         $this->assertEquals(['msg' => 'True or false required'], $a->getErrorMessage(1));
 
         $a = new Validator(Type::STRING, ['min_range' => null, 'max_range' => null]);
-        $this->assertEquals(['msg' => 'Field required'], $a->getErrorMessage(''));
+        $this->assertEquals(['msg' => '{type} required', 'context' => ['type' => 'String', 'value' => '']], $a->getErrorMessage(''));
 
         $a = new Validator(Type::STRING, ['min_range' => 5, 'max_range' => null]);
         $expected['msg'] = 'At least {min} characters required';
@@ -319,7 +319,7 @@ final class ValidatorTest extends TestCase
         $this->assertEquals($expected, $a->getErrorMessage(''));
 
         $a = new Validator(Type::SCALAR, ['min_range' => null, 'max_range' => null]);
-        $this->assertEquals(['msg' => 'Field required'], $a->getErrorMessage(''));
+        $this->assertEquals(['msg' => '{type} required', 'context' => ['type' => 'Scalar', 'value' => '']], $a->getErrorMessage(''));
 
         $a = new Validator(Type::SCALAR, ['min_range' => 5, 'max_range' => null]);
         $expected['msg'] = 'At least {min} characters required';
