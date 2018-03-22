@@ -336,39 +336,48 @@ class Validator
             ];
         }
 
+        $strict = !($o['unstrict'] ?? false);
+        $type_ok = null;
+
         // Generate a message based on type
         $type = null;
         switch ($this->type)
         {
             case Type::INT:
                 $type = "Integral value";
+                $type_ok = $strict ? is_int($value) : WF::is_int_value($value);
             case Type::NUMERIC:
             case Type::FLOAT:
+                $type_ok = $type_ok ?? is_numeric($value);
                 $type = $type ?: "Number";
                 $context['type'] = $type;
 
-                if ($min !== null && $max !== null)
+                if ($type_ok)
                 {
-                    return [
-                        'msg' => "{type} between {min} and {max} is required", 
-                        'context' => $context
-                    ];
-                }
-                
-                if ($min !== null)
-                {
-                    return [
-                        'msg' => "{type} equal to or greater than {min} is required",
-                        'context' => $context
-                    ];
-                }
-                
-                if ($max !== null)
-                {
-                    return [
-                        'msg' => "{type} less than or equal to {max} is required", 
-                        'context' => $context
-                    ];
+                    // Only give details when the range apparently was exceeded
+                    if ($min !== null && $max !== null)
+                    {
+                        return [
+                            'msg' => "{type} between {min} and {max} is required", 
+                            'context' => $context
+                        ];
+                    }
+                    
+                    if ($min !== null)
+                    {
+                        return [
+                            'msg' => "{type} equal to or greater than {min} is required",
+                            'context' => $context
+                        ];
+                    }
+                    
+                    if ($max !== null)
+                    {
+                        return [
+                            'msg' => "{type} less than or equal to {max} is required", 
+                            'context' => $context
+                        ];
+                    }
                 }
 
                 return [
