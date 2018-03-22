@@ -86,6 +86,18 @@ class Validator
     {
         return $this->options['nullable'] ?? false;
     }
+
+    /**
+     * Change the nullable value of the validator
+     *
+     * @param bool $nullable The value for nullable
+     * @return Validator
+     */
+    public function setNullable(bool $nullable)
+    {
+        $this->options['nullable'] = $nullable;
+        return $this;
+    }
     
     /**
      * Return a properly typed value
