@@ -345,7 +345,7 @@ class Validator
         {
             case Type::INT:
                 $type = "Integral value";
-                $type_ok = $strict ? is_int($value) : WF::is_int_value($value);
+                $type_ok = $strict ? is_int($value) : WF::is_int_val($value);
             case Type::NUMERIC:
             case Type::FLOAT:
                 $type_ok = $type_ok ?? is_numeric($value);
