@@ -80,34 +80,40 @@ class Injector
             throw new DIException("Cyclic dependencies in creating $class: " . WF::str($this->instance_stack));
 
         array_push($this->instance_stack, $class);
-        if (!isset($this->objects[$class]) || !isset($this->objects[$class][$selector]))
+        try
         {
-            if ($selector === Injector::SHARED_SELECTOR)
-                throw new DIException("Refusing to instantiate shared instance");
-
-            if (isset($this->objects[$class][Injector::SHARED_SELECTOR]))
+            if (!isset($this->objects[$class]) || !isset($this->objects[$class][$selector]))
             {
-                $instance = $this->objects[$class][Injector::SHARED_SELECTOR];
+                if ($selector === Injector::SHARED_SELECTOR)
+                    throw new DIException("Refusing to instantiate shared instance");
+
+                if (isset($this->objects[$class][Injector::SHARED_SELECTOR]))
+                {
+                    $instance = $this->objects[$class][Injector::SHARED_SELECTOR];
+                }
+                else
+                {
+                    $instance = $this->newInstance($class, ['wdiSelector' => $selector]);
+                    $nclass = get_class($instance);
+                    $const_name = $nclass . '::WDI_REUSABLE';
+                    if (defined($const_name) && constant($const_name) === true)
+                        $this->setInstance($class, $instance, $selector);
+                }
             }
             else
             {
-                $instance = $this->newInstance($class, ['wdiSelector' => $selector]);
-                $nclass = get_class($instance);
-                $const_name = $nclass . '::WDI_REUSABLE';
-                if (defined($const_name) && constant($const_name) === true)
-                    $this->setInstance($class, $instance, $selector);
+                $instance = $this->objects[$class][$selector];
             }
         }
-        else
+        finally
         {
-            $instance = $this->objects[$class][$selector];
-        }
-
-        if ($class !== array_pop($this->instance_stack))
-        {
-            // @codeCoverageIgnoreStart
-            throw new DIException("Unexpected class at top of stack");
-            // @codeCoverageIgnoreEnd
+            $top = array_pop($this->instance_stack);
+            if ($class !== $top)
+            {
+                // @codeCoverageIgnoreStart
+                throw new DIException("Unexpected class at top of stack: expected $class, found $top");
+                // @codeCoverageIgnoreEnd
+            }
         }
 
         return $instance;

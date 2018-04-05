@@ -209,9 +209,16 @@ final class InjectorTest extends TestCase
         $instance7 = $injector2->getInstance(\DateTimeZone::class);
         $this->assertSame($instance6, $instance7, "After setting the instance should be available");
     
-        $this->expectException(DIException::class);
-        $this->expectExceptionMessage("Unable to determine value for parameter timezone for constructor of 'DateTimeZone'");
-        $injector->getInstance(\DateTimeZone::class);
+        try
+        {
+            $injector->getInstance(\DateTimeZone::class);
+        }
+        catch (\Exception $e)
+        {
+            $this->assertExceptionChain($e, DIException::class,
+                "Unable to determine value for parameter timezone for constructor of 'DateTimeZone'"
+            );
+        }
     }
 
     public function testNonResuableClasses()
@@ -229,13 +236,36 @@ final class InjectorTest extends TestCase
         $this->assertSame($instance2, $instance3, "Non-reusable classes can explicitly be assigned in injector");
     }
 
+    public function assertExceptionChain(\Exception $e, string $class, string $msg)
+    {
+        $matched = false;
+        while (null !== $e)
+        {
+            $ex_msg = $e->getMessage();
+            if (get_class($e) === $class && strpos($ex_msg, $msg) !== false)
+            {
+                $matched = true;
+                break;
+            }
+
+            $e = $e->getPrevious();
+        }
+
+        $this->assertTrue($matched, "Failed asserting that an exception of type $class with message '$msg' was thrown");
+    }
+
     public function testCyclicDependenciesThrowException()
     {
         $injector = new Injector();
 
-        $this->expectException(DIException::class);
-        $this->expectExceptionMessage("Cyclic dependencies");
-        $injector->getInstance(InjectorTestCyclicA::class);
+        try
+        {
+            $injector->getInstance(InjectorTestCyclicA::class);
+        }
+        catch (\Exception $e)
+        {
+            $this->assertExceptionChain($e, DIException::class, "Cyclic dependencies");
+        }
     }
     
     public function testSetInvalidInstanceThrowsException()
@@ -269,9 +299,14 @@ final class InjectorTest extends TestCase
     {
         $injector = new Injector();
 
-        $this->expectException(DIException::class);
-        $this->expectExceptionMessage("does not have a public constructor");
-        $injector->getInstance(InjectorTestMockClassPrivate::class);
+        try
+        {
+            $injector->getInstance(InjectorTestMockClassPrivate::class);
+        }
+        catch (\Exception $e)
+        {
+            $this->assertExceptionChain($e, DIException::class, "does not have a public constructor");
+        }
     }
 
     public function testSettingDefaultFactory()

@@ -47,25 +47,38 @@ class DefaultFactory implements Factory
             throw new DIException("Cannot instantiate $class because $class::WDI_NO_AUTO is true");
         }
 
-        $reflect = new ReflectionClass($class);
-        $constructor = $reflect->getConstructor();
-
-        if (null === $constructor)
-            return $reflect->newInstance();
-
-        if (!$constructor->isPublic())
-            throw new DIException("Class $class does not have a public constructor");
-
         try
         {
-            $constructor_args = $this->determineArgumentsFor($constructor, $class, "constructor", $args, $selector, $injector);
-            $instance = $reflect->newInstanceArgs($constructor_args);
+            $reflect = new ReflectionClass($class);
+
+            $instance = null;
+            $dc = $reflect->getDocComment();
+            if (!empty($dc))
+            {
+                $dc = new DocComment($dc);
+                $gen = $dc->getAnnotationTokens("generator");
+                if (!empty($gen))
+                {
+                    $instance = $this->attemptGeneratorMethod($gen, $class, $args, $selector, $injector);
+                }
+            }
+
+            if (null === $instance)
+            {
+                $constructor = $reflect->getConstructor();
+                if (null === $constructor)
+                    return $reflect->newInstance();
+
+                if (!$constructor->isPublic())
+                    throw new DIException("Class $class does not have a public constructor");
+
+                $constructor_args = $this->determineArgumentsFor($constructor, $class, "constructor", $args, $selector, $injector);
+                $instance = $reflect->newInstanceArgs($constructor_args);
+            }
         }
         catch (DIException $e)
         {
-            $instance = $this->attemptGeneratorMethod($reflect, $class, $args, $selector, $injector);
-            if (null === $instance)
-                throw $e;
+            throw new DIException("Could not instantiate class $class", 0, $e);
         }
 
         return $instance;
@@ -80,28 +93,20 @@ class DefaultFactory implements Factory
      * This method will be attempted to invoke, the arguments should therefore be
      * instantiatable by the injector.
      */
-    protected function attemptGeneratorMethod(ReflectionClass $reflect, string $class, array $args, string $selector, Injector $injector)
+    protected function attemptGeneratorMethod(array $tokens, string $class, array $args, string $selector, Injector $injector)
     {
-        $docComment = $reflect->getDocComment();
-        if (!empty($docComment))
-        {
-            $docComment = new DocComment($docComment);
+        $fn_name = $tokens[0] ?? "";
 
-            $tokens = $docComment->getAnnotationTokens("generator");
-            $fn_name = $tokens[0] ?? "";
+        if (!method_exists($class, $fn_name))
+            throw new DIException("Annotated generator method $class::$fn_name does not exist");
 
-            if (method_exists($class, $fn_name))
-            {
-                $method = new ReflectionMethod($class, $fn_name);
-                if ($method->isStatic() && $method->isPublic())
-                {
-                    $method_args = $this->determineArgumentsFor($method, $class, $fn_name, $args, $selector, $injector);
-                    $instance = $method->invokeArgs(null, $method_args);
-                    return $instance;
-                }
-            }
-        }
-        return null;
+        $method = new ReflectionMethod($class, $fn_name);
+        if (!$method->isStatic() || !$method->isPublic())
+            throw new DIException("Generator method $class::$fn_name must be public and static");
+
+        $method_args = $this->determineArgumentsFor($method, $class, $fn_name, $args, $selector, $injector);
+        $instance = $method->invokeArgs(null, $method_args);
+        return $instance;
     }
         
     /**
