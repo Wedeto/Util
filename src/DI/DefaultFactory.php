@@ -26,6 +26,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace Wedeto\Util\DI;
 
 use ReflectionClass;
+use ReflectionMethod;
+use Wedeto\Util\DocComment;
 
 /**
  * DefaultFactory is a DI injecting factory that uses the injector to
@@ -54,8 +56,68 @@ class DefaultFactory implements Factory
         if (!$constructor->isPublic())
             throw new DIException("Class $class does not have a public constructor");
 
-        $params = $constructor->getParameters();
-        $constructor_args = [];
+        try
+        {
+            $constructor_args = $this->determineArgumentsFor($constructor, $class, "constructor", $args, $selector, $injector);
+            $instance = $reflect->newInstanceArgs($constructor_args);
+        }
+        catch (DIException $e)
+        {
+            $instance = $this->attemptGeneratorMethod($reflect, $class, $args, $selector, $injector);
+            if (null === $instance)
+                throw $e;
+        }
+
+        return $instance;
+    }
+
+    /**
+     * Attempt to create an instance using a generator method supplied by a 
+     * annotation in the class' DocComment:
+     *
+     * @generator MyFactoryMethodName
+     *
+     * This method will be attempted to invoke, the arguments should therefore be
+     * instantiatable by the injector.
+     */
+    protected function attemptGeneratorMethod(ReflectionClass $reflect, string $class, array $args, string $selector, Injector $injector)
+    {
+        $docComment = $reflect->getDocComment();
+        if (!empty($docComment))
+        {
+            $docComment = new DocComment($docComment);
+
+            $tokens = $docComment->getAnnotationTokens("generator");
+            $fn_name = $tokens[0] ?? "";
+
+            if (method_exists($class, $fn_name))
+            {
+                $method = new ReflectionMethod($class, $fn_name);
+                if ($method->isStatic() && $method->isPublic())
+                {
+                    $method_args = $this->determineArgumentsFor($method, $class, $fn_name, $args, $selector, $injector);
+                    $instance = $method->invokeArgs(null, $method_args);
+                    return $instance;
+                }
+            }
+        }
+        return null;
+    }
+        
+    /**
+     * Find arguments for a method
+     */
+    protected function determineArgumentsFor(
+        ReflectionMethod $method, 
+        string $class, 
+        string $method_name, 
+        array $args, 
+        string $selector, 
+        Injector $injector
+    )
+    {
+        $params = $method->getParameters();
+        $method_args = [];
 
         // Determine values for each parameter
         $used_optional = false;
@@ -65,7 +127,7 @@ class DefaultFactory implements Factory
 
             if (array_key_exists($name, $args))
             {
-                $constructor_args[] = $args[$name];
+                $method_args[] = $args[$name];
                 continue;
             }
 
@@ -73,14 +135,14 @@ class DefaultFactory implements Factory
             if (null !== $pclass)
             {
                 $instance = $injector->getInstance($pclass->getName(), $selector);
-                $constructor_args[] = $instance;
+                $method_args[] = $instance;
                 continue;
             }
 
             if ($param->isDefaultValueAvailable())
             {
                 $default = $param->getDefaultValue();
-                $constructor_args[] = $default;
+                $method_args[] = $default;
                 continue;
             }
 
@@ -90,12 +152,10 @@ class DefaultFactory implements Factory
                 break;
             }
 
-            throw new DIException("Unable to determine value for parameter $name for constructor of '$class'");
-
+            throw new DIException("Unable to determine value for parameter $name for $method_name of '$class'");
         }
 
         // There should be a argument for every parameter
-        $instance = $reflect->newInstanceArgs($constructor_args);
-        return $instance;
+        return $method_args;
     }
 }
