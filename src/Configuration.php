@@ -37,7 +37,13 @@ class Configuration extends TypedDictionary
     const WDI_REUSABLE = true;
     const WDI_NO_AUTO = true;
 
-    public function __construct(array $types = [], $values = [])
+    /**
+     * Constructor: note that the arguments are reversed. When constructing
+     * a configuration you expect the object to know the types. As a fallback,
+     * they can still be specified. In general, subclasses should set the
+     * allowed types in the constructor.
+     */
+    public function __construct($values = [], $types = [])
     {
         parent::__construct($types, $values);
     }
