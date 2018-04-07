@@ -45,7 +45,7 @@ class TypedDictionary extends Dictionary
         if (!($types instanceof Dictionary))
             $types = new Dictionary($types);
 
-        if (empty($types) && !empty($values))
+        if (count($types) === 0 && !empty($values))
             self::determineTypes($values, $types);
 
         $this->validateTypes($types);
