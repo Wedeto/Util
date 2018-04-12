@@ -120,6 +120,18 @@ class Injector
     }
 
     /**
+     * Check if an instance for the class is available.
+     *
+     * @param string $class The class to check for an instance
+     * @param string $selector The selector to use to find an instance. Defaults to DEFAULT_SELECTOR
+     * @return bool True if an instance is available, false if not
+     */
+    public function hasInstance(string $class, string $selector = Injector::DEFAULT_SELECTOR)
+    {
+        return isset($this->objects[$class][$selector]);
+    }
+
+    /**
      * Set a factory as the default, used when no specific factory is available.
      *
      * @param Factory $factory The factory to use as default

@@ -169,6 +169,8 @@ final class InjectorTest extends TestCase
 
         $instance->shared = true;
         $injector->setInstance(\Stdclass::class, $instance, Injector::SHARED_SELECTOR);
+        $this->assertFalse($injector->hasInstance(\Stdclass::class, Injector::DEFAULT_SELECTOR));
+        $this->assertTrue($injector->hasInstance(\Stdclass::class, Injector::SHARED_SELECTOR));
         
         $instance3 = $injector->getInstance(\Stdclass::class);
         $this->assertSame($instance, $instance3, "The shared instance should be returned when a direct match is found");
@@ -227,11 +229,13 @@ final class InjectorTest extends TestCase
 
         $instance = $injector->getInstance(Dictionary::class);
         $this->assertInstanceOf(Dictionary::class, $instance);
+        $this->assertFalse($injector->hasInstance(Dictionary::class));
 
         $instance2 = $injector->getInstance(Dictionary::class);
         $this->assertNotSame($instance, $instance2, "Classes without WDI_REUSABLE constant should be re-instantiated");
 
         $injector->setInstance(Dictionary::class, $instance2);
+        $this->assertTrue($injector->hasInstance(Dictionary::class));
         $instance3 = $injector->getInstance(Dictionary::class);
         $this->assertSame($instance2, $instance3, "Non-reusable classes can explicitly be assigned in injector");
     }
