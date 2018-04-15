@@ -390,6 +390,15 @@ final class FunctionsTest extends TestCase
         $this->assertEquals([5, 'foo'], $cl->pairs[0]);
         $this->assertEquals([7, 'bar'], $cl->pairs[1]);
     }
+
+    public function testClamp()
+    {
+        $this->assertEquals(3, WF::clamp(3, 1, 10));
+        $this->assertEquals(3, WF::clamp(3, -1000, 10000));
+        $this->assertEquals(5, WF::clamp(3, 5, 10000));
+        $this->assertEquals(0, WF::clamp(3, -1000, 0));
+        $this->assertEquals(-100, WF::clamp(-100, -1000, -50));
+    }
 }
 
 class DummyBoolA

@@ -35,10 +35,13 @@ final class InjectionTraitTest extends TestCase
     public function testTrait()
     {
         DI::startNewContext('test', false);
+        $this->assertFalse(TestInjectionTraitMock::hasInstance());
         $instance = DI::getInjector()->getInstance(TestInjectionTraitMock::class);
         $instance2 = TestInjectionTraitMock::getInstance();
 
         $this->assertSame($instance, $instance2, "The instance should be the same both ways");
+        $this->assertTrue(TestInjectionTraitMock::hasInstance());
+        DI::destroyContext('test');
     }
 }
 

@@ -447,4 +447,17 @@ class Functions
             $msg = str_replace('{' . $key . '}', self::str($value), $msg);
         return $msg;
     }
+
+    /**
+     * Restrict the value to a specific valid range.
+     * 
+     * @param int $value The value to clamp
+     * @param int $min THe minimum allowable value
+     * @param int $max The maximum allowable value
+     * @return int The value, $min when $value is less than $min, or $max when $value is more than max.
+     */
+    public static function clamp(int $value, int $min, int $max)
+    {
+        return $value < $min ? $min : ($value > $max ? $max : $value);
+    }
 }

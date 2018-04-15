@@ -31,4 +31,9 @@ trait InjectionTrait
     {
         return DI::getInjector()->getInstance(static::class);
     }
+
+    public static function hasInstance()
+    {
+        return DI::getInjector()->hasInstance(static::class);
+    }
 }
