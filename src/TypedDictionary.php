@@ -45,16 +45,16 @@ class TypedDictionary extends Dictionary
         if (!($types instanceof Dictionary))
             $types = new Dictionary($types);
 
-        if (count($types) === 0 && !empty($values))
-            self::determineTypes($values, $types);
-
-        $this->validateTypes($types);
-        
         if ($values instanceof Dictionary)
             $values = $values->values;
         else
             $values = WF::to_array($values);
 
+        if (count($types) === 0 && !empty($values))
+            self::determineTypes($values, $types);
+
+        $this->validateTypes($types);
+        
         $this->types = $types;
         $this->values = [];
 
