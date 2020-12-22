@@ -113,7 +113,10 @@ class Hook
         if (count($params) !== 1)
             throw new InvalidArgumentException("Hook must accept exactly one argument of type Dictionary");
         
-        if ($params[0]->getType() === null || $params[0]->getType()->__toString() !== Dictionary::class)
+        $tp = $params[0]->getType();
+        $tpName = $tp instanceof \ReflectionNamedType ? $tp->getName() : (string)($tp);
+
+        if ($tp === null || $tpName !== Dictionary::class)
             throw new InvalidArgumentException("Hook must accept exactly one argument of type Dictionary");
 
         $ref = ++self::$sequence;
