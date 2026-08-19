@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.5
+
+- Replace deprecated reflection parameter class inspection with named-type handling.
+
 ## 1.1.4
 
 - Handle missing doc-comment annotations without passing null to string functions.

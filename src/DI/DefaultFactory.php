@@ -143,10 +143,10 @@ class DefaultFactory implements Factory
                 continue;
             }
 
-            $pclass = $param->getClass();
-            if (null !== $pclass)
+            $type = $param->getType();
+            if ($type instanceof \ReflectionNamedType && !$type->isBuiltin())
             {
-                $instance = $injector->getInstance($pclass->getName(), $selector);
+                $instance = $injector->getInstance($type->getName(), $selector);
                 $method_args[] = $instance;
                 continue;
             }
