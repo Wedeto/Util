@@ -109,7 +109,7 @@ class Manager
      */
     public function setHook()
     {
-        Hook::subscribe(Hook::SHUTDOWN_HOOK, [$this, 'saveCacheHook'], 10);
+        $this->hook_reference = Hook::subscribe(Hook::SHUTDOWN_HOOK, [$this, 'saveCacheHook'], 10);
 
         foreach ($this->repository as $name => $cache)
             $this->checkExpiry($name);
@@ -123,6 +123,7 @@ class Manager
         if ($this->hook_reference !== null)
         {
             Hook::unsubscribe(Hook::SHUTDOWN_HOOK, $this->hook_reference);
+            $this->hook_reference = null;
         }
     }
 

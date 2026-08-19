@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2
+
+- Fix cache shutdown-hook removal by retaining the subscription reference.
+
 ## 1.1.1
 
 - Require PHPUnit 9.6.33 or newer to avoid CVE-2026-24765 in development environments.
