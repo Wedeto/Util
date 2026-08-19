@@ -45,7 +45,7 @@ final class PoolTest extends TestCase
 {
     private $dir;
 
-    public function setUp()
+    public function setUp(): void
     {
         vfsStreamWrapper::register();
         vfsStreamWrapper::setRoot(new vfsStreamDirectory('cachedir'));
@@ -56,7 +56,7 @@ final class PoolTest extends TestCase
         $mgr->setCachePath($this->dir);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         DI::destroyContext('test', false);
     }

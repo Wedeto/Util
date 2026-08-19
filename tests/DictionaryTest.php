@@ -755,7 +755,7 @@ final class DictionaryTest extends TestCase
         }
         catch (\InvalidArgumentException $e)
         {
-            $this->assertContains('Keys must be scalar, not', $e->getMessage());
+            $this->assertStringContainsString('Keys must be scalar, not', $e->getMessage());
             $thrown = true;
         }
         $this->assertTrue($thrown, 'Dictionary#has did not throw an exception when an array was used as key');
@@ -767,7 +767,7 @@ final class DictionaryTest extends TestCase
         }
         catch (\InvalidArgumentException $e)
         {
-            $this->assertContains('Keys must be scalar, not', $e->getMessage());
+            $this->assertStringContainsString('Keys must be scalar, not', $e->getMessage());
             $thrown = true;
         }
         $this->assertTrue($thrown, 'Dictionary#set did not throw an exception when an array was used as key');
@@ -779,7 +779,7 @@ final class DictionaryTest extends TestCase
         }
         catch (\InvalidArgumentException $e)
         {
-            $this->assertContains('Keys must be scalar, not', $e->getMessage());
+            $this->assertStringContainsString('Keys must be scalar, not', $e->getMessage());
             $thrown = true;
         }
         $this->assertTrue($thrown, 'Dictionary#get did not throw an exception when an array was used as key');

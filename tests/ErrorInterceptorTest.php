@@ -32,12 +32,12 @@ use PHPUnit\Framework\TestCase;
  */
 final class ErrorInterceptorTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         ErrorInterceptor::registerErrorHandler();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         ErrorInterceptor::unregisterErrorHandler();
     }
@@ -99,7 +99,7 @@ final class ErrorInterceptorTest extends TestCase
     public function testInvalidCallable()
     {
         $this->expectException(\TypeError::class);
-        $this->expectExceptionMessage("must be callable");
+        $this->expectExceptionMessageMatches("/must be (?:of type )?callable/");
         $a = new ErrorInterceptor("1foo");
     }
 }

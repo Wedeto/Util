@@ -34,12 +34,12 @@ use Wedeto\Util\Validation\Type;
  */
 final class HookTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         $this->tearDown();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $hooks = Hook::getRegisteredHooks();
         foreach ($hooks as $h)
@@ -177,7 +177,7 @@ final class HookTest extends TestCase
 
         $this->assertEquals(1, count($response));
         $this->assertEquals('foo.hook', $response['hook']);
-        $this->assertContains('RecursionException', $contents);
+        $this->assertStringContainsString('RecursionException', $contents);
     }
 
     public function testInterruptHook()

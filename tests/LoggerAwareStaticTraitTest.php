@@ -44,9 +44,10 @@ final class LoggerAwareStaticTraitTest extends TestCase
         $this->assertInstanceOf(NullLogger::class, $l);
 
         // Create a mock logger
-        $mock = $this->prophesize(AbstractLogger::class);
-        $mock->debug("foo", [])->shouldBeCalled();
-        $l = $mock->reveal();
+        $l = $this->createMock(AbstractLogger::class);
+        $l->expects($this->once())
+            ->method('debug')
+            ->with("foo", []);
 
         $a->setLogger($l);
         $ln = $a->getLogger();
@@ -68,7 +69,7 @@ final class LoggerAwareStaticTraitTest extends TestCase
         $res = ob_get_contents();
         ob_end_clean();
 
-        $this->assertContains('Falling back to emergency logger', $res);
+        $this->assertStringContainsString('Falling back to emergency logger', $res);
     }
 
     public function getLogger(Dictionary $args)
@@ -83,7 +84,7 @@ final class LoggerAwareStaticTraitTest extends TestCase
         throw new RecursionException('Oops');
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         Hook::resetHook("Wedeto.Util.GetLogger");
     }

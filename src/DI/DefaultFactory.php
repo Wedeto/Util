@@ -136,18 +136,18 @@ class DefaultFactory implements Factory
                 continue;
             }
 
+            if ($param->isDefaultValueAvailable())
+            {
+                $default = $param->getDefaultValue();
+                $method_args[] = $default;
+                continue;
+            }
+
             $pclass = $param->getClass();
             if (null !== $pclass)
             {
                 $instance = $injector->getInstance($pclass->getName(), $selector);
                 $method_args[] = $instance;
-                continue;
-            }
-
-            if ($param->isDefaultValueAvailable())
-            {
-                $default = $param->getDefaultValue();
-                $method_args[] = $default;
                 continue;
             }
 

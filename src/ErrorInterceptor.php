@@ -151,7 +151,7 @@ class ErrorInterceptor
      * @param int $errline The line where the error occured
      * @param mixed $errcontext Erro context
      */
-    public static function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
+    public static function errorHandler($errno, $errstr, $errfile, $errline, $errcontext = null)
     {
         if (count(self::$interceptor_stack) > 0)
         {

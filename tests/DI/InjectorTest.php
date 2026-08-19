@@ -29,8 +29,6 @@ use PHPUnit\Framework\TestCase;
 use Wedeto\Util\TypedDictionary;
 use Wedeto\Util\Dictionary;
 
-use Prophecy\Argument;
-
 /**
  * @covers Wedeto\Util\DI\Injector
  * @covers Wedeto\Util\DI\Factory
@@ -317,9 +315,11 @@ final class InjectorTest extends TestCase
     {
         $injector = new Injector();
 
-        $mocker = $this->prophesize(DefaultFactory::class);
-        $mocker->produce("Stdclass", Argument::any(), Injector::DEFAULT_SELECTOR, $injector)->willThrow(new \RuntimeException("called"));
-        $factory = $mocker->reveal();
+        $factory = $this->createMock(DefaultFactory::class);
+        $factory->expects($this->once())
+            ->method('produce')
+            ->with("Stdclass", $this->anything(), Injector::DEFAULT_SELECTOR, $injector)
+            ->willThrowException(new \RuntimeException("called"));
 
         $injector->setDefaultFactory($factory);
 

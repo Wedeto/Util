@@ -242,7 +242,7 @@ class Functions
      * @param callable $else The else function, called when the iterable is empty
      * @return int The number of iterations
      */
-    public static function fee(&$iterable, callable $loop, callable $else = null)
+    public static function fee(&$iterable, callable $loop, ?callable $else = null)
     {
         if (is_object($loop))
             $refl = new \ReflectionMethod($loop, '__invoke');

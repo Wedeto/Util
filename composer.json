@@ -4,14 +4,14 @@
     "description": "Wedeto Platform - Basic Utilities",
     "homepage": "https://wedeto.net/",
     "require": {
-        "psr/log": "1.0.*",
-        "psr/cache": "1.0.*",
-        "php": ">=7.0.0",
+        "psr/log": "^1.0",
+        "psr/cache": "^1.0",
+        "php": "^7.4 || >=8.1",
         "ext-iconv": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "~6.0.8",
-        "mikey179/vfsstream": "~1"
+        "phpunit/phpunit": "^9.6",
+        "mikey179/vfsstream": "^1.6"
     },
     "provide": {
         "psr/cache-implementation": "1.0"

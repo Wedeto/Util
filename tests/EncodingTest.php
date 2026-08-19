@@ -32,7 +32,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class EncodingTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         $this->data = __DIR__ . '/data';
     }

@@ -49,7 +49,7 @@ EOC;
         $comment = new DocComment($cmt);
 
         $preamble = $comment->getPreamble();
-        $this->assertContains('My preamble', $preamble);
+        $this->assertStringContainsString('My preamble', $preamble);
         $this->assertEquals(['string', 'A', 'nice', 'value'], $comment->getAnnotationTokens('var'));
         $this->assertEquals(['One', 'misc'], $comment->getAnnotationTokens('misc'));
         $this->assertEquals('string A nice value', $comment->getAnnotation('var'));

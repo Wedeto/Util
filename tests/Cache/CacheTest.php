@@ -45,7 +45,7 @@ final class CacheTest extends TestCase
     private $dir;
     private $mgr;
 
-    public function setUp()
+    public function setUp(): void
     {
         vfsStreamWrapper::register();
         vfsStreamWrapper::setRoot(new vfsStreamDirectory('cachedir'));
@@ -59,7 +59,7 @@ final class CacheTest extends TestCase
         ErrorInterceptor::registerErrorHandler();
     }
     
-    public function tearDown()
+    public function tearDown(): void
     {
         DI::destroyContext('test');
         $this->mgr->unsetHook();
@@ -287,4 +287,3 @@ final class CacheTest extends TestCase
         $this->assertEquals($cache, $cache->save());
     }
 }
-

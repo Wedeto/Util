@@ -483,38 +483,45 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     }
     
     // Iterator implementation
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return $this->get($this->key());
     }
 
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->keys[$this->iterator];
     }
 
+    #[\ReturnTypeWillChange]
     public function rewind()
     {
         $this->keys = array_keys($this->values);
         $this->iterator = 0;
     }
 
+    #[\ReturnTypeWillChange]
     public function next()
     {
         ++$this->iterator;
     }
 
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         return array_key_exists($this->iterator, $this->keys);
     }
 
     // ArrayAccess implementation
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->dget($offset);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         if ($offset === null)
@@ -523,24 +530,28 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
             $this->set($offset, $value);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         unset($this->values[$offset]);
         $this->iterator = null;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return array_key_exists($offset, $this->values);
     }
 
     // Countable implementation
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->values);
     }
 
     // JsonSerializable implementation
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return $this->values;
@@ -555,6 +566,16 @@ class Dictionary implements \Iterator, \ArrayAccess, \Countable, \Serializable, 
     public function unserialize($data)
     {
         $this->values = unserialize($data);
+    }
+
+    public function __serialize(): array
+    {
+        return ['values' => $this->values];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->values = $data['values'];
     }
 
     // Sorting

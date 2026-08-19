@@ -199,7 +199,7 @@ final class TypedDictionaryTest extends TestCase
         }
         catch (\InvalidArgumentException $e)
         {
-            $this->assertContains("required", $e->getMessage());
+            $this->assertStringContainsString("required", $e->getMessage());
         }
         $this->assertEquals($should_work, $worked);
     }
@@ -226,7 +226,7 @@ final class TypedDictionaryTest extends TestCase
         catch (\Throwable $e)
         {
             $this->assertInstanceOf($class, $e);
-            $this->assertContains($msg, $e->getMessage());
+            $this->assertStringContainsString($msg, $e->getMessage());
         }
     }
 

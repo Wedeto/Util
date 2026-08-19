@@ -209,4 +209,22 @@ class Item implements CacheItemInterface, Serializable
         $this->expires = $data['expires'];
         $this->hit = $data['hit'];
     }
+
+    public function __serialize(): array
+    {
+        return [
+            'key' => $this->key,
+            'value' => $this->value,
+            'expires' => $this->expires,
+            'hit' => $this->hit
+        ];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->key = $data['key'];
+        $this->value = $data['value'];
+        $this->expires = $data['expires'];
+        $this->hit = $data['hit'];
+    }
 }
