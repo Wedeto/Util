@@ -55,6 +55,7 @@ EOC;
         $this->assertEquals('string A nice value', $comment->getAnnotation('var'));
         $this->assertEquals('string Another return', $comment->getAnnotation('return'));
         $this->assertEquals([], $comment->getAnnotationTokens('foo'));
+        $this->assertEquals([], $comment->getAnnotationTokens('missing'));
 
         $expected = ['One        misc', 'Another misc'];
         $this->assertEquals($expected, $comment->getAnnotations('misc'));

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.4
+
+- Handle missing doc-comment annotations without passing null to string functions.
+
 ## 1.1.3
 
 - Make cache shutdown-hook registration idempotent.

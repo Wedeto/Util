@@ -112,6 +112,8 @@ class DocComment
     public function getAnnotationTokens(string $name)
     {
         $val = $this->getAnnotation($name, true);
+        if ($val === null)
+            return [];
         $val = trim(preg_replace("/\s{1,}/", " ", $val));
 
         return !empty($val) ? explode(" ", $val) : [];
