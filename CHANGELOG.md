@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1
+
+- Require PHPUnit 9.6.33 or newer to avoid CVE-2026-24765 in development environments.
+
 ## 1.1.0
 
 - Add support for PHP 8.1 through PHP 8.5.
