@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3
+
+- Make cache shutdown-hook registration idempotent.
+
 ## 1.1.2
 
 - Fix cache shutdown-hook removal by retaining the subscription reference.

@@ -123,6 +123,7 @@ final class CacheTest extends TestCase
     {
         $cc = $this->mgr->getCache('resolve');
         $this->mgr->setHook();
+        $this->mgr->setHook();
         $class = $cc->get('class');
         $this->assertEmpty($class);
     }

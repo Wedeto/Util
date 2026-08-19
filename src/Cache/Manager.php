@@ -109,7 +109,8 @@ class Manager
      */
     public function setHook()
     {
-        $this->hook_reference = Hook::subscribe(Hook::SHUTDOWN_HOOK, [$this, 'saveCacheHook'], 10);
+        if ($this->hook_reference === null)
+            $this->hook_reference = Hook::subscribe(Hook::SHUTDOWN_HOOK, [$this, 'saveCacheHook'], 10);
 
         foreach ($this->repository as $name => $cache)
             $this->checkExpiry($name);
