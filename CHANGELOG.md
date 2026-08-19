@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.6
+
+- Explicitly mark all remaining nullable typed parameters for PHP 8.5.
+
 ## 1.1.5
 
 - Replace deprecated reflection parameter class inspection with named-type handling.

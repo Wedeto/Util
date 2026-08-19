@@ -54,7 +54,7 @@ class Injector
      *
      * @param Injector $other You can specify another injector to copy instances from
      */
-    public function __construct(Injector $other = null)
+    public function __construct(?Injector $other = null)
     {
         if (null !== $other)
         {

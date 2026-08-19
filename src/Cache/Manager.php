@@ -210,7 +210,7 @@ class Manager
      *
      * @param string $cache_name Can be specified to save one specific cache
      */
-    public function saveCache(string $cache_name = null)
+    public function saveCache(?string $cache_name = null)
     {
         $cache_dir = $this->cache_path;
         $cnt = 0;

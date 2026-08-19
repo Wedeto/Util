@@ -29,7 +29,7 @@ class HookInterrupted extends \Exception
 {
     protected $response;
 
-    public function __construct(array $response = null)
+    public function __construct(?array $response = null)
     {
         $this->response = $response;
     }

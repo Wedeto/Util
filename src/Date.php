@@ -62,7 +62,7 @@ class Date
         throw new InvalidArgumentException("Invalid argument: " . WF::str($str));
     }
 
-    public static function createFromFloat(float $timestamp, DateTimeZone $zone = null)
+    public static function createFromFloat(float $timestamp, ?DateTimeZone $zone = null)
     {
         $timestamp = sprintf("%.6f", $timestamp); 
         $dt = DateTime::createFromFormat('U.u', $timestamp);
